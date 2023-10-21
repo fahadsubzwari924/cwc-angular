@@ -1,0 +1,7 @@
+import { environment } from 'src/environments/environment';
+
+export enum ApiPaths {
+  Products = '/products',
+  Customers = '/customers',
+  Orders = '/orders',
+}

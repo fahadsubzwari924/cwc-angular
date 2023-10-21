@@ -1,0 +1,43 @@
+<div class="modal-content cvc-custom-modal">
+  <div class="modal-header">
+    <h4>{{ title || "Confirm" }}</h4>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="createProductForm">
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="firstname2" requiredField>Name</label>
+          <input formControlName="name" id="firstname2" type="text"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+      </div>
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="description">Description</label>
+          <textarea formControlName="description" id="description" rows="5" cols="30" pInputTextarea
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"></textarea>
+        </div>
+      </div>
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="lastname2" requiredField>Cost</label>
+          <input formControlName="cost" id="lastname2" type="number"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+        <div class="field col">
+          <label for="lastname2">Weight</label>
+          <input formControlName="weight" id="lastname2" type="text"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <p-button label="Cancel" styleClass="p-button-secondary p-button-sm" (onClick)="close()"></p-button>
+    <p-button label="Create" styleClass="p-button-sm ml-2" [disabled]="createProductForm.invalid"
+      (onClick)="createProduct()"></p-button>
+  </div>
+</div>
+<p-blockUI [blocked]="showSpinner">
+  <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
