@@ -50,7 +50,7 @@
 
                 <ng-template let-product pTemplate="gridItem">
                     <div class="col-12 md:col-4">
-                        <div class="card m-3 border-1 surface-border">
+                        <div class="card m-3 border-1 surface-border relative">
                             <!-- <div class="flex flex-wrap gap-2 align-items-center justify-content-between mb-2">
                                 <div class="flex align-items-center">
                                     <i class="pi pi-tag mr-2"></i>
@@ -59,6 +59,9 @@
                                 <span
                                     [class]="'product-badge status-' + product.inventoryStatus.toLowerCase()">{{product.inventoryStatus}}</span>
                             </div> -->
+                            <button pButton type="button" icon="pi pi-pencil" class="p-button-text absolute top-0 left-0 ml-1 mt-1 outline-none"></button>
+                            <button pButton type="button" icon="pi pi-trash" class="p-button-text absolute top-0 right-0 mr-1 mt-1 outline-none"></button>
+
                             <div class="flex flex-column align-items-center text-center mb-3">
                                 <img [src]="'assets/demo/images/product/bamboo-watch.jpg'" [alt]="product.name"
                                     class="w-9 shadow-2 my-3 mx-0" />
