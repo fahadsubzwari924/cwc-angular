@@ -39,7 +39,7 @@ export class ApiService {
     });
   }
 
-  delete(route: string, headers: HttpHeaders) {
-    return this.http.delete(this.getFormattedUrl(route), { headers: headers });
+  httpDelete(route: string) {
+    return this.http.delete(this.getFormattedUrl(route));
   }
 }

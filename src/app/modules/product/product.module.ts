@@ -10,6 +10,8 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { BlockUIModule } from 'primeng/blockui';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @NgModule({
   declarations: [ListComponent, CreateComponent],
@@ -23,7 +25,8 @@ import { BlockUIModule } from 'primeng/blockui';
     ReactiveFormsModule,
     ProgressSpinnerModule,
     BlockUIModule,
+    ToastModule,
   ],
-  providers: [ProductService],
+  providers: [ProductService, MessageService],
 })
 export class ProductModule {}
