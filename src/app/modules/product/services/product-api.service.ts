@@ -33,4 +33,9 @@ export class ProductService {
     .httpPut(`${ApiPaths.Products}/${product.id}`, product)
     .pipe(map((response: any) => new Product(response.payload)));
   }
+
+  public deleteProduct(productId: number): Observable<any> {
+    const apiUrl = `${ApiPaths.Products}/${productId}`;
+    return this.apiService.httpDelete(apiUrl);
+  }
 }

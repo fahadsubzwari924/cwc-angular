@@ -37,7 +37,7 @@ export class ApiService {
     return this.http.put(this.getFormattedUrl(route), payload);
   }
 
-  delete(route: string, headers: HttpHeaders) {
-    return this.http.delete(this.getFormattedUrl(route), { headers: headers });
+  httpDelete(route: string) {
+    return this.http.delete(this.getFormattedUrl(route));
   }
 }
