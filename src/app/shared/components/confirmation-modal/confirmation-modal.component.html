@@ -1,0 +1,12 @@
+<div class="modal-content cvc-custom-modal">
+    <div class="modal-header">
+        <h4>{{ modalTitle }}</h4>
+    </div>
+    <div class="modal-body">
+        <p>{{ modalDescription }}</p>
+    </div>
+    <div class="modal-footer">
+        <p-button label="Cancel" styleClass="p-button-secondary p-button-sm" (onClick)="close()"></p-button>
+        <p-button label="Confirm" styleClass="p-button-sm ml-2" (onClick)="onConfirm()"></p-button>
+    </div>
+</div>
