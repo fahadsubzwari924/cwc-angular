@@ -4,6 +4,7 @@ import { SimpleModalComponent } from 'ngx-simple-modal';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { ProductService } from '../../services/product-api.service';
 import { Product } from '../../models/product.model';
+import { eCRUDActions } from 'src/app/shared/enums/crud-actions.enum';
 
 @Component({
   selector: 'app-create',
@@ -15,7 +16,8 @@ export class CreateComponent
   implements OnInit
 {
   title!: string;
-  message!: string;
+  action!: string;
+  product!: Product;
 
   createProductForm!: FormGroup;
   spinner!: ProgressSpinner;
@@ -30,16 +32,25 @@ export class CreateComponent
   }
 
   ngOnInit(): void {
-    this.buildForm();
+    this.buildForm(this.product);
   }
 
-  buildForm(): void {
+  buildForm(data?: Product): void {
     this.createProductForm = this.formBuilder.group({
-      name: ['', [Validators.required, Validators.minLength(5)]],
-      cost: ['', [Validators.required]],
-      description: [''],
-      weight: [''],
+      id: [data?.id],
+      name: [data?.name ?? '', [Validators.required, Validators.minLength(5)]],
+      cost: [data?.cost ?? '', [Validators.required]],
+      description: [data?.description ?? ''],
+      weight: [data?.weight ?? ''],
     });
+  }
+
+  saveProduct() {
+    if (this.action === eCRUDActions.ADD) {
+      this.createProduct();
+    } else {
+      this.updateProduct();
+    }
   }
 
   createProduct(): void {
@@ -47,9 +58,20 @@ export class CreateComponent
     this.productService
       .createProduct(this.createProductForm.value)
       .subscribe((response: Product) => {
-        this.showSpinner = false;
-        this.result = true;
-        this.close();
+        this.closeModal();
       });
+  }
+
+  updateProduct(): void {
+    this.showSpinner = true;
+    this.productService.updateProduct(this.createProductForm.value)
+    .subscribe((response: any) => {
+      this.closeModal();
+    })
+  }
+
+  closeModal() {
+    this.showSpinner = false;
+    this.close();
   }
 }

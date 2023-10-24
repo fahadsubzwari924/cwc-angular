@@ -34,8 +34,8 @@
   </div>
   <div class="modal-footer">
     <p-button label="Cancel" styleClass="p-button-secondary p-button-sm" (onClick)="close()"></p-button>
-    <p-button label="Create" styleClass="p-button-sm ml-2" [disabled]="createProductForm.invalid"
-      (onClick)="createProduct()"></p-button>
+    <p-button label="Save" styleClass="p-button-sm ml-2" [disabled]="createProductForm.invalid"
+      (onClick)="saveProduct()"></p-button>
   </div>
 </div>
 <p-blockUI [blocked]="showSpinner">

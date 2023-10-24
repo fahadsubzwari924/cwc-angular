@@ -33,10 +33,8 @@ export class ApiService {
     return this.http.post(this.getFormattedUrl(route), payload);
   }
 
-  httpPut(route: string, payload: any, headers: HttpHeaders) {
-    return this.http.put(this.getFormattedUrl(route), payload, {
-      headers: headers,
-    });
+  httpPut(route: string, payload: any, headers = this.httpOptions) {
+    return this.http.put(this.getFormattedUrl(route), payload);
   }
 
   delete(route: string, headers: HttpHeaders) {

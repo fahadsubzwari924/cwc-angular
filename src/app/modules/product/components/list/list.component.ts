@@ -5,6 +5,7 @@ import { SelectItem } from 'primeng/api';
 import { DataView } from 'primeng/dataview';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { CreateComponent } from '../create/create.component';
+import { eCRUDActions } from 'src/app/shared/enums/crud-actions.enum';
 
 @Component({
   selector: 'app-list',
@@ -52,11 +53,19 @@ export class ListComponent implements OnInit {
     dv.filter((event.target as HTMLInputElement).value);
   }
 
-  openCreateProductModal(): void {
+  openCreateProductModal() {
+    this.openProductModal('Create Product', eCRUDActions.ADD);
+  }
+
+  openEditProductModal(product: Product) {
+    this.openProductModal('Update Product', eCRUDActions.EDIT, product);
+  }
+  openProductModal(title: string, action: string, product?: Product): void {
     const modalRef = this.modalService
       .addModal(CreateComponent, {
-        title: 'Create Product',
-        message: 'Test Product',
+        title,
+        action,
+        product
       })
       .subscribe((isConfirmed) => {
         console.log(isConfirmed);

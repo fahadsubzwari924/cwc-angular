@@ -27,4 +27,10 @@ export class ProductService {
       .httpPost(ApiPaths.Products, productPayload)
       .pipe(map((response: any) => new Product(response.payload)));
   }
+
+  public updateProduct(product: Product) {
+    return this.apiService
+    .httpPut(`${ApiPaths.Products}/${product.id}`, product)
+    .pipe(map((response: any) => new Product(response.payload)));
+  }
 }
