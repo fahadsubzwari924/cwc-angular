@@ -5,10 +5,10 @@ import { SelectItem } from 'primeng/api';
 import { DataView } from 'primeng/dataview';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { CreateComponent } from '../create/create.component';
-import { eCRUDActions } from 'src/app/shared/enums/crud-actions.enum';
 import { ConfirmationModalComponent } from 'src/app/shared/components/confirmation-modal/confirmation-modal.component';
 import { MessageService } from 'primeng/api';
 import { Observable, of, switchMap, tap } from 'rxjs';
+import { EditProductComponent } from '../edit/edit-product.component';
 
 @Component({
   selector: 'app-list',
@@ -52,20 +52,27 @@ export class ListComponent implements OnInit {
     dv.filter((event.target as HTMLInputElement).value);
   }
 
-  openCreateProductModal() {
-    this.openProductModal('Create Product', eCRUDActions.ADD);
+  openCreateProductModal(): void {
+    const inputs = {
+      title: 'Create Product',
+    };
+    this.modalService
+      .addModal(CreateComponent, inputs)
+      .subscribe((isConfirmed) => {
+        console.log('isConfirmed : ', isConfirmed);
+        if (isConfirmed) {
+          this.getProducts();
+        }
+      });
   }
 
-  openEditProductModal(product: Product) {
-    this.openProductModal('Update Product', eCRUDActions.EDIT, product);
-  }
-  openProductModal(title: string, action: string, product?: Product): void {
+  openEditProductModal(product: Product): void {
+    const inputs = {
+      title: 'Edit Product',
+      product,
+    };
     this.modalService
-      .addModal(CreateComponent, {
-        title,
-        action,
-        product
-      })
+      .addModal(EditProductComponent, inputs)
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
           this.getProducts();
@@ -87,7 +94,7 @@ export class ListComponent implements OnInit {
             .deleteProduct(product.id as number)
             .pipe(
               tap(() => this.showToast(toastMessage)),
-              switchMap(() => of(this.getProducts))
+              switchMap(() => of(this.getProducts()))
             )
             .subscribe();
         }
