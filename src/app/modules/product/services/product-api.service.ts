@@ -28,6 +28,12 @@ export class ProductService {
       .pipe(map((response: any) => new Product(response.payload)));
   }
 
+  public updateProduct(product: Product) {
+    return this.apiService
+    .httpPut(`${ApiPaths.Products}/${product.id}`, product)
+    .pipe(map((response: any) => new Product(response.payload)));
+  }
+
   public deleteProduct(productId: number): Observable<any> {
     const apiUrl = `${ApiPaths.Products}/${productId}`;
     return this.apiService.httpDelete(apiUrl);

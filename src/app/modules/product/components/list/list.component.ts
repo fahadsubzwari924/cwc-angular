@@ -8,6 +8,7 @@ import { CreateComponent } from '../create/create.component';
 import { ConfirmationModalComponent } from 'src/app/shared/components/confirmation-modal/confirmation-modal.component';
 import { MessageService } from 'primeng/api';
 import { Observable, of, switchMap, tap } from 'rxjs';
+import { EditProductComponent } from '../edit/edit-product.component';
 
 @Component({
   selector: 'app-list',
@@ -52,11 +53,26 @@ export class ListComponent implements OnInit {
   }
 
   openCreateProductModal(): void {
+    const inputs = {
+      title: 'Create Product',
+    };
     this.modalService
-      .addModal(CreateComponent, {
-        title: 'Create Product',
-        message: 'Test Product',
-      })
+      .addModal(CreateComponent, inputs)
+      .subscribe((isConfirmed) => {
+        console.log('isConfirmed : ', isConfirmed);
+        if (isConfirmed) {
+          this.getProducts();
+        }
+      });
+  }
+
+  openEditProductModal(product: Product): void {
+    const inputs = {
+      title: 'Edit Product',
+      product,
+    };
+    this.modalService
+      .addModal(EditProductComponent, inputs)
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
           this.getProducts();
@@ -78,7 +94,7 @@ export class ListComponent implements OnInit {
             .deleteProduct(product.id as number)
             .pipe(
               tap(() => this.showToast(toastMessage)),
-              switchMap(() => of(this.getProducts))
+              switchMap(() => of(this.getProducts()))
             )
             .subscribe();
         }

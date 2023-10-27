@@ -12,9 +12,10 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { BlockUIModule } from 'primeng/blockui';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { EditProductComponent } from './components/edit/edit-product.component';
 
 @NgModule({
-  declarations: [ListComponent, CreateComponent],
+  declarations: [ListComponent, CreateComponent, EditProductComponent],
   imports: [
     CommonModule,
     SharedModule,
