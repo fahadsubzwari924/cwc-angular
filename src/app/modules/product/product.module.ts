@@ -10,6 +10,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { BlockUIModule } from 'primeng/blockui';
+import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { EditProductComponent } from './components/edit/edit-product.component';
@@ -27,6 +28,7 @@ import { EditProductComponent } from './components/edit/edit-product.component';
     ProgressSpinnerModule,
     BlockUIModule,
     ToastModule,
+    PaginatorModule,
   ],
   providers: [ProductService, MessageService],
 })
