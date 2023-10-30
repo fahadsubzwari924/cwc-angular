@@ -7,8 +7,10 @@ import { SimpleModalService } from 'ngx-simple-modal';
 import { CreateComponent } from '../create/create.component';
 import { ConfirmationModalComponent } from 'src/app/shared/components/confirmation-modal/confirmation-modal.component';
 import { MessageService } from 'primeng/api';
-import { Observable, of, switchMap, tap } from 'rxjs';
+import { of, switchMap, tap } from 'rxjs';
 import { EditProductComponent } from '../edit/edit-product.component';
+import { CustomResponse } from 'src/app/shared/models/response.model';
+import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
 
 @Component({
   selector: 'app-list',
@@ -19,10 +21,12 @@ export class ListComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private modalService: SimpleModalService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    public paginationConstants: PaginationConstants
   ) {}
 
-  products$!: Observable<Array<Product>>;
+  products: Array<Product> = [];
+  productResponseMetadata: any;
   sortOptions: SelectItem[] = [];
   sortOrder: number = 0;
   sortField: string = '';
@@ -32,8 +36,13 @@ export class ListComponent implements OnInit {
     this.getProducts();
   }
 
-  getProducts(): void {
-    this.products$ = this.productService.getProducts();
+  getProducts(params = {}): void {
+    this.productService
+      .getProducts(params)
+      .subscribe((response: CustomResponse<Product[]>) => {
+        this.products = response?.payload;
+        this.productResponseMetadata = response.metadata;
+      });
   }
 
   onSortChange(event: any) {
@@ -113,5 +122,12 @@ export class ListComponent implements OnInit {
       { label: 'Price High to Low', value: '!price' },
       { label: 'Price Low to High', value: 'price' },
     ];
+  }
+
+  onPageChange(paginationEvent: any): void {
+    const queryParams = {
+      page: paginationEvent?.page + 1,
+    };
+    this.getProducts(queryParams);
   }
 }

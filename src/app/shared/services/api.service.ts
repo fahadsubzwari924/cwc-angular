@@ -21,8 +21,11 @@ export class ApiService {
     return url;
   }
 
-  httpGet(route: string, headers = this.httpOptions): Observable<any> {
-    return this.http.get(this.getFormattedUrl(route), this.httpOptions);
+  httpGet(route: string, params: any = {}): Observable<any> {
+    return this.http.get(this.getFormattedUrl(route), {
+      ...this.httpOptions,
+      params: params,
+    });
   }
 
   httpPost(
