@@ -185,10 +185,10 @@
   dependencies:
     tslib "^2.3.0"
 
-"@angular/cdk@^15.1.0":
-  version "15.2.5"
-  resolved "https://registry.npmjs.org/@angular/cdk/-/cdk-15.2.5.tgz"
-  integrity sha512-6/vA4xATcx//AULwXnRRH0Of0aaNlfrFxdlhvRVfnfmxi/hZAkjjEtil/wv8uBw+dAwXBx5yZMsAol9nUFS/BQ==
+"@angular/cdk@^16.2.12":
+  version "16.2.12"
+  resolved "https://registry.npmjs.org/@angular/cdk/-/cdk-16.2.12.tgz"
+  integrity sha512-wT8/265zm2WKY0BDaRoYbrAT4kadrmejTRLjuimQIEUKnw4vBsJMWCwQkpFo3s6zr6eznGqYVAFb8KKPVLKGBg==
   dependencies:
     tslib "^2.3.0"
   optionalDependencies:
@@ -218,7 +218,7 @@
     symbol-observable "4.0.0"
     yargs "17.6.2"
 
-"@angular/common@^15.0.0 || ^16.0.0", "@angular/common@^16.2.0", "@angular/common@^16.2.12", "@angular/common@16.2.12":
+"@angular/common@^16.0.0 || ^17.0.0", "@angular/common@^16.2.0", "@angular/common@^16.2.12", "@angular/common@16.2.12":
   version "16.2.12"
   resolved "https://registry.npmjs.org/@angular/common/-/common-16.2.12.tgz"
   integrity sha512-B+WY/cT2VgEaz9HfJitBmgdk4I333XG/ybC98CMC4Wz8E49T8yzivmmxXB3OD6qvjcOB6ftuicl6WBqLbZNg2w==
@@ -246,7 +246,7 @@
   dependencies:
     tslib "^2.3.0"
 
-"@angular/core@^15.0.0 || ^16.0.0", "@angular/core@^16.2.0", "@angular/core@^16.2.12", "@angular/core@16.2.12":
+"@angular/core@^16.0.0 || ^17.0.0", "@angular/core@^16.2.0", "@angular/core@^16.2.12", "@angular/core@16.2.12":
   version "16.2.12"
   resolved "https://registry.npmjs.org/@angular/core/-/core-16.2.12.tgz"
   integrity sha512-GLLlDeke/NjroaLYOks0uyzFVo6HyLl7VOm0K1QpLXnYvW63W9Ql/T3yguRZa7tRkOAeFZ3jw+1wnBD4O8MoUA==
