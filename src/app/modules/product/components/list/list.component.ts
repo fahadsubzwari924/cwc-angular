@@ -28,7 +28,7 @@ export class ListComponent implements OnInit {
   products: Array<Product> = [];
   productResponseMetadata: any;
   sortOptions: SelectItem[] = [];
-  sortOrder: number = 0;
+  sortOrder!: string;
   sortField: string = '';
 
   ngOnInit(): void {
@@ -47,14 +47,12 @@ export class ListComponent implements OnInit {
 
   onSortChange(event: any) {
     const value = event.value;
-
-    if (value.indexOf('!') === 0) {
-      this.sortOrder = -1;
-      this.sortField = value.substring(1, value.length);
-    } else {
-      this.sortOrder = 1;
-      this.sortField = value;
-    }
+    this.getSortFieldAndOrde(value);
+    const queryParams = {
+      sortBy: this.sortField,
+      sortOrder: this.sortOrder,
+    };
+    this.getProducts(queryParams);
   }
 
   onFilter(dv: DataView, event: Event) {
@@ -119,8 +117,8 @@ export class ListComponent implements OnInit {
 
   buildSortOptions(): void {
     this.sortOptions = [
-      { label: 'Price High to Low', value: '!price' },
-      { label: 'Price Low to High', value: 'price' },
+      { label: 'Cost High to Low', value: '!cost' },
+      { label: 'Cost Low to High', value: 'cost' },
     ];
   }
 
@@ -129,5 +127,15 @@ export class ListComponent implements OnInit {
       page: paginationEvent?.page + 1,
     };
     this.getProducts(queryParams);
+  }
+
+  private getSortFieldAndOrde(value: string): void {
+    if (value.indexOf('!') === 0) {
+      this.sortOrder = 'desc';
+      this.sortField = value.substring(1, value.length);
+    } else {
+      this.sortOrder = 'asc';
+      this.sortField = value;
+    }
   }
 }
