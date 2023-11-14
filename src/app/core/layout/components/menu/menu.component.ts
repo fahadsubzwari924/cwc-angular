@@ -35,7 +35,7 @@ export class MenuComponent implements OnInit {
           {
             label: 'Customers',
             icon: 'pi pi-fw pi-id-card',
-            routerLink: ['/uikit/formlayout'],
+            routerLink: ['/customers'],
           },
         ],
       },

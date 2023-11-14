@@ -83,7 +83,6 @@
                     </div>
                 </ng-template>
             </p-dataView>
-            <!-- {{ paginationConstants.FIRST_ROW | json }} -->
             <p-paginator (onPageChange)="onPageChange($event)" [first]="paginationConstants.FIRST_ROW" [rows]="paginationConstants.PAGE_LIMIT"
                 [totalRecords]="productResponseMetadata?.totalItems"></p-paginator>
             <p-toast></p-toast>
