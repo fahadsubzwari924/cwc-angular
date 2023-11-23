@@ -26,3 +26,43 @@ $gutter: 1rem; //for primeflex grid system
 .ml-2px{
   margin-left: 2px;
 }
+
+
+
+/* Theme Customizations */
+.p-autocomplete{
+  width: 100%;
+}
+.p-autocomplete-multiple-container{
+  width: 100%;
+}
+.tabview-custom span {
+  margin: 0 0.5rem;
+}
+.p-dropdown{
+  width: 100%;
+}
+
+.card{
+  position: relative;
+  padding: 1rem 2rem;
+  
+  .card-footer{
+    background-color: white;
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    p{
+      text-align: left;
+      margin: 0;
+    }
+  }
+
+  .card-content {
+    height: 100%;
+    overflow-y: auto;
+  }  
+}

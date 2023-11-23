@@ -31,6 +31,11 @@ const routes: Routes = [
             (m) => m.CustomersModule
           ),
       },
+      {
+        path: 'orders',
+        loadChildren: () =>
+          import('./modules/order/order.module').then((m) => m.OrderModule),
+      },
     ],
   },
   {

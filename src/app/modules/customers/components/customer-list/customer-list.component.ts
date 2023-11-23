@@ -42,6 +42,10 @@ export class CustomerListComponent {
       field: 'age',
       header: 'Age',
     },
+    {
+      field: 'ordersCount',
+      header: 'Orders',
+    },
   ];
   sortOrder: number = 0;
   sortField: string = '';
