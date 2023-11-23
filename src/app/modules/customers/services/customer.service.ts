@@ -39,7 +39,13 @@ export class CustomerService {
     return this.apiService.httpDelete(apiUrl);
   }
 
+  public searchCustomers(params = {}): Observable<Array<Customer>> {
+    return this.apiService
+      .httpGet(`${ApiPaths.Customers}/search`, params)
+      .pipe(map((response) => this.mapCustomers(response?.payload)));
+  }
+
   private mapCustomers(data: any): Array<Customer> {
-    return data.map((customer: any) => new Customer(customer));
+    return data?.map((customer: any) => new Customer(customer));
   }
 }

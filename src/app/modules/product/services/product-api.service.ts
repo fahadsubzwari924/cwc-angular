@@ -39,7 +39,13 @@ export class ProductService {
     return this.apiService.httpDelete(apiUrl);
   }
 
+  public searchProducts(params = {}): Observable<Array<Product>> {
+    return this.apiService
+      .httpGet(`${ApiPaths.Products}/search`, params)
+      .pipe(map((response) => this.mapProducts(response?.payload)));
+  }
+
   private mapProducts(data: any): Product[] {
-    return data.map((product: any) => new Product(product));
+    return data?.map((product: any) => new Product(product));
   }
 }
