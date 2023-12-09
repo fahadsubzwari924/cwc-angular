@@ -4,4 +4,5 @@ export enum ApiPaths {
   Products = '/products',
   Customers = '/customers',
   Orders = '/orders',
+  Auth = '/auth',
 }

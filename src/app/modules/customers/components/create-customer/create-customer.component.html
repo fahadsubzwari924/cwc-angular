@@ -1,0 +1,53 @@
+<div class="modal-content cvc-custom-modal">
+  <div class="modal-header">
+    <h4>{{ title || "Confirm" }}</h4>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="customerForm">
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="firstname2" requiredField>Full Name</label>
+          <input formControlName="fullName" id="firstname2" type="text"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+        <div class="field col">
+          <label for="description">Contact Number</label>
+          <input formControlName="contactNumber" id="firstname2" type="text"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+      </div>
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="lastname2" requiredField>Address</label>
+          <input formControlName="address" id="lastname2" type="text"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+        <div class="field col">
+          <label for="lastname2" requiredField>Age</label>
+          <input formControlName="age" id="lastname2" type="number"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+      </div>
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="lastname2">Country</label>
+          <input formControlName="country" id="lastname2" type="text"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+        <div class="field col">
+          <label for="lastname2">City</label>
+          <input formControlName="city" id="lastname2" type="text"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <p-button label="Cancel" styleClass="p-button-secondary p-button-sm" (onClick)="close()"></p-button>
+    <p-button label="Save" styleClass="p-button-sm ml-2" [disabled]="customerForm.invalid" (onClick)="saveCustomer()">
+    </p-button>
+  </div>
+</div>
+<p-blockUI [blocked]="showSpinner">
+  <p-progressSpinner></p-progressSpinner>
+</p-blockUI>

@@ -24,6 +24,18 @@ const routes: Routes = [
             (m) => m.ProductModule
           ),
       },
+      {
+        path: 'customers',
+        loadChildren: () =>
+          import('./modules/customers/customers.module').then(
+            (m) => m.CustomersModule
+          ),
+      },
+      {
+        path: 'orders',
+        loadChildren: () =>
+          import('./modules/order/order.module').then((m) => m.OrderModule),
+      },
     ],
   },
   {

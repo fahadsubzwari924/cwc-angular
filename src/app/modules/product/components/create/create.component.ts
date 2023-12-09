@@ -6,7 +6,7 @@ import { ProductService } from '../../services/product-api.service';
 import { Product } from '../../models/product.model';
 
 @Component({
-  selector: 'app-create',
+  selector: 'app-create-product',
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.scss'],
 })
@@ -15,15 +15,14 @@ export class CreateComponent
   implements OnInit
 {
   title!: string;
-  message!: string;
 
-  createProductForm!: FormGroup;
+  productForm!: FormGroup;
   spinner!: ProgressSpinner;
   showSpinner = false;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private productService: ProductService
+    protected formBuilder: FormBuilder,
+    protected productService: ProductService
   ) {
     super();
     this.spinner = new ProgressSpinner();
@@ -34,7 +33,7 @@ export class CreateComponent
   }
 
   buildForm(): void {
-    this.createProductForm = this.formBuilder.group({
+    this.productForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(5)]],
       cost: ['', [Validators.required]],
       description: [''],
@@ -42,14 +41,22 @@ export class CreateComponent
     });
   }
 
+  saveProduct() {
+    this.createProduct();
+  }
+
   createProduct(): void {
     this.showSpinner = true;
     this.productService
-      .createProduct(this.createProductForm.value)
+      .createProduct(this.productForm.value)
       .subscribe((response: Product) => {
-        this.showSpinner = false;
-        this.result = true;
-        this.close();
+        this.closeModal();
       });
+  }
+
+  closeModal() {
+    this.showSpinner = false;
+    this.result = true;
+    this.close();
   }
 }

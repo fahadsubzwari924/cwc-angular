@@ -1,0 +1,122 @@
+<div class="grid">
+  <div class="col-12">
+    <div class="card" style="height: 80vh; overflow-y: auto">
+      <div class="card-content">
+        <form [formGroup]="orderForm">
+          <div class="grid">
+            <div class="col-5">
+              <div class="flex flex-column gap-2">
+                <label>Select Customer</label>
+                <p-autoComplete [style]="{ width: '100%' }" [inputStyle]="{ width: '100%' }"
+                  formControlName="selectedCustomer" [dropdown]="true" [suggestions]="customerSuggestions"
+                  (completeMethod)="searchCustomer($event)" field="fullName"></p-autoComplete>
+              </div>
+            </div>
+            <div class="col-7">
+              <div class="flex flex-column gap-2">
+                <label>Select Products</label>
+                <p-autoComplete [style]="{ width: '100%' }" [inputStyle]="{ width: '100%' }"
+                  formControlName="selectedProducts" [multiple]="true" [suggestions]="productSuggestions"
+                  (completeMethod)="searchProducts($event)" (onSelect)="onProductSelect()"
+                  field="name"></p-autoComplete>
+              </div>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="col-5">
+              <div class="flex flex-column gap-2">
+                <label>Select Payment Method</label>
+                <p-dropdown formControlName="paymentMethod" [options]="paymentMethods" optionLabel="name"
+                  dataKey="value"></p-dropdown>
+              </div>
+            </div>
+            <div class="col-7">
+              <div class="flex flex-column gap-2">
+                <label>Order Description</label>
+                <input id="firstname2" type="text" formControlName="description"
+                  class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+              </div>
+            </div>
+          </div>
+        </form>
+        <div class="grid mt-3" *ngIf="selectedProductsControl?.value?.length">
+          <div class="col-12">
+            <p-tabView styleClass="tabview-custom">
+              <p-tabPanel *ngFor="let product of selectedProductsControl.value" [closable]="true">
+                <ng-template pTemplate="header">
+                  <i class="pi pi-calendar"></i>
+                  <span>{{ product?.name }}</span>
+                </ng-template>
+                <div class="grid">
+                  <div class="col-2">
+                    <div class="flex flex-column gap-2">
+                      <label>Quantity</label>
+                      <input type="number" [(ngModel)]="productDetails[product.name].quantity" (blur)="
+                          onSelectProductQuantity(
+                            product,
+                            productDetails[product.name].quantity
+                          )
+                        "
+                        class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                    </div>
+                  </div>
+                  <div class="col-2">
+                    <div class="flex flex-column gap-2">
+                      <label>Price</label>
+                      <input type="number" [(ngModel)]="productDetails[product.name].price" (blur)="onPriceChange()"
+                        class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                    </div>
+                  </div>
+                </div>
+                <div class="grid mt-2" *ngIf="canShowProductDetailsTable">
+                  <div class="col-12">
+                    <p-table [value]="productDetails[product.name].orderProducts"
+                      [tableStyle]="{ 'min-width': '50rem' }">
+                      <ng-template pTemplate="header">
+                        <tr>
+                          <th>Product Name</th>
+                          <th>Cost</th>
+                          <th>Customize Name</th>
+                          <th>Color</th>
+                        </tr>
+                      </ng-template>
+                      <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
+                        <tr>
+                          <td>{{ product?.name }}</td>
+                          <td>{{ product?.cost }}</td>
+                          <td>
+                            <input id="firstname2" type="text" [(ngModel)]="
+                                productDetails[product.name].orderProducts[rowIndex]
+                                  .customizeName
+                              "
+                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                          </td>
+                          <td>
+                            <input id="firstname2" type="text" [(ngModel)]="
+                                productDetails[product.name].orderProducts[rowIndex]
+                                  .color
+                              "
+                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                          </td>
+                        </tr>
+                      </ng-template>
+                    </p-table>
+                  </div>
+                </div>
+              </p-tabPanel>
+            </p-tabView>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <p class="text-3xl text-indigo-400 font-bold">
+          Total : {{ orderTotalAmount }}
+        </p>
+        <p-button icon="pi pi-plus" label="Save" styleClass="mb-2 p-button-sm" (onClick)="createOrder()"></p-button>
+      </div>
+    </div>
+  </div>
+</div>
+<p-blockUI [blocked]="showSpinner">
+  <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
