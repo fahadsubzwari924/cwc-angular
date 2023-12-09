@@ -9,6 +9,7 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { CustomPrimengModule } from './modules/primeng/primeng.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutModule } from './core/layout/layout.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [AppComponent, RegisterComponent, LoginComponent],
@@ -18,6 +19,8 @@ import { LayoutModule } from './core/layout/layout.module';
     BrowserModule,
     BrowserAnimationsModule,
     LayoutModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [AuthGuard],
   bootstrap: [AppComponent],

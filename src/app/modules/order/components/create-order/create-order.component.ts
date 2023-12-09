@@ -18,6 +18,10 @@ import { Customer } from 'src/app/modules/customers/models/customer.model';
 import { CustomerService } from 'src/app/modules/customers/services/customer.service';
 import { Product } from 'src/app/modules/product/models/product.model';
 import { ProductService } from 'src/app/modules/product/services/product-api.service';
+import { OrderService } from '../../services/order.service';
+import { MessageService } from 'primeng/api';
+import { Router } from '@angular/router';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 interface AutoCompleteCompleteEvent {
   originalEvent: Event;
@@ -63,11 +67,19 @@ export class CreateOrderComponent implements OnInit {
   paymentMethods: Array<{ name: string; value: string }> = [];
   orderTotalAmount: number = 0;
 
+  spinner!: ProgressSpinner;
+  showSpinner = false;
+
   constructor(
     private customerService: CustomerService,
     private productService: ProductService,
-    private formBuilder: FormBuilder
-  ) {}
+    private formBuilder: FormBuilder,
+    private orderService: OrderService,
+    private messageService: MessageService,
+    private router: Router
+  ) {
+    this.spinner = new ProgressSpinner();
+  }
 
   ngOnInit(): void {
     this.buildOrderForm();
@@ -180,9 +192,15 @@ export class CreateOrderComponent implements OnInit {
     });
   }
 
-  createOrder() {
+  createOrder(): void {
+    this.showSpinner = true;
     const createOrderPayload = this.buildCreateOrderPayload();
-    console.log(createOrderPayload);
+    this.orderService.createOrder(createOrderPayload).subscribe((res) => {
+      this.showSpinner = false;
+      console.log(res);
+      this.showToast('Order created!');
+      this.router.navigate(['/orders']);
+    });
   }
 
   private buildPaymentMethodOptions(): void {
@@ -227,7 +245,7 @@ export class CreateOrderComponent implements OnInit {
       amount: this.orderTotalAmount,
       customerId: this.orderForm.value.selectedCustomer?.id,
       totalProductQuantity: this.getTotalCountByProperty('quantity'),
-      totalWeight: this.getTotalCountByProperty('weight', true),
+      totalWeight: this.getTotalCountByProperty('weight', true).toString(),
       products: this.buildOrderProductsPayload(),
     };
   }
@@ -245,6 +263,13 @@ export class CreateOrderComponent implements OnInit {
         price: this.productDetails[product.name].price,
         customizeName: product.customizeName,
       };
+    });
+  }
+
+  private showToast(message: string) {
+    this.messageService.add({
+      severity: 'success',
+      detail: message,
     });
   }
 }

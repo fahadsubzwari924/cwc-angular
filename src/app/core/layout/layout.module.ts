@@ -11,6 +11,9 @@ import { RouterModule } from '@angular/router';
 import { LayoutComponent } from './layout.component';
 import { MenuitemComponent } from './components/menu-item/menu-item.component';
 import { AppConfigModule } from './config/config.module';
+import { MenuModule } from 'primeng/menu';
+import { PanelMenuModule } from 'primeng/panelmenu';
+import { ButtonModule } from 'primeng/button';
 
 @NgModule({
   declarations: [
@@ -28,6 +31,9 @@ import { AppConfigModule } from './config/config.module';
     HttpClientModule,
     RouterModule,
     AppConfigModule,
+    MenuModule,
+    PanelMenuModule,
+    ButtonModule,
   ],
   exports: [LayoutComponent],
 })

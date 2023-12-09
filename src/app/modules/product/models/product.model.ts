@@ -5,6 +5,7 @@ export class Product {
   cost: number;
   price?: number;
   weight: string;
+  thumbnailImage: string;
   createdAt: Date;
 
   constructor(product: any) {
@@ -14,5 +15,6 @@ export class Product {
     this.cost = product?.cost;
     this.weight = product?.weight;
     this.createdAt = product?.createdAt;
+    this.thumbnailImage = product?.thumbnailImage;
   }
 }

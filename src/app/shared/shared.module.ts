@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ApiService } from './services/api.service';
 import { SimpleModalModule } from 'ngx-simple-modal';
 import { MarkFeildRequired } from './directives/requred-field-asterisk';
@@ -10,7 +10,7 @@ import { FieldPipe } from './pipes/show-nested-field.pipe';
 @NgModule({
   declarations: [MarkFeildRequired, ConfirmationModalComponent, FieldPipe],
   imports: [CommonModule, SimpleModalModule, ButtonModule],
-  providers: [ApiService],
+  providers: [ApiService, DatePipe],
   exports: [
     SimpleModalModule,
     MarkFeildRequired,

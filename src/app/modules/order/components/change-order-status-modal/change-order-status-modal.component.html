@@ -1,0 +1,25 @@
+<div class="modal-content cvc-custom-modal">
+    <div class="modal-header">
+        <h4>{{ title }}</h4>
+    </div>
+    <div class="modal-body">
+        <div class="grid">
+            <div class="col">
+                <div class="flex flex-column gap-2">
+                    <label>Select Status</label>
+                    <p-dropdown [(ngModel)]="selectedStatus" [options]="orderStatusOptions"
+                        optionLabel="name"></p-dropdown>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <p-button label="Cancel" styleClass="p-button-secondary p-button-sm" (onClick)="close()"></p-button>
+        <p-button label="Save" styleClass="p-button-sm ml-2" [disabled]="!selectedStatus"
+            (onClick)="changeOrderStatus()">
+        </p-button>
+    </div>
+</div>
+<p-blockUI [blocked]="showSpinner">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>

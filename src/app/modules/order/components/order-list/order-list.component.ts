@@ -7,6 +7,7 @@ import { PaginationConstants } from 'src/app/shared/constants/pagination.constan
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { Order } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
+import { ChangeOrderStatusModalComponent } from '../change-order-status-modal/change-order-status-modal.component';
 
 @Component({
   selector: 'app-order-list',
@@ -27,26 +28,32 @@ export class OrderListComponent {
     {
       field: 'id',
       header: 'Order ID',
+      type: 'string',
     },
     {
       field: 'description',
       header: 'Description',
+      type: 'string',
     },
     {
       field: 'customer.fullName',
       header: 'Customer',
+      type: 'string',
     },
     {
       field: 'amount',
       header: 'Total Amount',
+      type: 'string',
     },
     {
-      field: 'quantity',
-      header: 'No. of products',
+      field: 'status',
+      header: 'Status',
+      type: 'chips',
     },
     {
       field: 'createdAt',
       header: 'Date',
+      type: 'date',
     },
   ];
   sortOrder: number = 0;
@@ -139,5 +146,21 @@ export class OrderListComponent {
       page: paginationEvent?.page + 1,
     };
     this.getOrders(queryParams);
+  }
+
+  onChangeOrderStatus(order: Order): void {
+    const inputs = {
+      title: 'Change Order Status',
+      orderStatus: order.status?.toLowerCase(),
+      orderId: order.id,
+    };
+    this.modalService
+      .addModal(ChangeOrderStatusModalComponent, inputs)
+      .subscribe((isConfirmed) => {
+        console.log('isConfirmed : ', isConfirmed);
+        if (isConfirmed) {
+          this.getOrders();
+        }
+      });
   }
 }

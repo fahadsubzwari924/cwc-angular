@@ -9,11 +9,8 @@
 </div> -->
 <div class="grid">
   <div class="col-12">
-    <p-table
-      [columns]="columns"
-      [value]="orders"
-      [tableStyle]="{ 'min-width': '50rem' }"
-    >
+    <p-table [columns]="columns" [value]="orders" [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-gridlines">
       <ng-template pTemplate="header" let-columns>
         <tr>
           <th *ngFor="let col of columns">
@@ -25,12 +22,17 @@
       <ng-template pTemplate="body" let-rowData let-columns="columns">
         <tr>
           <td *ngFor="let col of columns">
-            <span *ngIf="col.field !== 'createdAt'">{{
-              rowData | field : col
-            }}</span>
-            <span *ngIf="col.field === 'createdAt'">{{
-              rowData[col.field] | date : "dd-MM-yyyy, hh:mm a"
-            }}</span>
+            <span *ngIf="col.field !== 'status'; else statusColumn">
+              {{ rowData | field : col }}
+            </span>
+            <ng-template #statusColumn>
+              <div class="flex align-items-center">
+                <p-chip [label]="rowData[col.field]" styleClass="chip-info">
+                </p-chip>
+                <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded ml-3"
+                  (click)="onChangeOrderStatus(rowData)"></button>
+              </div>
+            </ng-template>
           </td>
           <!-- <td>
             <p-button
@@ -46,12 +48,8 @@
         </tr>
       </ng-template>
     </p-table>
-    <p-paginator
-      (onPageChange)="onPageChange($event)"
-      [first]="paginationConstants.FIRST_ROW"
-      [rows]="paginationConstants.PAGE_LIMIT"
-      [totalRecords]="orderResponseMetadata?.totalItems"
-    ></p-paginator>
-    <p-toast></p-toast>
+    <p-paginator (onPageChange)="onPageChange($event)" [first]="paginationConstants.FIRST_ROW"
+      [rows]="paginationConstants.PAGE_LIMIT" [totalRecords]="orderResponseMetadata?.totalItems"></p-paginator>
+    <p-toast position="bottom-right"></p-toast>
   </div>
 </div>

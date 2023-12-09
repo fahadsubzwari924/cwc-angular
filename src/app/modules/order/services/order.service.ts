@@ -20,17 +20,17 @@ export class OrderService {
       );
   }
 
-  public createOrder(orderPayload: Order): Observable<Order> {
+  public createOrder(orderPayload: any): Observable<Order> {
     return this.apiService
       .httpPost(ApiPaths.Orders, orderPayload)
       .pipe(map((response: any) => new Order(response.payload)));
   }
 
-  // public updateCustomer(customer: Customer) {
-  //   return this.apiService
-  //     .httpPut(`${ApiPaths.Customers}/${customer.id}`, customer)
-  //     .pipe(map((response: any) => new Customer(response.payload)));
-  // }
+  public updateCustomer(orderid: number, orderPayload: any) {
+    return this.apiService
+      .httpPut(`${ApiPaths.Orders}/${orderid}`, orderPayload)
+      .pipe(map((response: any) => new Order(response.payload)));
+  }
 
   // public deleteCustomer(customerId: number): Observable<any> {
   //   const apiUrl = `${ApiPaths.Customers}/${customerId}`;
