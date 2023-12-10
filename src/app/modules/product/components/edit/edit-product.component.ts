@@ -33,6 +33,7 @@ export class EditProductComponent extends CreateComponent implements OnInit {
       cost: [this.product?.cost, [Validators.required]],
       description: [this.product?.description],
       weight: [this.product?.weight],
+      thumbnailImage: [''],
     });
   }
 

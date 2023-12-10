@@ -30,6 +30,15 @@
             class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
         </div>
       </div>
+      <div class="formgrid grid">
+        <div class="field col">
+          <div class="product-thumbnail-container" (click)="openFileUploader()">
+            Browse
+          </div>
+          <p *ngIf="productThumbnailName" class="text-primary font-bold mt-1">{{ productThumbnailName }}</p>
+          <input type="file" #fileInput [hidden]="true" (change)="onUploadProductThumbnail($event)">
+        </div>
+      </div>
     </form>
   </div>
   <div class="modal-footer">
