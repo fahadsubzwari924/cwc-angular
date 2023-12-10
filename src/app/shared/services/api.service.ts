@@ -23,8 +23,8 @@ export class ApiService {
     });
   }
 
-  httpPost(route: string, payload: any) {
-    const headers = this.buildHeaders();
+  httpPost(route: string, payload: any, isFormData = false) {
+    const headers = this.buildHeaders(isFormData);
     return this.http.post(this.getFormattedUrl(route), payload, {
       headers: headers,
     });
@@ -42,10 +42,12 @@ export class ApiService {
     return this.http.delete(this.getFormattedUrl(route), { headers: headers });
   }
 
-  private buildHeaders(): HttpHeaders {
-    const defaultHeaders = new HttpHeaders({
-      'Content-Type': 'application/json',
-    });
+  private buildHeaders(isFormData = false): HttpHeaders {
+    const defaultHeaders = isFormData
+      ? new HttpHeaders()
+      : new HttpHeaders({
+          'Content-Type': 'application/json',
+        });
 
     const token = localStorage.getItem('token');
     const headers = this.setTokenInHeaders(defaultHeaders, token);

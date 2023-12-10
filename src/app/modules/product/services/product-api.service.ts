@@ -22,13 +22,13 @@ export class ProductService {
       );
   }
 
-  public createProduct(productPayload: Product): Observable<Product> {
+  public createProduct(productPayload: FormData): Observable<Product> {
     return this.apiService
-      .httpPost(ApiPaths.Products, productPayload)
+      .httpPost(ApiPaths.Products, productPayload, true)
       .pipe(map((response: any) => new Product(response.payload)));
   }
 
-  public updateProduct(product: Product) {
+  public updateProduct(product: any) {
     return this.apiService
       .httpPut(`${ApiPaths.Products}/${product.id}`, product)
       .pipe(map((response: any) => new Product(response.payload)));
