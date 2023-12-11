@@ -33,8 +33,11 @@ export class EditProductComponent extends CreateComponent implements OnInit {
       cost: [this.product?.cost, [Validators.required]],
       description: [this.product?.description],
       weight: [this.product?.weight],
-      thumbnailImage: [''],
+      thumbnailImage: [this.product.thumbnailImage],
     });
+    this.productThumbnailName = this.extractFileName(
+      this.product.thumbnailImage
+    );
   }
 
   override saveProduct(): void {
@@ -42,11 +45,20 @@ export class EditProductComponent extends CreateComponent implements OnInit {
   }
 
   updateProduct(): void {
-    this.showSpinner = true;
-    this.productService
-      .updateProduct(this.productForm.value)
-      .subscribe((response: any) => {
-        this.closeModal();
-      });
+    if (this.productForm.valid) {
+      this.showSpinner = true;
+      const payload = this.buildCreateProductPayload();
+      this.productService
+        .updateProduct(Number(this.product.id), payload)
+        .subscribe((response: any) => {
+          this.closeModal();
+        });
+    }
+  }
+
+  private extractFileName(thumbnailImageURL: string): string {
+    return thumbnailImageURL.split('/')[
+      thumbnailImageURL.split('/').length - 1
+    ];
   }
 }

@@ -30,8 +30,8 @@ export class ApiService {
     });
   }
 
-  httpPut(route: string, payload: any) {
-    const headers = this.buildHeaders();
+  httpPut(route: string, payload: any, isFormData = false) {
+    const headers = this.buildHeaders(isFormData);
     return this.http.put(this.getFormattedUrl(route), payload, {
       headers: headers,
     });
