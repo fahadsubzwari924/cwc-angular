@@ -28,9 +28,9 @@ export class ProductService {
       .pipe(map((response: any) => new Product(response.payload)));
   }
 
-  public updateProduct(product: any) {
+  public updateProduct(productId: number, product: FormData) {
     return this.apiService
-      .httpPut(`${ApiPaths.Products}/${product.id}`, product)
+      .httpPut(`${ApiPaths.Products}/${productId}`, product, true)
       .pipe(map((response: any) => new Product(response.payload)));
   }
 
