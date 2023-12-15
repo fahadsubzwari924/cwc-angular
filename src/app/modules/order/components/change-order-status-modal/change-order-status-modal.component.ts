@@ -73,8 +73,16 @@ export class ChangeOrderStatusModalComponent
         value: OrderStatus.VENDOR,
       },
       {
+        name: 'Delivered',
+        value: OrderStatus.DELIVERED,
+      },
+      {
         name: 'Dispatched',
         value: OrderStatus.DISPATCHED,
+      },
+      {
+        name: 'Returned',
+        value: OrderStatus.RETURNED,
       },
     ];
   }

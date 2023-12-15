@@ -27,7 +27,7 @@
             </span>
             <ng-template #statusColumn>
               <div class="flex align-items-center">
-                <p-chip [label]="rowData[col.field]" styleClass="chip-info">
+                <p-chip [label]="orderStatusValues[rowData[col.field]]" styleClass="chip-info">
                 </p-chip>
                 <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded ml-3"
                   (click)="onChangeOrderStatus(rowData)"></button>

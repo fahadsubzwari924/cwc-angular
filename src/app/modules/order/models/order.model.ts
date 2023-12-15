@@ -1,4 +1,3 @@
-import { TitleCasePipe } from '@angular/common';
 import { Customer } from '../../customers/models/customer.model';
 import { Product } from '../../product/models/product.model';
 
@@ -15,10 +14,8 @@ export class Order {
   productCount?: number;
   status?: string;
   createdAt?: Date;
-  titleCasePipe: TitleCasePipe;
 
   constructor(order: any) {
-    this.titleCasePipe = new TitleCasePipe();
     this.id = order?.id;
     this.description = order?.description;
     this.quantity = order?.quantity;
@@ -27,7 +24,7 @@ export class Order {
     this.customizeName = order.customizeName;
     this.weight = order?.weight;
     this.createdAt = order.createdAt;
-    this.status = this.titleCasePipe.transform(order?.status);
+    this.status = order?.status;
     if (order?.products?.length) {
       this.products = order?.products.map(
         (product: any) => new Product(product)
