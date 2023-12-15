@@ -24,6 +24,7 @@ export class LoginComponent implements OnInit {
   valCheck: string[] = ['remember'];
 
   loginForm!: FormGroup;
+  isLoading = false;
 
   constructor(
     public layoutService: LayoutService,
@@ -41,9 +42,11 @@ export class LoginComponent implements OnInit {
   }
 
   login(): void {
+    this.isLoading = true;
     this.authService
       .signIn(this.loginForm.value)
       .subscribe((response: LoginResponse) => {
+        this.isLoading = false;
         Utils.setItemFromToStorage('token', response.accessToken);
         this.router.navigate(['/dashboard']);
       });

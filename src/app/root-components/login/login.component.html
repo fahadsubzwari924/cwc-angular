@@ -29,8 +29,8 @@
                         <a class="font-medium no-underline ml-2 text-right cursor-pointer"
                             style="color: var(--primary-color)">Forgot password?</a>
                     </div>
-                    <button pButton pRipple label="Sign In" class="w-full p-3 text-xl" (click)="login()"
-                        [disabled]="loginForm.invalid"></button>
+                    <p-button label="Submit" [loading]="isLoading" [disabled]="loginForm.invalid" (onClick)="login()"
+                        styleClass="w-full p-3 text-xl"></p-button>
                 </form>
             </div>
         </div>

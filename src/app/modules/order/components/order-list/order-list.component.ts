@@ -58,6 +58,13 @@ export class OrderListComponent {
   ];
   sortOrder: number = 0;
   sortField: string = '';
+  orderStatusValues: { [key: string]: string } = {
+    pending: 'Pending',
+    vendor: 'Vendor',
+    dispatched: 'Dispatched',
+    returned: 'Returned',
+    delivered: 'Delivered',
+  };
 
   ngOnInit(): void {
     this.getOrders();
