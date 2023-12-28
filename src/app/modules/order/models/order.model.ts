@@ -1,16 +1,15 @@
 import { Customer } from '../../customers/models/customer.model';
-import { Product } from '../../product/models/product.model';
+import { OrderProduct } from './order-product.model';
 
 export class Order {
   id?: number;
   description: string;
   quantity?: number;
   amount: number;
-  paymentMethod: string;
+  totalWeight: string;
   weight?: string;
-  customizeName?: string;
   customer?: Customer;
-  products?: Array<Product>;
+  products?: Array<OrderProduct>;
   productCount?: number;
   status?: string;
   createdAt?: Date;
@@ -20,14 +19,12 @@ export class Order {
     this.description = order?.description;
     this.quantity = order?.quantity;
     this.amount = order?.amount;
-    this.paymentMethod = order?.paymentMethod;
-    this.customizeName = order.customizeName;
-    this.weight = order?.weight;
+    this.totalWeight = order?.totalWeight;
     this.createdAt = order.createdAt;
     this.status = order?.status;
     if (order?.products?.length) {
       this.products = order?.products.map(
-        (product: any) => new Product(product)
+        (product: any) => new OrderProduct(product)
       );
     }
     this.productCount = order?.products?.length ?? 0;

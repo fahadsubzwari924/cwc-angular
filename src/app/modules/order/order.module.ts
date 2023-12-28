@@ -19,9 +19,10 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ChipModule } from 'primeng/chip';
 import { ChangeOrderStatusModalComponent } from './components/change-order-status-modal/change-order-status-modal.component';
+import { EditOrderComponent } from './components/edit-order/edit-order.component';
 
 @NgModule({
-  declarations: [OrderListComponent, CreateOrderComponent, ChangeOrderStatusModalComponent],
+  declarations: [OrderListComponent, CreateOrderComponent, ChangeOrderStatusModalComponent, EditOrderComponent],
   imports: [
     CommonModule,
     SharedModule,

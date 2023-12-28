@@ -44,7 +44,7 @@ export class ChangeOrderStatusModalComponent
     };
     if (this.orderId) {
       this.orderService
-        .updateCustomer(this.orderId, updateOrderPayload)
+        .updateOrder(this.orderId, updateOrderPayload)
         .subscribe((res) => {
           this.showSpinner = false;
           this.messageService.add({

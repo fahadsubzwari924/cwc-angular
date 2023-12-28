@@ -9,32 +9,38 @@
 </div> -->
 <div class="grid">
   <div class="col-12">
-    <p-table [columns]="columns" [value]="orders" [tableStyle]="{ 'min-width': '50rem' }"
-      styleClass="p-datatable-gridlines">
-      <ng-template pTemplate="header" let-columns>
-        <tr>
-          <th *ngFor="let col of columns">
-            {{ col.header }}
-          </th>
-          <!-- <th>Actions</th> -->
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-rowData let-columns="columns">
-        <tr>
-          <td *ngFor="let col of columns">
-            <span *ngIf="col.field !== 'status'; else statusColumn">
-              {{ rowData | field : col }}
-            </span>
-            <ng-template #statusColumn>
-              <div class="flex align-items-center">
-                <p-chip [label]="orderStatusValues[rowData[col.field]]" styleClass="chip-info">
-                </p-chip>
-                <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded ml-3"
-                  (click)="onChangeOrderStatus(rowData)"></button>
-              </div>
-            </ng-template>
-          </td>
-          <!-- <td>
+    <ng-container *ngIf="orders?.length; else noOrders">
+      <p-table [columns]="columns" [value]="orders" [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-gridlines">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th *ngFor="let col of columns">
+              {{ col.header }}
+            </th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-columns="columns">
+          <tr>
+            <td *ngFor="let col of columns">
+              <span *ngIf="col.field !== 'status'; else statusColumn">
+                {{ rowData | field : col }}
+              </span>
+              <ng-template #statusColumn>
+                <div class="flex align-items-center">
+                  <p-chip [label]="orderStatusValues[rowData[col.field]]" styleClass="chip-info">
+                  </p-chip>
+                  <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded ml-3"
+                    (click)="onChangeOrderStatus(rowData)"></button>
+                </div>
+              </ng-template>
+            </td>
+            <td>
+              <button pButton pRipple type="button" class="p-button-rounded ml-3"
+                (click)="onEdit(rowData.id)">Edit</button>
+              <p-button icon="pi pi-trash" class="ml-2" (onClick)="onDelete(rowData)"></p-button>
+            </td>
+            <!-- <td>
             <p-button
               icon="pi pi-pencil"
               (onClick)="openEditCustomerModal(rowData)"
@@ -45,11 +51,21 @@
               (onClick)="onDelete(rowData)"
             ></p-button>
           </td> -->
-        </tr>
-      </ng-template>
-    </p-table>
-    <p-paginator (onPageChange)="onPageChange($event)" [first]="paginationConstants.FIRST_ROW"
-      [rows]="paginationConstants.PAGE_LIMIT" [totalRecords]="orderResponseMetadata?.totalItems"></p-paginator>
-    <p-toast position="bottom-right"></p-toast>
+          </tr>
+        </ng-template>
+      </p-table>
+      <p-paginator (onPageChange)="onPageChange($event)" [first]="paginationConstants.FIRST_ROW"
+        [rows]="paginationConstants.PAGE_LIMIT" [totalRecords]="orderResponseMetadata?.totalItems"></p-paginator>
+      <p-toast position="bottom-right"></p-toast>
+    </ng-container>
+    <ng-template #noOrders>
+      <div class="grid mt-3">
+        <div class="col-12">
+          <p class="text-center text-2xl">No Orders added yet! <span class="text-primary cursor-pointer"
+              routerLink="/orders/create">Creat new
+              order?</span></p>
+        </div>
+      </div>
+    </ng-template>
   </div>
 </div>
