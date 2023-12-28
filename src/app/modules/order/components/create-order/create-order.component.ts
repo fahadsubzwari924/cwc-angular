@@ -5,7 +5,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { flatMap } from 'lodash';
+import { flatMap, omit } from 'lodash';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -22,31 +22,14 @@ import { OrderService } from '../../services/order.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { ProgressSpinner } from 'primeng/progressspinner';
-
-interface AutoCompleteCompleteEvent {
-  originalEvent: Event;
-  query: string;
-}
-
-interface OrderProductRecordTuple {
-  id: number;
-  color?: string;
-  customizeName?: string;
-  name: string;
-  cost: number;
-  weight: string;
-}
-
-interface ProductTuple {
-  quantity: number;
-  price: number;
-  weight: string | number;
-  orderProducts: Array<OrderProductRecordTuple>;
-}
-
-interface ProductDetail {
-  [key: string]: ProductTuple;
-}
+import { Order } from '../../models/order.model';
+import {
+  ProductDetail,
+  AutoCompleteCompleteEvent,
+  OrderProductRecordTuple,
+  TabCloseEvent,
+} from '../../interfaces/order-product.interface';
+import { OrderProduct } from '../../models/order-product.model';
 
 @Component({
   selector: 'app-create-order',
@@ -71,12 +54,12 @@ export class CreateOrderComponent implements OnInit {
   showSpinner = false;
 
   constructor(
-    private customerService: CustomerService,
-    private productService: ProductService,
-    private formBuilder: FormBuilder,
-    private orderService: OrderService,
-    private messageService: MessageService,
-    private router: Router
+    protected customerService: CustomerService,
+    protected productService: ProductService,
+    protected formBuilder: FormBuilder,
+    protected orderService: OrderService,
+    protected messageService: MessageService,
+    protected router: Router
   ) {
     this.spinner = new ProgressSpinner();
   }
@@ -154,38 +137,53 @@ export class CreateOrderComponent implements OnInit {
     return this.productService.searchProducts(queryParams);
   }
 
-  onProductSelect(): void {
-    this.selectedProductsControl.value.forEach((selectedProduct: Product) => {
-      this.productDetails[selectedProduct.name] = {
-        quantity: 0,
-        price: 0,
-        orderProducts: [],
-        weight: selectedProduct?.weight,
-      };
-    });
+  onProductSelect(selectedProduct: Product): void {
+    this.productDetails[selectedProduct.name] = {
+      quantity: 0,
+      price: 0,
+      orderProducts: [],
+      weight: selectedProduct?.weight,
+    };
+    this.addOrderProductRow(selectedProduct);
+    this.canShowProductDetailsTable = true;
   }
 
-  onSelectProductQuantity(product: Product, productQuantity: number) {
+  onSelectProductQuantity(product: OrderProduct, productQuantity: number) {
     for (let i = 0; i < productQuantity; i++) {
       this.productDetails[product.name].orderProducts.push({
         id: product.id ?? 0,
-        color: '',
-        customizeName: '',
+        color: product?.color ?? '',
+        customizeName: product?.customizeName ?? '',
         name: product.name,
         cost: product.cost,
         weight: product.weight,
+        quantity: this.productDetails[product.name].quantity ?? 0,
       });
     }
     this.canShowProductDetailsTable = true;
   }
 
-  onPriceChange(): void {
+  addOrderProductRow(product: Product): void {
+    this.productDetails[product.name].orderProducts.push({
+      id: product.id ?? 0,
+      color: '',
+      customizeName: '',
+      name: product?.name,
+      cost: product?.cost,
+      weight: product?.weight,
+      quantity: this.productDetails[product.name]?.quantity ?? 0,
+    });
+    this.calculateOrderTotalAmount();
+  }
+
+  calculateOrderTotalAmount(): void {
     this.orderTotalAmount = 0;
     Object.keys(this.productDetails).forEach((productName: string) => {
+      const orderProductQuantity =
+        this.productDetails[productName].orderProducts?.length;
       if (this.productDetails[productName].price > 0) {
         this.orderTotalAmount +=
-          this.productDetails[productName].price *
-          this.productDetails[productName].quantity;
+          this.productDetails[productName].price * orderProductQuantity;
       } else {
         this.orderTotalAmount = this.orderTotalAmount;
       }
@@ -203,7 +201,11 @@ export class CreateOrderComponent implements OnInit {
     });
   }
 
-  private buildPaymentMethodOptions(): void {
+  saveOrder(): void {
+    this.createOrder();
+  }
+
+  buildPaymentMethodOptions(): void {
     this.paymentMethods = [
       {
         name: 'Cash On Delivery',
@@ -218,6 +220,46 @@ export class CreateOrderComponent implements OnInit {
         value: 'online_account',
       },
     ];
+  }
+
+  onProductClear(orderProduct: OrderProduct) {
+    this.productDetails = omit(this.productDetails, orderProduct.name);
+    this.calculateOrderTotalAmount();
+  }
+
+  onProductTabClose(tabCloseEvent: TabCloseEvent) {
+    const productToBeRemoved = this.selectedProductsControl.value[
+      tabCloseEvent.index
+    ] as OrderProduct;
+    this.productDetails = omit(this.productDetails, productToBeRemoved.name);
+    this.selectedProductsControl.value.splice(tabCloseEvent.index, 1);
+    this.selectedProductsControl.setValue(this.selectedProductsControl.value);
+    this.calculateOrderTotalAmount();
+  }
+
+  buildCreateOrderPayload() {
+    return {
+      description: this.orderForm.value.description,
+      paymentMethod: this.orderForm.value.paymentMethod?.value,
+      amount: this.orderTotalAmount,
+      customerId: this.orderForm.value.selectedCustomer?.id,
+      totalProductQuantity: this.getTotalCountByProperty('quantity'),
+      totalWeight: this.getTotalCountByProperty('weight', true).toString(),
+      products: this.buildOrderProductsPayload(),
+    };
+  }
+
+  onRemoveProductRow(rowIndex: number, productName: string): void {
+    this.productDetails[productName].quantity--;
+    this.productDetails[productName].orderProducts.splice(rowIndex, 1);
+    this.calculateOrderTotalAmount();
+  }
+
+  showToast(message: string, type = 'success') {
+    this.messageService.add({
+      severity: type,
+      detail: message,
+    });
   }
 
   private getTotalCountByProperty(
@@ -238,18 +280,6 @@ export class CreateOrderComponent implements OnInit {
     );
   }
 
-  private buildCreateOrderPayload() {
-    return {
-      description: this.orderForm.value.description,
-      paymentMethod: this.orderForm.value.paymentMethod?.value,
-      amount: this.orderTotalAmount,
-      customerId: this.orderForm.value.selectedCustomer?.id,
-      totalProductQuantity: this.getTotalCountByProperty('quantity'),
-      totalWeight: this.getTotalCountByProperty('weight', true).toString(),
-      products: this.buildOrderProductsPayload(),
-    };
-  }
-
   private buildOrderProductsPayload() {
     const orderProducts = flatMap(
       this.productDetails,
@@ -262,14 +292,8 @@ export class CreateOrderComponent implements OnInit {
         color: product.color,
         price: this.productDetails[product.name].price,
         customizeName: product.customizeName,
+        quantity: product.quantity,
       };
-    });
-  }
-
-  private showToast(message: string) {
-    this.messageService.add({
-      severity: 'success',
-      detail: message,
     });
   }
 }

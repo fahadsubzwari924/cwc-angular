@@ -26,16 +26,28 @@ export class OrderService {
       .pipe(map((response: any) => new Order(response.payload)));
   }
 
-  public updateCustomer(orderid: number, orderPayload: any) {
+  public updateOrder(orderid: number, orderPayload: any) {
     return this.apiService
       .httpPut(`${ApiPaths.Orders}/${orderid}`, orderPayload)
       .pipe(map((response: any) => new Order(response.payload)));
   }
 
-  // public deleteCustomer(customerId: number): Observable<any> {
-  //   const apiUrl = `${ApiPaths.Customers}/${customerId}`;
-  //   return this.apiService.httpDelete(apiUrl);
-  // }
+  public getOrderById(orderId: number): Observable<Order> {
+    const apiUrl = `${ApiPaths.Orders}/${orderId}`;
+    return this.apiService
+      .httpGet(apiUrl)
+      .pipe(
+        map(
+          (responseOrder: CustomResponse<Order>) =>
+            new Order(responseOrder.payload)
+        )
+      );
+  }
+
+  public deleteOrder(OrderId: number): Observable<any> {
+    const apiUrl = `${ApiPaths.Orders}/${OrderId}`;
+    return this.apiService.httpDelete(apiUrl);
+  }
 
   private mapOrders(data: any): Array<Order> {
     return data.map((order: any) => new Order(order));

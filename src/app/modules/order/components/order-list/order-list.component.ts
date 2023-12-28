@@ -8,6 +8,7 @@ import { CustomResponse } from 'src/app/shared/models/response.model';
 import { Order } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { ChangeOrderStatusModalComponent } from '../change-order-status-modal/change-order-status-modal.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-order-list',
@@ -19,7 +20,8 @@ export class OrderListComponent {
     private orderService: OrderService,
     public paginationConstants: PaginationConstants,
     private modalService: SimpleModalService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) {}
 
   orders: Array<Order> = [];
@@ -120,33 +122,33 @@ export class OrderListComponent {
   //     });
   // }
 
-  // onDelete(customer: Customer): void {
-  //   const description = `Are you sure you want to delete this customer with name "${customer.fullName}"?`;
-  //   const toastMessage = 'Customer deleted!';
-  //   this.modalService
-  //     .addModal(ConfirmationModalComponent, {
-  //       modalTitle: 'Delete Customer',
-  //       modalDescription: description,
-  //     })
-  //     .subscribe((isConfirmed) => {
-  //       if (isConfirmed) {
-  //         this.orderService
-  //           .deleteCustomer(customer.id as number)
-  //           .pipe(
-  //             tap(() => this.showToast(toastMessage)),
-  //             switchMap(() => of(this.getCustomers()))
-  //           )
-  //           .subscribe();
-  //       }
-  //     });
-  // }
+  onDelete(order: Order): void {
+    const description = `Are you sure you want to delete this order with order ID:  "${order.id}" and customer name: ${order?.customer?.fullName}?`;
+    const toastMessage = 'Order deleted!';
+    this.modalService
+      .addModal(ConfirmationModalComponent, {
+        modalTitle: 'Delete Order',
+        modalDescription: description,
+      })
+      .subscribe((isConfirmed) => {
+        if (isConfirmed) {
+          this.orderService
+            .deleteOrder(order.id as number)
+            .pipe(
+              tap(() => this.showToast(toastMessage)),
+              switchMap(() => of(this.getOrders()))
+            )
+            .subscribe();
+        }
+      });
+  }
 
-  // showToast(message: string) {
-  //   this.messageService.add({
-  //     severity: 'success',
-  //     detail: message,
-  //   });
-  // }
+  showToast(message: string) {
+    this.messageService.add({
+      severity: 'success',
+      detail: message,
+    });
+  }
 
   onPageChange(paginationEvent: any): void {
     const queryParams = {
@@ -169,5 +171,16 @@ export class OrderListComponent {
           this.getOrders();
         }
       });
+  }
+
+  onEdit(orderId: number) {
+    if (orderId) {
+      this.router.navigate([`orders/${orderId}/edit`]);
+    } else {
+      this.messageService.add({
+        severity: 'warning',
+        detail: 'Order id not found',
+      });
+    }
   }
 }
