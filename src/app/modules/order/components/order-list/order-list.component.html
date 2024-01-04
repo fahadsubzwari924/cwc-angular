@@ -10,7 +10,9 @@
 <div class="grid">
   <div class="col-12">
     <ng-container *ngIf="orders?.length; else noOrders">
-      <p-table [columns]="columns" [value]="orders" [tableStyle]="{ 'min-width': '50rem' }"
+      <p-table [columns]="columns" [value]="orders" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true"
+        [rows]="paginationConstants.PAGE_LIMIT" [first]="paginationConstants.FIRST_ROW"
+        [totalRecords]="orderResponseMetadata?.totalItems" (onPage)="onPageChange($event)"
         styleClass="p-datatable-gridlines">
         <ng-template pTemplate="header" let-columns>
           <tr>
@@ -54,9 +56,6 @@
           </tr>
         </ng-template>
       </p-table>
-      <p-paginator (onPageChange)="onPageChange($event)" [first]="paginationConstants.FIRST_ROW"
-        [rows]="paginationConstants.PAGE_LIMIT" [totalRecords]="orderResponseMetadata?.totalItems"></p-paginator>
-      <p-toast position="bottom-right"></p-toast>
     </ng-container>
     <ng-template #noOrders>
       <div class="grid mt-3">
