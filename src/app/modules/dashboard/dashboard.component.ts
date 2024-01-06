@@ -17,7 +17,7 @@ export class DashboardComponent {
     this.getDashboardStats();
   }
 
-  getDashboardStats() {
+  getDashboardStats(): void {
     this.reportService.getDashboardStats()
     .subscribe((response: CustomResponse<DashboardStatsModel>) => {
       this.dashboardStats = response?.payload ?? {};
