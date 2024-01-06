@@ -1,4 +1,4 @@
-<div class="grid">
+<div class="grid" *ngIf="dashboardStats">
   <ng-container *ngFor="let item of dashboardStats | keyvalue">
     <div class="col-12 lg:col-6 xl:col-4">
         <div class="card mb-0">

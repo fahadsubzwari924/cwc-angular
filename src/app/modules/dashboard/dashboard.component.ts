@@ -20,8 +20,7 @@ export class DashboardComponent {
   getDashboardStats() {
     this.reportService.getDashboardStats()
     .subscribe((response: CustomResponse<DashboardStatsModel>) => {
-      this.dashboardStats = response.payload;
-      console.log('this.dashboardStats: ', this.dashboardStats);
+      this.dashboardStats = response?.payload ?? {};
     })
   }
 }
