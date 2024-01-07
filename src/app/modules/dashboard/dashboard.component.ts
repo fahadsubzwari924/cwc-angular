@@ -7,20 +7,27 @@ import { DashboardStatsModel } from './model/dashboard.model';
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
-
   dashboardStats!: DashboardStatsModel;
+  isLoading = false;
+  dashboardStatusProperties = 7;
 
-  constructor(private reportService: ReportsService) {
-  }
+  constructor(private reportService: ReportsService) {}
 
   ngOnInit() {
     this.getDashboardStats();
   }
 
   getDashboardStats(): void {
-    this.reportService.getDashboardStats()
-    .subscribe((response: CustomResponse<DashboardStatsModel>) => {
-      this.dashboardStats = response?.payload ?? {};
-    })
+    this.isLoading = true;
+    this.reportService.getDashboardStats().subscribe(
+      (response: CustomResponse<DashboardStatsModel>) => {
+        this.dashboardStats = response?.payload ?? {};
+        this.isLoading = false;
+      },
+      (error) => {
+        this.isLoading = false;
+        console.log(error);
+      }
+    );
   }
 }
