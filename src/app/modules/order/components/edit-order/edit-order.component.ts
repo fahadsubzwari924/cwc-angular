@@ -102,8 +102,6 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
         };
       });
     }
-
-    console.log(this.orderForm.value);
     this.populateProductRows();
     this.calculateOrderTotalAmount();
   }
