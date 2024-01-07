@@ -59,6 +59,7 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
         },
         [Validators.required],
       ],
+      orderDate: ['', [Validators.required]]
     });
   }
 
@@ -90,6 +91,7 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
     this.orderForm.get('description')?.setValue(this.order.description);
     const productsByOrderId = uniqBy(this.order.products, 'id');
     this.orderForm.get('selectedProducts')?.setValue(productsByOrderId);
+    this.orderForm.get('orderDate')?.setValue(new Date(this.order.orderDate));
     if (productsByOrderId) {
       productsByOrderId.forEach((orderProduct: OrderProduct) => {
         this.productDetails[orderProduct.name] = {

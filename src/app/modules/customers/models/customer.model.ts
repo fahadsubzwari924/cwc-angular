@@ -23,7 +23,6 @@ export class Customer {
     this.createdAt = customer?.createdAt;
     this.updatedAt = customer?.updatedAt;
     this.ordersCount = customer?.orders?.length ?? 0;
-    console.log('orders: ', customer.orders);
     if (customer?.orders?.length) {
       this.orders = customer?.orders.map((order: any) => new Order(order));
     }
