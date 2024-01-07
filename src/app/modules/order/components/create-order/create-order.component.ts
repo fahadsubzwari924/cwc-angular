@@ -53,6 +53,8 @@ export class CreateOrderComponent implements OnInit {
   spinner!: ProgressSpinner;
   showSpinner = false;
 
+  maxDate: Date = new Date();
+
   constructor(
     protected customerService: CustomerService,
     protected productService: ProductService,
@@ -80,6 +82,7 @@ export class CreateOrderComponent implements OnInit {
         },
         [Validators.required],
       ],
+      orderDate: ['', [Validators.required]]
     });
   }
 
@@ -195,7 +198,6 @@ export class CreateOrderComponent implements OnInit {
     const createOrderPayload = this.buildCreateOrderPayload();
     this.orderService.createOrder(createOrderPayload).subscribe((res) => {
       this.showSpinner = false;
-      console.log(res);
       this.showToast('Order created!');
       this.router.navigate(['/orders']);
     });
@@ -246,6 +248,7 @@ export class CreateOrderComponent implements OnInit {
       totalProductQuantity: this.getTotalCountByProperty('quantity'),
       totalWeight: this.getTotalCountByProperty('weight', true).toString(),
       products: this.buildOrderProductsPayload(),
+      orderDate: this.orderForm.value.orderDate,
     };
   }
 
@@ -268,7 +271,6 @@ export class CreateOrderComponent implements OnInit {
   ): number {
     return Object.values(this.productDetails).reduce(
       (total: number, product: any) => {
-        console.log(product[propertyName]);
         return (
           total +
           (isFloatTypeValue

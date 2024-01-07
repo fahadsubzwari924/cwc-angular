@@ -53,7 +53,7 @@ export class OrderListComponent {
       type: 'chips',
     },
     {
-      field: 'createdAt',
+      field: 'orderDate',
       header: 'Date',
       type: 'date',
     },
@@ -78,7 +78,6 @@ export class OrderListComponent {
       .subscribe((response: CustomResponse<Order[]>) => {
         this.orders = response?.payload;
         this.orderResponseMetadata = response.metadata;
-        console.log(this.orders);
       });
   }
 
@@ -166,7 +165,6 @@ export class OrderListComponent {
     this.modalService
       .addModal(ChangeOrderStatusModalComponent, inputs)
       .subscribe((isConfirmed) => {
-        console.log('isConfirmed : ', isConfirmed);
         if (isConfirmed) {
           this.getOrders();
         }
