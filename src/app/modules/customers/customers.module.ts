@@ -11,7 +11,6 @@ import { BlockUIModule } from 'primeng/blockui';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { SharedModule } from 'src/app/shared/shared.module';
-import { CustomPrimengModule } from '../primeng/primeng.module';
 import { CreateCustomerComponent } from './components/create-customer/create-customer.component';
 import { MessageService } from 'primeng/api';
 import { EditCustomerComponent } from './components/edit-customer/edit-customer.component';
@@ -25,7 +24,6 @@ import { EditCustomerComponent } from './components/edit-customer/edit-customer.
   imports: [
     CommonModule,
     SharedModule,
-    CustomPrimengModule,
     TableModule,
     CustomerRoutingModule,
     ButtonModule,
