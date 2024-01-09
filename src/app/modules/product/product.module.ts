@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ListComponent } from './components/list/list.component';
 import { CreateComponent } from './components/create/create.component';
 import { SharedModule } from 'src/app/shared/shared.module';
-import { CustomPrimengModule } from '../primeng/primeng.module';
 import { ProductService } from './services/product-api.service';
 import { ProductsRoutingModule } from './product-routing.module';
 import { InputTextareaModule } from 'primeng/inputtextarea';
@@ -14,13 +13,14 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { EditProductComponent } from './components/edit/edit-product.component';
+import { ButtonModule } from 'primeng/button';
+import { DataViewModule } from 'primeng/dataview';
 
 @NgModule({
   declarations: [ListComponent, CreateComponent, EditProductComponent],
   imports: [
     CommonModule,
     SharedModule,
-    CustomPrimengModule,
     ProductsRoutingModule,
     InputTextareaModule,
     FormsModule,
@@ -29,6 +29,8 @@ import { EditProductComponent } from './components/edit/edit-product.component';
     BlockUIModule,
     ToastModule,
     PaginatorModule,
+    ButtonModule,
+    DataViewModule
   ],
   providers: [ProductService, MessageService],
 })

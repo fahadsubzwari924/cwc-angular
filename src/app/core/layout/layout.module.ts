@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CustomPrimengModule } from '../../modules/primeng/primeng.module';
 import { FooterComponent } from './components/footer/footer.component';
 import { TopbarComponent } from './components/topbar/topbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
@@ -26,7 +25,6 @@ import { ButtonModule } from 'primeng/button';
   ],
   imports: [
     CommonModule,
-    CustomPrimengModule,
     FormsModule,
     HttpClientModule,
     RouterModule,
