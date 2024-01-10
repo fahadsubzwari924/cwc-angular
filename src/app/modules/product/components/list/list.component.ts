@@ -11,7 +11,6 @@ import { of, switchMap, tap } from 'rxjs';
 import { EditProductComponent } from '../edit/edit-product.component';
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
-import { error } from 'console';
 
 @Component({
   selector: 'app-list',

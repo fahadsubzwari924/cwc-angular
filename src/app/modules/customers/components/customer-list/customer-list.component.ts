@@ -9,7 +9,6 @@ import { Customer } from '../../models/customer.model';
 import { CustomerService } from '../../services/customer.service';
 import { CreateCustomerComponent } from '../create-customer/create-customer.component';
 import { EditCustomerComponent } from '../edit-customer/edit-customer.component';
-import { error } from 'console';
 
 @Component({
   selector: 'app-customer-list',
