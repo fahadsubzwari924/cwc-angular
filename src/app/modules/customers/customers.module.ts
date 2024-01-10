@@ -14,6 +14,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { CreateCustomerComponent } from './components/create-customer/create-customer.component';
 import { MessageService } from 'primeng/api';
 import { EditCustomerComponent } from './components/edit-customer/edit-customer.component';
+import { SkeletonModule } from 'primeng/skeleton';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { EditCustomerComponent } from './components/edit-customer/edit-customer.
     BlockUIModule,
     ToastModule,
     PaginatorModule,
+    SkeletonModule
   ],
   providers: [CustomerService, MessageService],
 })

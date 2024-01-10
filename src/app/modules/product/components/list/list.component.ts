@@ -11,6 +11,7 @@ import { of, switchMap, tap } from 'rxjs';
 import { EditProductComponent } from '../edit/edit-product.component';
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
+import { error } from 'console';
 
 @Component({
   selector: 'app-list',
@@ -30,6 +31,7 @@ export class ListComponent implements OnInit {
   sortOptions: SelectItem[] = [];
   sortOrder!: string;
   sortField: string = '';
+  isLoading = false;
 
   ngOnInit(): void {
     this.buildSortOptions();
@@ -37,11 +39,15 @@ export class ListComponent implements OnInit {
   }
 
   getProducts(params = {}): void {
+    this.isLoading = true;
     this.productService
       .getProducts(params)
       .subscribe((response: CustomResponse<Product[]>) => {
         this.products = response?.payload;
         this.productResponseMetadata = response.metadata;
+        this.isLoading = false;
+      }, (error) => {
+        this.isLoading = false;
       });
   }
 

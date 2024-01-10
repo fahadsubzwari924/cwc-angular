@@ -15,6 +15,7 @@ import { MessageService } from 'primeng/api';
 import { EditProductComponent } from './components/edit/edit-product.component';
 import { ButtonModule } from 'primeng/button';
 import { DataViewModule } from 'primeng/dataview';
+import { SkeletonModule } from 'primeng/skeleton';
 
 @NgModule({
   declarations: [ListComponent, CreateComponent, EditProductComponent],
@@ -30,7 +31,8 @@ import { DataViewModule } from 'primeng/dataview';
     ToastModule,
     PaginatorModule,
     ButtonModule,
-    DataViewModule
+    DataViewModule,
+    SkeletonModule
   ],
   providers: [ProductService, MessageService],
 })
