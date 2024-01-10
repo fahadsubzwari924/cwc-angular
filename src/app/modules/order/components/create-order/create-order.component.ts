@@ -82,7 +82,7 @@ export class CreateOrderComponent implements OnInit {
         },
         [Validators.required],
       ],
-      orderDate: ['', [Validators.required]]
+      orderDate: [new Date(), [Validators.required]],
     });
   }
 
