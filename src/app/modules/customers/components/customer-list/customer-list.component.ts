@@ -49,17 +49,22 @@ export class CustomerListComponent {
   ];
   sortOrder: number = 0;
   sortField: string = '';
+  isLoading = false;
 
   ngOnInit(): void {
     this.getCustomers();
   }
 
   getCustomers(params = {}): void {
+    this.isLoading = true;
     this.customerService
       .getCustomers(params)
       .subscribe((response: CustomResponse<Customer[]>) => {
         this.customers = response?.payload;
         this.customerResponseMetadata = response.metadata;
+        this.isLoading = false;
+      }, error => {
+        this.isLoading = false;
       });
   }
 
@@ -82,7 +87,6 @@ export class CustomerListComponent {
     this.modalService
       .addModal(CreateCustomerComponent, inputs)
       .subscribe((isConfirmed) => {
-        console.log('isConfirmed : ', isConfirmed);
         if (isConfirmed) {
           this.getCustomers();
         }

@@ -30,6 +30,7 @@ export class ListComponent implements OnInit {
   sortOptions: SelectItem[] = [];
   sortOrder!: string;
   sortField: string = '';
+  isLoading = false;
 
   ngOnInit(): void {
     this.buildSortOptions();
@@ -37,11 +38,15 @@ export class ListComponent implements OnInit {
   }
 
   getProducts(params = {}): void {
+    this.isLoading = true;
     this.productService
       .getProducts(params)
       .subscribe((response: CustomResponse<Product[]>) => {
         this.products = response?.payload;
         this.productResponseMetadata = response.metadata;
+        this.isLoading = false;
+      }, (error) => {
+        this.isLoading = false;
       });
   }
 

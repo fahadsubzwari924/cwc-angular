@@ -67,17 +67,23 @@ export class OrderListComponent {
     returned: 'Returned',
     delivered: 'Delivered',
   };
+  isLoading: boolean = false;
 
   ngOnInit(): void {
     this.getOrders();
   }
 
   getOrders(params = {}): void {
+    this.isLoading = true;
     this.orderService
       .getOrders(params)
       .subscribe((response: CustomResponse<Order[]>) => {
-        this.orders = response?.payload;
+        this.orders = response?.payload ?? [];
         this.orderResponseMetadata = response.metadata;
+        this.isLoading = false;
+      }, error => {
+        this.isLoading = false;
+        this.orders = [];
       });
   }
 
