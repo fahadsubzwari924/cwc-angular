@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
@@ -22,7 +23,7 @@ import { OrderService } from '../../services/order.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { ProgressSpinner } from 'primeng/progressspinner';
-import { Order } from '../../models/order.model';
+
 import {
   ProductDetail,
   AutoCompleteCompleteEvent,
@@ -52,7 +53,6 @@ export class CreateOrderComponent implements OnInit {
 
   spinner!: ProgressSpinner;
   showSpinner = false;
-
   maxDate: Date = new Date();
 
   constructor(
@@ -83,7 +83,13 @@ export class CreateOrderComponent implements OnInit {
         [Validators.required],
       ],
       orderDate: [new Date(), [Validators.required]],
+      orderTotalAmount: [0, [Validators.required]],
+      products: this.formBuilder.group({})
     });
+  }
+
+  get productsForm() {
+    return this.orderForm.get('products') as FormGroup;
   }
 
   get selectedCustomerControl() {
@@ -141,61 +147,75 @@ export class CreateOrderComponent implements OnInit {
   }
 
   onProductSelect(selectedProduct: Product): void {
-    this.productDetails[selectedProduct.name] = {
-      quantity: 0,
-      price: 0,
-      orderProducts: [],
-      weight: selectedProduct?.weight,
-    };
+    const productControls = this.formBuilder.group({
+      name: new FormControl(selectedProduct.name),
+      quantity: new FormControl(1),
+      price: new FormControl(0),
+      orderProducts: this.formBuilder.array([]),
+      weight: new FormControl(selectedProduct?.weight),
+    });
+
+    this.productsForm.addControl(selectedProduct.name, productControls);
+
     this.addOrderProductRow(selectedProduct);
     this.canShowProductDetailsTable = true;
   }
 
   onSelectProductQuantity(product: OrderProduct, productQuantity: number) {
     for (let i = 0; i < productQuantity; i++) {
-      this.productDetails[product.name].orderProducts.push({
-        id: product.id ?? 0,
-        color: product?.color ?? '',
-        customizeName: product?.customizeName ?? '',
-        name: product.name,
-        cost: product.cost,
-        weight: product.weight,
-        quantity: this.productDetails[product.name].quantity ?? 0,
+      const form = this.formBuilder.group({
+        id: new FormControl(product.id ?? 0),
+        color: new FormControl(product.color ?? ''),
+        customizeName: new FormControl(product.customizeName ?? ''),
+        name: new FormControl(product.name),
+        cost: new FormControl(product.cost),
+        weight: new FormControl(product.weight),
+        quantity: new FormControl(this.productsForm.value[product.name]?.quantity ?? 0),
       });
+
+      (this.productsForm.get(product.name)?.get('orderProducts') as FormArray).push(form);
+
     }
     this.canShowProductDetailsTable = true;
   }
 
   addOrderProductRow(product: Product): void {
-    this.productDetails[product.name].orderProducts.push({
-      id: product.id ?? 0,
-      color: '',
-      customizeName: '',
-      name: product?.name,
-      cost: product?.cost,
-      weight: product?.weight,
-      quantity: this.productDetails[product.name]?.quantity ?? 0,
+    const details = this.formBuilder.group({
+      id: new FormControl(product.id ?? 0),
+      color: new FormControl(''),
+      customizeName: new FormControl(''),
+      name: new FormControl(product?.name),
+      cost: new FormControl(product?.cost),
+      weight: new FormControl(product?.weight),
+      quantity: new FormControl(this.productsForm.get(product.name)?.value.quantity ?? 0),
     });
+
+    (this.productsForm.get(product.name)?.get('orderProducts') as FormArray).push(details);
     this.calculateOrderTotalAmount();
   }
 
   calculateOrderTotalAmount(): void {
-    this.orderTotalAmount = 0;
-    Object.keys(this.productDetails).forEach((productName: string) => {
+    this.orderForm.get('orderTotalAmount')?.setValue(0);
+    Object.keys(this.productsForm.value).forEach((productName: string) => {
       const orderProductQuantity =
-        this.productDetails[productName].orderProducts?.length;
-      if (this.productDetails[productName].price > 0) {
-        this.orderTotalAmount +=
-          this.productDetails[productName].price * orderProductQuantity;
-      } else {
-        this.orderTotalAmount = this.orderTotalAmount;
+      this.productsForm.value[productName]?.orderProducts?.length;
+      if (this.productsForm.value[productName]?.price > 0) {
+        const totalAmount = this.orderForm.value?.orderTotalAmount +
+        this.productsForm.value[productName]?.price * orderProductQuantity;
+
+        this.orderForm.get('orderTotalAmount')?.setValue(totalAmount);
       }
+      // else {
+      //   this.orderTotalAmount = this.orderTotalAmount;
+      // }
     });
   }
 
   createOrder(): void {
     this.showSpinner = true;
     const createOrderPayload = this.buildCreateOrderPayload();
+    console.log('createOrderPayload: ', createOrderPayload);
+    return;
     this.orderService.createOrder(createOrderPayload).subscribe((res) => {
       this.showSpinner = false;
       this.showToast('Order created!');
@@ -225,7 +245,7 @@ export class CreateOrderComponent implements OnInit {
   }
 
   onProductClear(orderProduct: OrderProduct) {
-    this.productDetails = omit(this.productDetails, orderProduct.name);
+    this.productsForm.removeControl(orderProduct.name);
     this.calculateOrderTotalAmount();
   }
 
@@ -233,7 +253,7 @@ export class CreateOrderComponent implements OnInit {
     const productToBeRemoved = this.selectedProductsControl.value[
       tabCloseEvent.index
     ] as OrderProduct;
-    this.productDetails = omit(this.productDetails, productToBeRemoved.name);
+    this.productsForm.removeControl(productToBeRemoved.name);
     this.selectedProductsControl.value.splice(tabCloseEvent.index, 1);
     this.selectedProductsControl.setValue(this.selectedProductsControl.value);
     this.calculateOrderTotalAmount();
@@ -243,7 +263,7 @@ export class CreateOrderComponent implements OnInit {
     return {
       description: this.orderForm.value.description,
       paymentMethod: this.orderForm.value.paymentMethod?.value,
-      amount: this.orderTotalAmount,
+      amount: this.orderForm.value.orderTotalAmount,
       customerId: this.orderForm.value.selectedCustomer?.id,
       totalProductQuantity: this.getTotalCountByProperty('quantity'),
       totalWeight: this.getTotalCountByProperty('weight', true).toString(),
@@ -253,8 +273,10 @@ export class CreateOrderComponent implements OnInit {
   }
 
   onRemoveProductRow(rowIndex: number, productName: string): void {
-    this.productDetails[productName].quantity--;
-    this.productDetails[productName].orderProducts.splice(rowIndex, 1);
+    this.productsForm.get(productName)?.setValue(
+      this.productsForm.value[productName].quantity--
+    );
+    (this.productsForm.get(productName)?.get('orderProducts') as FormArray).removeAt(rowIndex);
     this.calculateOrderTotalAmount();
   }
 
@@ -269,33 +291,39 @@ export class CreateOrderComponent implements OnInit {
     propertyName: string,
     isFloatTypeValue = false
   ): number {
-    return Object.values(this.productDetails).reduce(
-      (total: number, product: any) => {
-        return (
-          total +
-          (isFloatTypeValue
-            ? parseFloat(product[propertyName])
-            : product[propertyName])
-        );
+    const count = Object.values(this.productsForm.value).reduce(
+      (total: number, product: any, index: number) => {
+        const value = product[propertyName];
+        return total + (isFloatTypeValue ? parseFloat(value) : value);
       },
       0
     );
+    return count;
   }
 
   private buildOrderProductsPayload() {
     const orderProducts = flatMap(
-      this.productDetails,
-      (value) => value.orderProducts
+      this.productsForm.value,
+      (value) => value?.orderProducts
     );
     return orderProducts.map((product: OrderProductRecordTuple) => {
       return {
         id: product.id,
         cost: product.cost,
         color: product.color,
-        price: this.productDetails[product.name].price,
+        price: this.productsForm.value[product.name]?.price,
         customizeName: product.customizeName,
-        quantity: product.quantity,
+        quantity: product.quantity ?? 0,
       };
     });
+  }
+
+  getFormByName(productName: string): FormGroup {
+    return this.productsForm.get(productName) as FormGroup;
+  }
+
+  getOrderProductsFormArr(productName: string, index: number): FormGroup {
+    const form = this.productsForm.get(productName)?.get('orderProducts') as FormArray;
+    return form.controls[index] as FormGroup;
   }
 }

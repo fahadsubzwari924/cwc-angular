@@ -56,11 +56,11 @@
                   <i class="pi pi-calendar"></i>
                   <span>{{ product?.name }}</span>
                 </ng-template>
-                <div class="grid flex align-items-end">
+                <div [formGroup]="getFormByName(product?.name)" class="grid flex align-items-end">
                   <div class="col-12 md:col-2">
                     <div class="flex flex-column gap-2">
                       <label>Price</label>
-                      <input type="number" [(ngModel)]="productDetails[product.name].price"
+                      <input type="number" formControlName="price"
                         (blur)="calculateOrderTotalAmount()"
                         class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
                     </div>
@@ -74,7 +74,7 @@
                 </div>
                 <div class="grid mt-2" *ngIf="canShowProductDetailsTable">
                   <div class="col-12">
-                    <p-table [value]="productDetails[product.name].orderProducts"
+                    <p-table [value]="productsForm.value[product.name]?.orderProducts"
                       [tableStyle]="{ 'min-width': '50rem' }">
                       <ng-template pTemplate="header">
                         <tr>
@@ -86,21 +86,16 @@
                         </tr>
                       </ng-template>
                       <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
-                        <tr>
+                        <tr [formGroup]="getOrderProductsFormArr(product?.name, rowIndex)">
                           <td>{{ product?.name }}</td>
                           <td>{{ product?.cost }}</td>
                           <td>
-                            <input id="firstname2" type="text" [(ngModel)]="
-                                productDetails[product.name].orderProducts[rowIndex]
-                                  .customizeName
-                              "
+                            <input id="{{product?.name}}-customizeName-{{rowIndex}}" type="text"
+                            formControlName="customizeName" name="customizeName"
                               class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
                           </td>
                           <td>
-                            <input id="firstname2" type="text" [(ngModel)]="
-                                productDetails[product.name].orderProducts[rowIndex]
-                                  .color
-                              "
+                            <input id="{{product?.name}}-color-{{rowIndex}}" type="text" name="color" formControlName="color"
                               class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
                           </td>
                           <td>
@@ -119,7 +114,7 @@
       </div>
       <div class="card-footer">
         <p class="text-3xl text-indigo-400 font-bold">
-          Total : {{ orderTotalAmount }}
+          Total : {{ orderForm.value?.orderTotalAmount }}
         </p>
         <p-button icon="pi pi-plus" label="Save" styleClass="mb-2 p-button-sm" (onClick)="saveOrder()"
           [disabled]="orderForm.invalid"></p-button>
