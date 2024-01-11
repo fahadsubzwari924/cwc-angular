@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
@@ -83,6 +84,7 @@ export class CreateOrderComponent implements OnInit {
         [Validators.required],
       ],
       orderDate: [new Date(), [Validators.required]],
+      orderProducts: this.formBuilder.group({}),
     });
   }
 
@@ -92,6 +94,28 @@ export class CreateOrderComponent implements OnInit {
 
   get selectedProductsControl() {
     return this.orderForm.get('selectedProducts') as FormControl;
+  }
+
+  get orderProductsFormGroup(): FormGroup {
+    return this.orderForm.get('orderProducts') as FormGroup;
+  }
+
+  getOrderProductFormGroup(productName: string): FormGroup {
+    return this.orderForm.get('orderProducts')?.get(productName) as FormGroup;
+  }
+  getOrderProductRows(productName: string): FormArray {
+    return this.orderForm
+      .get('orderProducts')
+      ?.get(productName)
+      ?.get('rows') as FormArray;
+  }
+
+  getOrderProductRowGroup(productName: string, rowIndex: number) {
+    const form = this.orderForm
+      .get('orderProducts')
+      ?.get(productName)
+      ?.get('rows') as FormArray;
+    return form.controls[rowIndex] as FormGroup;
   }
 
   searchCustomer(event: AutoCompleteCompleteEvent): void {
@@ -133,6 +157,35 @@ export class CreateOrderComponent implements OnInit {
       });
   }
 
+  initizalizeProductDetail(product: Product) {
+    this.orderProductsFormGroup.addControl(
+      product?.name,
+      this.newOrderProduct(product)
+    );
+    console.log(this.orderProductsFormGroup.value);
+  }
+
+  newOrderProduct(product: Product): FormGroup {
+    return this.formBuilder.group({
+      price: [null, [Validators.required]],
+      rows: this.formBuilder.array(
+        [this.newOrderProductRow(product)],
+        Validators.required
+      ),
+    });
+  }
+
+  newOrderProductRow(product: Product): FormGroup {
+    return this.formBuilder.group({
+      id: [product.id, [Validators.required]],
+      color: '',
+      customizeName: '',
+      name: product.name,
+      cost: product.cost,
+      weight: product.weight,
+    });
+  }
+
   searchForProducts(searchTerm: string): Observable<Array<Product>> {
     let queryParams = {
       searchTerm,
@@ -147,7 +200,8 @@ export class CreateOrderComponent implements OnInit {
       orderProducts: [],
       weight: selectedProduct?.weight,
     };
-    this.addOrderProductRow(selectedProduct);
+    // this.addOrderProductRow(selectedProduct);
+    this.initizalizeProductDetail(selectedProduct);
     this.canShowProductDetailsTable = true;
   }
 
@@ -194,13 +248,14 @@ export class CreateOrderComponent implements OnInit {
   }
 
   createOrder(): void {
-    this.showSpinner = true;
-    const createOrderPayload = this.buildCreateOrderPayload();
-    this.orderService.createOrder(createOrderPayload).subscribe((res) => {
-      this.showSpinner = false;
-      this.showToast('Order created!');
-      this.router.navigate(['/orders']);
-    });
+    console.log(this.orderForm.value);
+    // this.showSpinner = true;
+    // const createOrderPayload = this.buildCreateOrderPayload();
+    // this.orderService.createOrder(createOrderPayload).subscribe((res) => {
+    //   this.showSpinner = false;
+    //   this.showToast('Order created!');
+    //   this.router.navigate(['/orders']);
+    // });
   }
 
   saveOrder(): void {

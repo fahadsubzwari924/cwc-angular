@@ -43,75 +43,106 @@
             <div class="col-12 md:col-5">
               <div class="flex flex-column gap-2">
                 <label>Order Date</label>
-                <p-calendar appendTo="body" styleClass="w-full" [showIcon]="true" [maxDate]="maxDate" formControlName="orderDate" inputId="icon"></p-calendar>
+                <p-calendar appendTo="body" styleClass="w-full" [showIcon]="true" [maxDate]="maxDate"
+                  formControlName="orderDate" inputId="icon"></p-calendar>
               </div>
             </div>
           </div>
         </form>
         <div class="grid mt-3" *ngIf="selectedProductsControl?.value?.length">
-          <div class="col-12">
+          <div class="col-12" [formGroup]="orderForm">
             <p-tabView styleClass="tabview-custom" (onClose)="onProductTabClose($event)">
               <p-tabPanel *ngFor="let product of selectedProductsControl.value" [closable]="true">
                 <ng-template pTemplate="header">
                   <i class="pi pi-calendar"></i>
                   <span>{{ product?.name }}</span>
                 </ng-template>
-                <div class="grid flex align-items-end">
-                  <div class="col-12 md:col-2">
-                    <div class="flex flex-column gap-2">
-                      <label>Price</label>
-                      <input type="number" [(ngModel)]="productDetails[product.name].price"
-                        (blur)="calculateOrderTotalAmount()"
-                        class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                <ng-container>
+                  <div [formGroup]="getOrderProductFormGroup(product.name)">
+                    <div class="grid flex align-items-end">
+                      <div class="col-12 md:col-2">
+                        <div class="flex flex-column gap-2">
+                          <label>Price</label>
+                          <input type="number" formControlName="price" (blur)="calculateOrderTotalAmount()"
+                            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                        </div>
+                      </div>
+                      <div class="col-12 md:col-2 d-flex align-items-end">
+                        <div class="flex flex-column gap-2">
+                          <button pButton pRipple type="button" icon="pi pi-plus"
+                            (click)="addOrderProductRow(product)"></button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-12 md:col-2 d-flex align-items-end">
-                    <div class="flex flex-column gap-2">
-                      <button pButton pRipple type="button" icon="pi pi-plus"
-                        (click)="addOrderProductRow(product)"></button>
+                    <div class="grid mt-2" *ngIf="canShowProductDetailsTable">
+                      <div class="col-12">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Cost</th>
+                              <th>Customize Name</th>
+                              <th>Color</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr
+                              *ngFor="let orderProductRowControl of getOrderProductRows(product.name).controls; let i=index">
+                              <td>{{product?.name}} {{orderProductRowControl.value | json}}</td>
+                              <td>{{product?.cost}}</td>
+                              <td [formGroup]="getOrderProductRowGroup(product.name, i)">
+                                <input type="text" formControlName="customizeName">
+                              </td>
+                              <td [formGroup]="getOrderProductRowGroup(product.name, i)">
+                                <input type="text" formControlName="color">
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
+                    <!-- <div class="grid mt-2" *ngIf="canShowProductDetailsTable">
+                      <div class="col-12">
+                        <p-table [value]="productDetails[product.name].orderProducts"
+                          [tableStyle]="{ 'min-width': '50rem' }">
+                          <ng-template pTemplate="header">
+                            <tr>
+                              <th>Product Name</th>
+                              <th>Cost</th>
+                              <th>Customize Name</th>
+                              <th>Color</th>
+                              <th>Actions</th>
+                            </tr>
+                          </ng-template>
+                          <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
+                            <tr>
+                              <td>{{ product?.name }}</td>
+                              <td>{{ product?.cost }}</td>
+                              <td>
+                                <input id="firstname2" type="text" [(ngModel)]="
+                                    productDetails[product.name].orderProducts[rowIndex]
+                                      .customizeName
+                                  "
+                                  class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                              </td>
+                              <td>
+                                <input id="firstname2" type="text" [(ngModel)]="
+                                    productDetails[product.name].orderProducts[rowIndex]
+                                      .color
+                                  "
+                                  class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                              </td>
+                              <td>
+                                <button pButton pRipple type="button" icon="pi pi-times" class="p-button-rounded ml-3"
+                                  (click)="onRemoveProductRow(rowIndex, product.name)"></button>
+                              </td>
+                            </tr>
+                          </ng-template>
+                        </p-table>
+                      </div>
+                    </div> -->
                   </div>
-                </div>
-                <div class="grid mt-2" *ngIf="canShowProductDetailsTable">
-                  <div class="col-12">
-                    <p-table [value]="productDetails[product.name].orderProducts"
-                      [tableStyle]="{ 'min-width': '50rem' }">
-                      <ng-template pTemplate="header">
-                        <tr>
-                          <th>Product Name</th>
-                          <th>Cost</th>
-                          <th>Customize Name</th>
-                          <th>Color</th>
-                          <th>Actions</th>
-                        </tr>
-                      </ng-template>
-                      <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
-                        <tr>
-                          <td>{{ product?.name }}</td>
-                          <td>{{ product?.cost }}</td>
-                          <td>
-                            <input id="firstname2" type="text" [(ngModel)]="
-                                productDetails[product.name].orderProducts[rowIndex]
-                                  .customizeName
-                              "
-                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
-                          </td>
-                          <td>
-                            <input id="firstname2" type="text" [(ngModel)]="
-                                productDetails[product.name].orderProducts[rowIndex]
-                                  .color
-                              "
-                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
-                          </td>
-                          <td>
-                            <button pButton pRipple type="button" icon="pi pi-times" class="p-button-rounded ml-3"
-                              (click)="onRemoveProductRow(rowIndex, product.name)"></button>
-                          </td>
-                        </tr>
-                      </ng-template>
-                    </p-table>
-                  </div>
-                </div>
+                </ng-container>
               </p-tabPanel>
             </p-tabView>
           </div>
