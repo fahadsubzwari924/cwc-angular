@@ -17,14 +17,3 @@ export interface OrderProductRecordTuple {
   weight: string;
   quantity: number;
 }
-
-interface ProductTuple {
-  quantity: number;
-  price: number;
-  weight: string | number;
-  orderProducts: Array<OrderProductRecordTuple>;
-}
-
-export interface ProductDetail {
-  [key: string]: ProductTuple;
-}
