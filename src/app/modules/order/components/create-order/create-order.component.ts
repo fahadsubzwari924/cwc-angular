@@ -6,7 +6,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { flatMap, omit } from 'lodash';
+import { flatMap, sumBy } from 'lodash';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -23,14 +23,13 @@ import { OrderService } from '../../services/order.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { ProgressSpinner } from 'primeng/progressspinner';
-import { Order } from '../../models/order.model';
 import {
-  ProductDetail,
   AutoCompleteCompleteEvent,
   OrderProductRecordTuple,
   TabCloseEvent,
 } from '../../interfaces/order-product.interface';
 import { OrderProduct } from '../../models/order-product.model';
+import { ProductOrderProduct } from '../../types/order-product.type';
 
 @Component({
   selector: 'app-create-order',
@@ -43,8 +42,6 @@ export class CreateOrderComponent implements OnInit {
 
   selectedProducts: Array<Product> = [];
   productSuggestions: Array<Product> = [];
-
-  productDetails: ProductDetail = {};
 
   orderForm!: FormGroup;
   canShowProductDetailsTable = false;
@@ -103,6 +100,7 @@ export class CreateOrderComponent implements OnInit {
   getOrderProductFormGroup(productName: string): FormGroup {
     return this.orderForm.get('orderProducts')?.get(productName) as FormGroup;
   }
+
   getOrderProductRows(productName: string): FormArray {
     return this.orderForm
       .get('orderProducts')
@@ -157,32 +155,40 @@ export class CreateOrderComponent implements OnInit {
       });
   }
 
-  initizalizeProductDetail(product: Product) {
+  initizalizeProductDetail(product: ProductOrderProduct, isEmptyRows = false) {
     this.orderProductsFormGroup.addControl(
       product?.name,
-      this.newOrderProduct(product)
+      this.newOrderProduct(product, isEmptyRows)
     );
-    console.log(this.orderProductsFormGroup.value);
   }
 
-  newOrderProduct(product: Product): FormGroup {
+  newOrderProduct(
+    product: ProductOrderProduct,
+    isEmptyRows = false
+  ): FormGroup {
     return this.formBuilder.group({
-      price: [null, [Validators.required]],
+      price: [product.price ?? null, [Validators.required]],
       rows: this.formBuilder.array(
-        [this.newOrderProductRow(product)],
+        isEmptyRows ? [] : [this.newOrderProductRow(product)],
         Validators.required
       ),
     });
   }
 
-  newOrderProductRow(product: Product): FormGroup {
+  newOrderProductRow(product: ProductOrderProduct, isNew = false): FormGroup {
+    const customizeName = isNew
+      ? ''
+      : (product as OrderProduct).customizeName ?? '';
+    const color = isNew ? '' : (product as OrderProduct).color ?? '';
+    const quantity = this.getOrderProductQuantity(product.name, isNew);
     return this.formBuilder.group({
       id: [product.id, [Validators.required]],
-      color: '',
-      customizeName: '',
+      color: color,
+      customizeName: customizeName,
       name: product.name,
       cost: product.cost,
       weight: product.weight,
+      quantity: quantity,
     });
   }
 
@@ -194,68 +200,40 @@ export class CreateOrderComponent implements OnInit {
   }
 
   onProductSelect(selectedProduct: Product): void {
-    this.productDetails[selectedProduct.name] = {
-      quantity: 0,
-      price: 0,
-      orderProducts: [],
-      weight: selectedProduct?.weight,
-    };
-    // this.addOrderProductRow(selectedProduct);
     this.initizalizeProductDetail(selectedProduct);
     this.canShowProductDetailsTable = true;
   }
 
-  onSelectProductQuantity(product: OrderProduct, productQuantity: number) {
-    for (let i = 0; i < productQuantity; i++) {
-      this.productDetails[product.name].orderProducts.push({
-        id: product.id ?? 0,
-        color: product?.color ?? '',
-        customizeName: product?.customizeName ?? '',
-        name: product.name,
-        cost: product.cost,
-        weight: product.weight,
-        quantity: this.productDetails[product.name].quantity ?? 0,
-      });
-    }
-    this.canShowProductDetailsTable = true;
-  }
-
-  addOrderProductRow(product: Product): void {
-    this.productDetails[product.name].orderProducts.push({
-      id: product.id ?? 0,
-      color: '',
-      customizeName: '',
-      name: product?.name,
-      cost: product?.cost,
-      weight: product?.weight,
-      quantity: this.productDetails[product.name]?.quantity ?? 0,
-    });
+  addOrderProductRow(product: ProductOrderProduct, isNew = false): void {
+    const productRows = this.getOrderProductRows(product.name);
+    productRows.push(this.newOrderProductRow(product, isNew));
+    this.incrementProductQuantityCount(product.name);
     this.calculateOrderTotalAmount();
   }
 
   calculateOrderTotalAmount(): void {
     this.orderTotalAmount = 0;
-    Object.keys(this.productDetails).forEach((productName: string) => {
-      const orderProductQuantity =
-        this.productDetails[productName].orderProducts?.length;
-      if (this.productDetails[productName].price > 0) {
-        this.orderTotalAmount +=
-          this.productDetails[productName].price * orderProductQuantity;
-      } else {
-        this.orderTotalAmount = this.orderTotalAmount;
+    Object.keys(this.orderForm.value.orderProducts).forEach(
+      (productName: string) => {
+        const orderProducts = this.orderForm.value.orderProducts[productName];
+        const orderProductQuantity = orderProducts.rows?.length;
+        if (orderProducts?.price > 0) {
+          this.orderTotalAmount += orderProducts?.price * orderProductQuantity;
+        } else {
+          this.orderTotalAmount = this.orderTotalAmount;
+        }
       }
-    });
+    );
   }
 
   createOrder(): void {
-    console.log(this.orderForm.value);
-    // this.showSpinner = true;
-    // const createOrderPayload = this.buildCreateOrderPayload();
-    // this.orderService.createOrder(createOrderPayload).subscribe((res) => {
-    //   this.showSpinner = false;
-    //   this.showToast('Order created!');
-    //   this.router.navigate(['/orders']);
-    // });
+    this.showSpinner = true;
+    const createOrderPayload = this.buildCreateOrderPayload();
+    this.orderService.createOrder(createOrderPayload).subscribe((res) => {
+      this.showSpinner = false;
+      this.showToast('Order created!');
+      this.router.navigate(['/orders']);
+    });
   }
 
   saveOrder(): void {
@@ -280,7 +258,7 @@ export class CreateOrderComponent implements OnInit {
   }
 
   onProductClear(orderProduct: OrderProduct) {
-    this.productDetails = omit(this.productDetails, orderProduct.name);
+    this.removeProductFormGroup(orderProduct.name);
     this.calculateOrderTotalAmount();
   }
 
@@ -288,7 +266,7 @@ export class CreateOrderComponent implements OnInit {
     const productToBeRemoved = this.selectedProductsControl.value[
       tabCloseEvent.index
     ] as OrderProduct;
-    this.productDetails = omit(this.productDetails, productToBeRemoved.name);
+    this.removeProductFormGroup(productToBeRemoved.name);
     this.selectedProductsControl.value.splice(tabCloseEvent.index, 1);
     this.selectedProductsControl.setValue(this.selectedProductsControl.value);
     this.calculateOrderTotalAmount();
@@ -300,16 +278,17 @@ export class CreateOrderComponent implements OnInit {
       paymentMethod: this.orderForm.value.paymentMethod?.value,
       amount: this.orderTotalAmount,
       customerId: this.orderForm.value.selectedCustomer?.id,
-      totalProductQuantity: this.getTotalCountByProperty('quantity'),
-      totalWeight: this.getTotalCountByProperty('weight', true).toString(),
+      totalProductQuantity: this.buildOrderProductsPayload()?.length,
+      totalWeight: this.getTotalCountByProperty('weight').toString(),
       products: this.buildOrderProductsPayload(),
       orderDate: this.orderForm.value.orderDate,
     };
   }
 
   onRemoveProductRow(rowIndex: number, productName: string): void {
-    this.productDetails[productName].quantity--;
-    this.productDetails[productName].orderProducts.splice(rowIndex, 1);
+    const orderProductRows = this.getOrderProductRows(productName);
+    orderProductRows.removeAt(rowIndex);
+    this.decrementProductQuantityCount(productName);
     this.calculateOrderTotalAmount();
   }
 
@@ -320,37 +299,76 @@ export class CreateOrderComponent implements OnInit {
     });
   }
 
-  private getTotalCountByProperty(
-    propertyName: string,
-    isFloatTypeValue = false
-  ): number {
-    return Object.values(this.productDetails).reduce(
-      (total: number, product: any) => {
-        return (
-          total +
-          (isFloatTypeValue
-            ? parseFloat(product[propertyName])
-            : product[propertyName])
-        );
-      },
-      0
+  onCancel(): void {
+    this.router.navigate(['/orders']);
+  }
+
+  private getTotalCountByProperty(propertyName: string): number {
+    const orderProducts = flatMap(
+      this.orderForm.value?.orderProducts,
+      (value) => value.rows
     );
+    const totalWeight = sumBy(orderProducts, (item) => {
+      const numericWeight = parseFloat(
+        item[propertyName].replace(/[^\d.]/g, '')
+      );
+      return isNaN(numericWeight) ? 0 : numericWeight;
+    });
+    return totalWeight;
   }
 
   private buildOrderProductsPayload() {
     const orderProducts = flatMap(
-      this.productDetails,
-      (value) => value.orderProducts
+      this.orderForm.value?.orderProducts,
+      (value) => value.rows
     );
     return orderProducts.map((product: OrderProductRecordTuple) => {
       return {
         id: product.id,
         cost: product.cost,
         color: product.color,
-        price: this.productDetails[product.name].price,
+        price: this.orderForm.value.orderProducts[product.name].price,
         customizeName: product.customizeName,
         quantity: product.quantity,
       };
     });
+  }
+
+  private incrementProductQuantityCount(productName: string): void {
+    const orderProductRows = this.getOrderProductRows(productName);
+    const incrementedOrderProductQuantity =
+      Number(orderProductRows.controls[0].get('quantity')?.value) + 1;
+    for (let i = 0; i < orderProductRows.length; i++) {
+      orderProductRows.controls[i]
+        .get('quantity')
+        ?.setValue(incrementedOrderProductQuantity);
+    }
+  }
+
+  private decrementProductQuantityCount(productName: string): void {
+    const orderProductRows = this.getOrderProductRows(productName);
+    let decrementedOrderProductQuantity =
+      this.getOrderProductQuantity(productName);
+    decrementedOrderProductQuantity =
+      decrementedOrderProductQuantity > 0
+        ? decrementedOrderProductQuantity--
+        : 0;
+    for (let i = 0; i < orderProductRows.length; i++) {
+      orderProductRows.controls[i]
+        .get('quantity')
+        ?.setValue(decrementedOrderProductQuantity);
+    }
+  }
+
+  private removeProductFormGroup(productName: string): void {
+    const orderProductFormGroup = this.orderForm.get(
+      'orderProducts'
+    ) as FormGroup;
+    orderProductFormGroup.removeControl(productName);
+  }
+
+  private getOrderProductQuantity(productName: string, isNew = false): number {
+    const orderProductRows = this.getOrderProductRows(productName);
+    return isNew ? orderProductRows.length + 1 : orderProductRows?.length ?? 1;
   }
 }

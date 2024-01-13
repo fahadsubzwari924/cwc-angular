@@ -7,7 +7,6 @@ import { OrderService } from '../../services/order.service';
 import { MessageService } from 'primeng/api';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Order } from '../../models/order.model';
-import { CustomResponse } from 'src/app/shared/models/response.model';
 import { OrderProduct } from '../../models/order-product.model';
 import { groupBy, uniqBy } from 'lodash';
 
@@ -59,7 +58,8 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
         },
         [Validators.required],
       ],
-      orderDate: ['', [Validators.required]]
+      orderDate: ['', [Validators.required]],
+      orderProducts: this.formBuilder.group({}),
     });
   }
 
@@ -92,36 +92,22 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
     const productsByOrderId = uniqBy(this.order.products, 'id');
     this.orderForm.get('selectedProducts')?.setValue(productsByOrderId);
     this.orderForm.get('orderDate')?.setValue(new Date(this.order.orderDate));
-    if (productsByOrderId) {
-      productsByOrderId.forEach((orderProduct: OrderProduct) => {
-        this.productDetails[orderProduct.name] = {
-          quantity: orderProduct?.quantity,
-          price: orderProduct.price,
-          orderProducts: [],
-          weight: orderProduct.weight,
-        };
-      });
-    }
+    productsByOrderId.forEach((product: OrderProduct) => {
+      this.initizalizeProductDetail(product, true);
+    });
     this.populateProductRows();
     this.calculateOrderTotalAmount();
   }
 
   private populateProductRows(): void {
-    const productsGroupByOrderId = groupBy(this.order.products, 'id');
-    Object.keys(productsGroupByOrderId).forEach((orderProductKey: string) => {
-      const orderProductGroup = productsGroupByOrderId[orderProductKey];
-      for (let i = 0; i < orderProductGroup.length; i++) {
-        this.productDetails[orderProductGroup[i].name].orderProducts.push({
-          id: orderProductGroup[i].id ?? 0,
-          color: orderProductGroup[i]?.color ?? '',
-          customizeName: orderProductGroup[i]?.customizeName ?? '',
-          name: orderProductGroup[i].name,
-          cost: orderProductGroup[i].cost,
-          weight: orderProductGroup[i].weight,
-          quantity: orderProductGroup[i].quantity,
-        });
-      }
-      this.canShowProductDetailsTable = true;
+    const productsGrupedByName = groupBy(this.order.products, 'name');
+    Object.keys(productsGrupedByName).forEach((orderProductKey: string) => {
+      this.order.products?.forEach((orderProduct: OrderProduct) => {
+        if (orderProduct.name === orderProductKey) {
+          this.addOrderProductRow(orderProduct as OrderProduct);
+        }
+      });
     });
+    this.canShowProductDetailsTable = true;
   }
 }
