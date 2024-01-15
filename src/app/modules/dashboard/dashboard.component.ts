@@ -9,7 +9,7 @@ import { DashboardStatsModel } from './model/dashboard.model';
 export class DashboardComponent {
   dashboardStats!: DashboardStatsModel;
   isLoading = false;
-  dashboardStatusProperties = 7;
+  dashboardStatusProperties = 8;
 
   constructor(private reportService: ReportsService) {}
 
