@@ -81,7 +81,8 @@
           </ng-template>
         </p-dataView>
         <p-paginator (onPageChange)="onPageChange($event)" [first]="paginationConstants.FIRST_ROW"
-          [rows]="paginationConstants.PAGE_LIMIT" [totalRecords]="productResponseMetadata?.totalItems"></p-paginator>
+          [rows]="paginationConstants.PRODUCT_LIST_PAGE_LIMIT"
+          [totalRecords]="productResponseMetadata?.totalItems"></p-paginator>
       </ng-container>
       <ng-template #noProducts>
         <div class="grid mt-3">

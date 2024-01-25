@@ -9,6 +9,8 @@ import { Order } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { ChangeOrderStatusModalComponent } from '../change-order-status-modal/change-order-status-modal.component';
 import { Router } from '@angular/router';
+import { UtilService } from 'src/app/util/util.service';
+import { ListConstants } from 'src/app/constants/list-constants';
 
 @Component({
   selector: 'app-order-list',
@@ -21,7 +23,8 @@ export class OrderListComponent {
     public paginationConstants: PaginationConstants,
     private modalService: SimpleModalService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private utilService: UtilService
   ) {}
 
   orders: Array<Order> = [];
@@ -33,11 +36,6 @@ export class OrderListComponent {
       type: 'string',
     },
     {
-      field: 'description',
-      header: 'Description',
-      type: 'string',
-    },
-    {
       field: 'customer.fullName',
       header: 'Customer',
       type: 'string',
@@ -45,6 +43,11 @@ export class OrderListComponent {
     {
       field: 'amount',
       header: 'Total Amount',
+      type: 'string',
+    },
+    {
+      field: 'description',
+      header: 'Description',
       type: 'string',
     },
     {
@@ -68,23 +71,30 @@ export class OrderListComponent {
     delivered: 'Delivered',
   };
   isLoading: boolean = false;
+  startingRow = 0;
+  isOrderStatusUpdated = false;
 
   ngOnInit(): void {
+    this.startingRow = this.paginationConstants.FIRST_ROW;
     this.getOrders();
   }
 
-  getOrders(params = {}): void {
+  getOrders(params: any = {}): void {
     this.isLoading = true;
-    this.orderService
-      .getOrders(params)
-      .subscribe((response: CustomResponse<Order[]>) => {
+    this.orderService.getOrders(params).subscribe(
+      (response: CustomResponse<Order[]>) => {
         this.orders = response?.payload ?? [];
         this.orderResponseMetadata = response.metadata;
         this.isLoading = false;
-      }, error => {
+        if (this.isOrderStatusUpdated) {
+          this.setCurrentPage();
+        }
+      },
+      (error) => {
         this.isLoading = false;
         this.orders = [];
-      });
+      }
+    );
   }
 
   // onSortChange(event: any) {
@@ -141,6 +151,7 @@ export class OrderListComponent {
             .deleteOrder(order.id as number)
             .pipe(
               tap(() => this.showToast(toastMessage)),
+              tap(() => this.setCurrentPage()),
               switchMap(() => of(this.getOrders()))
             )
             .subscribe();
@@ -156,6 +167,15 @@ export class OrderListComponent {
   }
 
   onPageChange(paginationEvent: any): void {
+    this.startingRow = paginationEvent?.first ?? 0;
+    this.utilService.setValueInLocalStorage(
+      ListConstants.CURRENT_ROWS,
+      this.startingRow
+    );
+    this.utilService.setValueInLocalStorage(
+      ListConstants.CURRENT_PAGE,
+      paginationEvent?.page + 1
+    );
     const queryParams = {
       page: paginationEvent?.page + 1,
     };
@@ -172,7 +192,13 @@ export class OrderListComponent {
       .addModal(ChangeOrderStatusModalComponent, inputs)
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
-          this.getOrders();
+          this.isOrderStatusUpdated = true;
+          const requestParams = {
+            page: this.utilService.getFromLocalStorage(
+              ListConstants.CURRENT_PAGE
+            ),
+          };
+          this.getOrders(requestParams);
         }
       });
   }
@@ -186,5 +212,11 @@ export class OrderListComponent {
         detail: 'Order id not found',
       });
     }
+  }
+
+  private setCurrentPage(): void {
+    this.startingRow = this.utilService.getFromLocalStorage(
+      ListConstants.CURRENT_ROWS
+    );
   }
 }

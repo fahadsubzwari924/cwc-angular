@@ -4,6 +4,8 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class PaginationConstants {
-  readonly FIRST_ROW = 0;
+  FIRST_ROW = 0;
+  CURRENT_PAGE = 1;
   readonly PAGE_LIMIT = 10;
+  readonly PRODUCT_LIST_PAGE_LIMIT = 12;
 }
