@@ -9,6 +9,8 @@ import { Customer } from '../../models/customer.model';
 import { CustomerService } from '../../services/customer.service';
 import { CreateCustomerComponent } from '../create-customer/create-customer.component';
 import { EditCustomerComponent } from '../edit-customer/edit-customer.component';
+import { UtilService } from '../../../../util/util.service';
+import { ListConstants } from 'src/app/constants/list-constants';
 
 @Component({
   selector: 'app-customer-list',
@@ -20,7 +22,8 @@ export class CustomerListComponent {
     private customerService: CustomerService,
     public paginationConstants: PaginationConstants,
     private modalService: SimpleModalService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private utilService: UtilService
   ) {}
 
   customers: Array<Customer> = [];
@@ -50,22 +53,26 @@ export class CustomerListComponent {
   sortOrder: number = 0;
   sortField: string = '';
   isLoading = false;
+  startingRow = 0;
 
   ngOnInit(): void {
+    this.startingRow = this.paginationConstants.FIRST_ROW;
     this.getCustomers();
   }
 
   getCustomers(params = {}): void {
     this.isLoading = true;
-    this.customerService
-      .getCustomers(params)
-      .subscribe((response: CustomResponse<Customer[]>) => {
-        this.customers = response?.payload;
+    this.customerService.getCustomers(params).subscribe(
+      (response: CustomResponse<Customer[]>) => {
+        this.customers = response?.payload ?? [];
         this.customerResponseMetadata = response.metadata;
         this.isLoading = false;
-      }, error => {
+      },
+      (error) => {
         this.isLoading = false;
-      });
+        this.customers = [];
+      }
+    );
   }
 
   onSortChange(event: any) {
@@ -102,7 +109,12 @@ export class CustomerListComponent {
       .addModal(EditCustomerComponent, inputs)
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
-          this.getCustomers();
+          const requestParams = {
+            page: this.utilService.getFromLocalStorage(
+              ListConstants.CURRENT_PAGE
+            ),
+          };
+          this.getCustomers(requestParams);
         }
       });
   }
@@ -121,6 +133,7 @@ export class CustomerListComponent {
             .deleteCustomer(customer.id as number)
             .pipe(
               tap(() => this.showToast(toastMessage)),
+              tap(() => this.setCurrentPage()),
               switchMap(() => of(this.getCustomers()))
             )
             .subscribe();
@@ -136,9 +149,24 @@ export class CustomerListComponent {
   }
 
   onPageChange(paginationEvent: any): void {
+    this.startingRow = paginationEvent?.first ?? 0;
+    this.utilService.setValueInLocalStorage(
+      ListConstants.CURRENT_ROWS,
+      this.startingRow
+    );
+    this.utilService.setValueInLocalStorage(
+      ListConstants.CURRENT_PAGE,
+      paginationEvent?.page + 1
+    );
     const queryParams = {
       page: paginationEvent?.page + 1,
     };
     this.getCustomers(queryParams);
+  }
+
+  private setCurrentPage(): void {
+    this.startingRow = this.utilService.getFromLocalStorage(
+      ListConstants.CURRENT_ROWS
+    );
   }
 }

@@ -13,7 +13,7 @@ export class Order {
   productCount?: number;
   status?: string;
   createdAt?: Date;
-  orderDate: Date;
+  orderDate: Date | string;
 
   constructor(order: any) {
     this.id = order?.id;
@@ -32,6 +32,6 @@ export class Order {
     if (order?.customer) {
       this.customer = new Customer(order?.customer);
     }
-    this.orderDate = order?.orderDate ?? new Date();
+    this.orderDate = order?.orderDate ?? 'N/A';
   }
 }

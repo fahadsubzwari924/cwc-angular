@@ -38,16 +38,21 @@ export class ListComponent implements OnInit {
   }
 
   getProducts(params = {}): void {
+    params = {
+      ...params,
+      pageSize: this.paginationConstants.PRODUCT_LIST_PAGE_LIMIT,
+    };
     this.isLoading = true;
-    this.productService
-      .getProducts(params)
-      .subscribe((response: CustomResponse<Product[]>) => {
+    this.productService.getProducts(params).subscribe(
+      (response: CustomResponse<Product[]>) => {
         this.products = response?.payload;
         this.productResponseMetadata = response.metadata;
         this.isLoading = false;
-      }, (error) => {
+      },
+      (error) => {
         this.isLoading = false;
-      });
+      }
+    );
   }
 
   onSortChange(event: any) {

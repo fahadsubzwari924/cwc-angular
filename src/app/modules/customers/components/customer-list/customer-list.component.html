@@ -1,7 +1,8 @@
 <div class="grid">
-    <div class="col-12">
-        <p-button icon="pi pi-plus" label="Add Customer" styleClass="mb-2 p-button-sm" (onClick)="openCreateCustomerModal()"></p-button>
-    </div>
+  <div class="col-12">
+    <p-button icon="pi pi-plus" label="Add Customer" styleClass="mb-2 p-button-sm"
+      (onClick)="openCreateCustomerModal()"></p-button>
+  </div>
 </div>
 <div class="grid">
   <div class="col-12">
@@ -11,28 +12,28 @@
 
         <p-table [columns]="columns" [value]="customers" [tableStyle]="{ 'min-width': '50rem' }">
           <ng-template pTemplate="header" let-columns>
-              <tr>
-                  <th *ngFor="let col of columns">
-                      {{ col.header }}
-                  </th>
-                  <th>Actions</th>
-              </tr>
+            <tr>
+              <th *ngFor="let col of columns">
+                {{ col.header }}
+              </th>
+              <th>Actions</th>
+            </tr>
           </ng-template>
           <ng-template pTemplate="body" let-rowData let-columns="columns">
-              <tr>
-                  <td *ngFor="let col of columns">
-                      {{ rowData[col.field] }}
-                  </td>
-                  <td>
-                      <p-button icon="pi pi-pencil" (onClick)="openEditCustomerModal(rowData)"></p-button>
-                      <p-button icon="pi pi-trash" class="ml-2" (onClick)="onDelete(rowData)"></p-button>
-                  </td>
-              </tr>
+            <tr>
+              <td *ngFor="let col of columns">
+                {{ rowData[col.field] }}
+              </td>
+              <td>
+                <p-button icon="pi pi-pencil" (onClick)="openEditCustomerModal(rowData)"></p-button>
+                <p-button icon="pi pi-trash" class="ml-2" (onClick)="onDelete(rowData)"></p-button>
+              </td>
+            </tr>
           </ng-template>
 
         </p-table>
-        <p-paginator (onPageChange)="onPageChange($event)" [first]="paginationConstants.FIRST_ROW" [rows]="paginationConstants.PAGE_LIMIT"
-        [totalRecords]="customerResponseMetadata?.totalItems"></p-paginator>
+        <p-paginator (onPageChange)="onPageChange($event)" [first]="startingRow" [rows]="paginationConstants.PAGE_LIMIT"
+          [totalRecords]="customerResponseMetadata?.totalItems"></p-paginator>
       </ng-container>
       <ng-template #noCustomer>
         <div class="grid mt-3">
