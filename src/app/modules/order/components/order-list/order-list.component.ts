@@ -194,9 +194,10 @@ export class OrderListComponent {
         if (isConfirmed) {
           this.isOrderStatusUpdated = true;
           const requestParams = {
-            page: this.utilService.getFromLocalStorage(
-              ListConstants.CURRENT_PAGE
-            ),
+            page:
+              this.utilService.getFromLocalStorage(
+                ListConstants.CURRENT_PAGE
+              ) ?? this.paginationConstants.CURRENT_PAGE,
           };
           this.getOrders(requestParams);
         }
