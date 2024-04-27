@@ -9,7 +9,7 @@ export interface TabCloseEvent {
 }
 
 export interface OrderProductRecordTuple {
-  id: number;
+  productId: number;
   color?: string;
   customizeName?: string;
   name: string;

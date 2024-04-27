@@ -76,7 +76,6 @@ export class ListComponent implements OnInit {
     this.modalService
       .addModal(CreateComponent, inputs)
       .subscribe((isConfirmed) => {
-        console.log('isConfirmed : ', isConfirmed);
         if (isConfirmed) {
           this.getProducts();
         }

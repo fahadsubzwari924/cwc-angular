@@ -94,6 +94,5 @@ export class CreateComponent
     formData.forEach((value, key) => {
       formDataObj[key] = value;
     });
-    console.log('FormData contents:', formDataObj);
   }
 }

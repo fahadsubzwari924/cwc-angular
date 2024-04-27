@@ -182,7 +182,7 @@ export class CreateOrderComponent implements OnInit {
     const color = isNew ? '' : (product as OrderProduct).color ?? '';
     const quantity = this.getOrderProductQuantity(product.name, isNew);
     return this.formBuilder.group({
-      id: [product.id, [Validators.required]],
+      productId: [product.id, [Validators.required]],
       color: color,
       customizeName: customizeName,
       name: product.name,
@@ -280,7 +280,7 @@ export class CreateOrderComponent implements OnInit {
       customerId: this.orderForm.value.selectedCustomer?.id,
       totalProductQuantity: this.buildOrderProductsPayload()?.length,
       totalWeight: this.getTotalCountByProperty('weight').toString(),
-      products: this.buildOrderProductsPayload(),
+      orderItems: this.buildOrderProductsPayload(),
       orderDate: this.orderForm.value.orderDate,
     };
   }
@@ -318,13 +318,13 @@ export class CreateOrderComponent implements OnInit {
   }
 
   private buildOrderProductsPayload() {
-    const orderProducts = flatMap(
+    const orderItems = flatMap(
       this.orderForm.value?.orderProducts,
       (value) => value.rows
     );
-    return orderProducts.map((product: OrderProductRecordTuple) => {
+    return orderItems.map((product: OrderProductRecordTuple) => {
       return {
-        id: product.id,
+        productId: product.productId,
         cost: product.cost,
         color: product.color,
         price: this.orderForm.value.orderProducts[product.name].price,
