@@ -6,8 +6,8 @@
   <div class="col-5">
     <div class="flex flex-column gap-2">
       <p-autoComplete placeholder="Search customer" [dropdown]="true" [suggestions]="customerSuggestions"
-        (completeMethod)="searchCustomer($event)" (onSelect)="getSelectedCustomer($event)"
-        field="fullName"></p-autoComplete>
+        [showClear]="true" (completeMethod)="searchCustomer($event)" (onSelect)="getSelectedCustomer($event)"
+        (onClear)="onCustomerUnSelect()" field="fullName"></p-autoComplete>
     </div>
   </div>
 </div>

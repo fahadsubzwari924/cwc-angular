@@ -11,6 +11,8 @@ import { of, switchMap, tap } from 'rxjs';
 import { EditProductComponent } from '../edit/edit-product.component';
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
+import { UtilService } from 'src/app/util/util.service';
+import { ListConstants } from 'src/app/constants/list-constants';
 
 @Component({
   selector: 'app-list',
@@ -22,7 +24,8 @@ export class ListComponent implements OnInit {
     private productService: ProductService,
     private modalService: SimpleModalService,
     private messageService: MessageService,
-    public paginationConstants: PaginationConstants
+    public paginationConstants: PaginationConstants,
+    private utilService: UtilService
   ) {}
 
   products: Array<Product> = [];
@@ -31,8 +34,10 @@ export class ListComponent implements OnInit {
   sortOrder!: string;
   sortField: string = '';
   isLoading = false;
+  startingRow = 0;
 
   ngOnInit(): void {
+    this.startingRow = this.paginationConstants.FIRST_ROW;
     this.buildSortOptions();
     this.getProducts();
   }
@@ -132,6 +137,15 @@ export class ListComponent implements OnInit {
   }
 
   onPageChange(paginationEvent: any): void {
+    this.startingRow = paginationEvent?.first ?? 0;
+    this.utilService.setValueInLocalStorage(
+      ListConstants.CURRENT_ROWS,
+      this.startingRow
+    );
+    this.utilService.setValueInLocalStorage(
+      ListConstants.CURRENT_PAGE,
+      paginationEvent?.page + 1
+    );
     const queryParams = {
       page: paginationEvent?.page + 1,
     };

@@ -80,7 +80,7 @@
             </div>
           </ng-template>
         </p-dataView>
-        <p-paginator (onPageChange)="onPageChange($event)" [first]="paginationConstants.FIRST_ROW"
+        <p-paginator (onPageChange)="onPageChange($event)" [first]="startingRow"
           [rows]="paginationConstants.PRODUCT_LIST_PAGE_LIMIT"
           [totalRecords]="productResponseMetadata?.totalItems"></p-paginator>
       </ng-container>
