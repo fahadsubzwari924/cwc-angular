@@ -15,6 +15,7 @@ import { CreateCustomerComponent } from './components/create-customer/create-cus
 import { MessageService } from 'primeng/api';
 import { EditCustomerComponent } from './components/edit-customer/edit-customer.component';
 import { SkeletonModule } from 'primeng/skeleton';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { SkeletonModule } from 'primeng/skeleton';
     BlockUIModule,
     ToastModule,
     PaginatorModule,
-    SkeletonModule
+    SkeletonModule,
+    AutoCompleteModule,
   ],
   providers: [CustomerService, MessageService],
 })

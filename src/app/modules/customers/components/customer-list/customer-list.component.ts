@@ -1,7 +1,15 @@
 import { Component } from '@angular/core';
 import { SimpleModalService } from 'ngx-simple-modal';
 import { MessageService } from 'primeng/api';
-import { of, switchMap, tap } from 'rxjs';
+import {
+  Observable,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { ConfirmationModalComponent } from 'src/app/shared/components/confirmation-modal/confirmation-modal.component';
 import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
 import { CustomResponse } from 'src/app/shared/models/response.model';
@@ -11,6 +19,7 @@ import { CreateCustomerComponent } from '../create-customer/create-customer.comp
 import { EditCustomerComponent } from '../edit-customer/edit-customer.component';
 import { UtilService } from '../../../../util/util.service';
 import { ListConstants } from 'src/app/constants/list-constants';
+import { AutoCompleteCompleteEvent } from 'src/app/modules/order/interfaces/order-product.interface';
 
 @Component({
   selector: 'app-customer-list',
@@ -54,6 +63,7 @@ export class CustomerListComponent {
   sortField: string = '';
   isLoading = false;
   startingRow = 0;
+  customerSuggestions: Array<Customer> = [];
 
   ngOnInit(): void {
     this.startingRow = this.paginationConstants.FIRST_ROW;
@@ -160,6 +170,36 @@ export class CustomerListComponent {
     );
     const queryParams = {
       page: paginationEvent?.page + 1,
+    };
+    this.getCustomers(queryParams);
+  }
+
+  searchForCustomers(searchTerm: string): Observable<Array<Customer>> {
+    let queryParams = {
+      searchTerm,
+    };
+    return this.customerService.searchCustomers(queryParams);
+  }
+
+  searchCustomer(event: AutoCompleteCompleteEvent): void {
+    of(event)
+      .pipe(
+        debounceTime(500),
+        map(
+          (customerAutocompleteEvent: AutoCompleteCompleteEvent) =>
+            customerAutocompleteEvent.query
+        ),
+        distinctUntilChanged(),
+        switchMap((searchTerm: string) => this.searchForCustomers(searchTerm))
+      )
+      .subscribe((customers: Array<Customer>) => {
+        this.customerSuggestions = customers;
+      });
+  }
+
+  getSelectedCustomer(selectedCustomer: Customer) {
+    const queryParams = {
+      filters: JSON.stringify({ fullName: selectedCustomer?.fullName }),
     };
     this.getCustomers(queryParams);
   }
