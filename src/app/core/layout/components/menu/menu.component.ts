@@ -16,7 +16,11 @@ export class MenuComponent implements OnInit {
       {
         label: 'Home',
         items: [
-          { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
+          {
+            label: 'Dashboard',
+            icon: 'pi pi-fw pi-home',
+            routerLink: ['/dashboard'],
+          },
         ],
       },
       {
@@ -24,7 +28,7 @@ export class MenuComponent implements OnInit {
         items: [
           {
             label: 'Products',
-            icon: 'pi pi-fw pi-id-card',
+            icon: 'pi pi-fw pi-th-large',
             routerLink: ['/products'],
           },
         ],
@@ -34,7 +38,7 @@ export class MenuComponent implements OnInit {
         items: [
           {
             label: 'Customers',
-            icon: 'pi pi-fw pi-id-card',
+            icon: 'pi pi-fw pi-users',
             routerLink: ['/customers'],
           },
         ],
@@ -44,12 +48,12 @@ export class MenuComponent implements OnInit {
         items: [
           {
             label: 'Orders',
-            icon: 'pi pi-fw pi-id-card',
+            icon: 'pi pi-fw pi-shopping-cart',
             routerLink: ['/orders'],
           },
           {
             label: 'Create Order',
-            icon: 'pi pi-fw pi-id-card',
+            icon: 'pi pi-fw pi-briefcase',
             routerLink: ['/orders/create'],
           },
         ],

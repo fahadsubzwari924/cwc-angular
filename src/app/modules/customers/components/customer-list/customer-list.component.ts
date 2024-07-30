@@ -197,11 +197,15 @@ export class CustomerListComponent {
       });
   }
 
-  getSelectedCustomer(selectedCustomer: Customer) {
+  getSelectedCustomer(selectedCustomer: Customer): void {
     const queryParams = {
       filters: JSON.stringify({ fullName: selectedCustomer?.fullName }),
     };
     this.getCustomers(queryParams);
+  }
+
+  onCustomerUnSelect(): void {
+    this.getCustomers();
   }
 
   private setCurrentPage(): void {
