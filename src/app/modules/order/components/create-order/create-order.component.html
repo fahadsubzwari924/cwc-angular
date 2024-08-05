@@ -58,55 +58,109 @@
                   <span>{{ product?.name }}</span>
                 </ng-template>
                 <ng-container *ngIf="canShowProductDetailsTable">
-                  <div [formGroup]="getOrderProductFormGroup(product.name)">
-                    <div class="grid flex align-items-end">
-                      <div class="col-12 md:col-2">
-                        <div class="flex flex-column gap-2">
-                          <label>Price</label>
-                          <input type="number" formControlName="price" (blur)="calculateOrderTotalAmount()"
-                            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                  <div class="order-items-table-desktop-view hidden md:block sm:hidden">
+                    <div [formGroup]="getOrderProductFormGroup(product.name)">
+                      <div class="grid flex align-items-end">
+                        <div class="col-12 md:col-2">
+                          <div class="flex flex-column gap-2">
+                            <label>Price</label>
+                            <input type="number" formControlName="price" (blur)="calculateOrderTotalAmount()"
+                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                          </div>
+                        </div>
+                        <div class="col-12 md:col-2 d-flex align-items-end">
+                          <!-- <div class="flex flex-column gap-2"> -->
+                          <button class="w-full md:w-auto" pButton pRipple type="button" icon="pi pi-plus"
+                            (click)="addOrderProductRow(product, true)"></button>
+                          <!-- </div> -->
                         </div>
                       </div>
-                      <div class="col-12 md:col-2 d-flex align-items-end">
-                        <div class="flex flex-column gap-2">
-                          <button pButton pRipple type="button" icon="pi pi-plus"
+                      <ng-container *ngIf="canShowProductDetailsTable">
+                        <div class="order-product-table">
+                          <div class="grid header-row mt-2">
+                            <div class="col-3 column">
+                              <h5 class="text-primary">Name</h5>
+                            </div>
+                            <div class="col-2 column">
+                              <h5 class="text-primary">Cost</h5>
+                            </div>
+                            <div class="col-3 column">
+                              <h5 class="text-primary">Customize Name</h5>
+                            </div>
+                            <div class="col-2 column">
+                              <h5 class="text-primary">Color</h5>
+                            </div>
+                          </div>
+                          <div class="grid"
+                            *ngFor="let orderProductRowControl of getOrderProductRows(product.name).controls; let i=index">
+                            <div class="col-3 column">{{product?.name}}</div>
+                            <div class="col-2 column">{{product?.cost}}</div>
+                            <div class="col-3" [formGroup]="getOrderProductRowGroup(product.name, i)">
+                              <input id="customize-name" type="text" formControlName="customizeName"
+                                class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                            </div>
+                            <div class="col-2" [formGroup]="getOrderProductRowGroup(product.name, i)">
+                              <input id="color-name" type="text" formControlName="color"
+                                class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                            </div>
+                            <div class="col-2 flex align-items-center">
+                              <button pButton pRipple type="button" icon="pi pi-times" class="p-button-rounded ml-3"
+                                (click)="onRemoveProductRow(i, product.name)" [disabled]="i === 0"></button>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-container>
+                    </div>
+                  </div>
+                  <div class="order-items-table-mobile-view block sm:hidden">
+                    <div [formGroup]="getOrderProductFormGroup(product.name)">
+                      <div class="grid flex align-items-end">
+                        <div class="col-12 md:col-2">
+                          <div class="flex flex-column gap-2">
+                            <label class="font-bold">Price</label>
+                            <input type="number" formControlName="price" (blur)="calculateOrderTotalAmount()"
+                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                          </div>
+                        </div>
+                        <div class="col-12 md:col-2 d-flex align-items-end">
+                          <!-- <div class="flex flex-column gap-2"> -->
+                          <button class="w-full md:w-auto" pButton pRipple type="button" icon="pi pi-plus"
                             (click)="addOrderProductRow(product, true)"></button>
+                          <!-- </div> -->
+                        </div>
+                      </div>
+                      <div class="grid mt-2">
+                        <div class="col-6">
+                          <div class="flex flex-column gap-2">
+                            <label class="font-bold">Name</label>
+                            <label>{{product?.name}}</label>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="flex flex-column gap-2">
+                            <label class="font-bold">Cost</label>
+                            <label>{{product?.cost}}</label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="grid mt-3 order-items-list"
+                        *ngFor="let orderProductRowControl of getOrderProductRows(product.name).controls; let i=index">
+                        <div class="col-6" [formGroup]="getOrderProductRowGroup(product.name, i)">
+                          <div class="flex flex-column gap-2">
+                            <label class="font-bold">Customize Name</label>
+                            <input id="customize-name" type="text" formControlName="customizeName"
+                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                          </div>
+                        </div>
+                        <div class="col-6" [formGroup]="getOrderProductRowGroup(product.name, i)">
+                          <div class="flex flex-column gap-2">
+                            <label class="font-bold">Color</label>
+                            <input id="color-name" type="text" formControlName="color"
+                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <ng-container *ngIf="canShowProductDetailsTable">
-                      <div class="grid mt-2">
-                        <div class="col-3">
-                          <h5 class="text-primary">Name</h5>
-                        </div>
-                        <div class="col-2">
-                          <h5 class="text-primary">Cost</h5>
-                        </div>
-                        <div class="col-3">
-                          <h5 class="text-primary">Customize Name</h5>
-                        </div>
-                        <div class="col-2">
-                          <h5 class="text-primary">Color</h5>
-                        </div>
-                      </div>
-                      <div class="grid"
-                        *ngFor="let orderProductRowControl of getOrderProductRows(product.name).controls; let i=index">
-                        <div class="col-3 flex align-items-center">{{product?.name}}</div>
-                        <div class="col-2  flex align-items-center">{{product?.cost}}</div>
-                        <div class="col-3" [formGroup]="getOrderProductRowGroup(product.name, i)">
-                          <input id="customize-name" type="text" formControlName="customizeName"
-                            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
-                        </div>
-                        <div class="col-2" [formGroup]="getOrderProductRowGroup(product.name, i)">
-                          <input id="color-name" type="text" formControlName="color"
-                            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
-                        </div>
-                        <div class="col-2 flex align-items-center">
-                          <button pButton pRipple type="button" icon="pi pi-times" class="p-button-rounded ml-3"
-                            (click)="onRemoveProductRow(i, product.name)" [disabled]="i === 0"></button>
-                        </div>
-                      </div>
-                    </ng-container>
                   </div>
                 </ng-container>
               </p-tabPanel>

@@ -45,6 +45,15 @@ $gutter: 1rem; //for primeflex grid system
 .tabview-custom span {
   margin: 0 0.5rem;
 }
+
+.tabview-custom {
+  .p-tabview-nav {
+    li {
+      text-wrap: nowrap;
+    }
+  }
+}
+
 .p-dropdown{
   width: 100%;
 }
@@ -91,3 +100,6 @@ $gutter: 1rem; //for primeflex grid system
 // .p-button{
 //   display: block !important;
 // }
+
+
+
