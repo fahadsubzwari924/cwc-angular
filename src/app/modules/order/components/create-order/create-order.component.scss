@@ -1,10 +1,49 @@
-.order-desc{
-    padding: 10px 0 !important;
+.order-items-table-mobile-view {
+  .order-items-list {
+    outline: 1px outset var(--indigo-400) !important;
+    border-radius: 10px;
+
+    label {
+      text-wrap: nowrap;
+    }
+  }
 }
 
-.order-items-table-mobile-view{
-    .order-items-list {
-        outline: 1px outset var(--indigo-400) !important;
-        border-radius: 10px;
+.card-footer {
+  background-color: white;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem; /* Add padding to the footer */
+
+  p {
+    text-align: left;
+    margin: 0;
+  }
+
+  .action-button-group {
+    display: flex;
+    justify-content: space-between; /* Space buttons between the row */
+    margin-top: 1rem; /* Add margin at the top for buttons on mobile view */
+  }
+
+  @media screen and (min-width: 768px) {
+    flex-direction: row;
+    align-items: center; /* Vertically center content on larger screens */
+
+    p {
+      margin-bottom: 0; /* Ensure there's no extra margin under the text */
     }
+
+    .action-button-group {
+      margin-top: 0; /* Remove top margin for buttons on desktop */
+      justify-content: flex-end;
+    }
+
+    /* Add margin-top to the footer itself on desktop view */
+    margin-top: 2rem;
+  }
 }

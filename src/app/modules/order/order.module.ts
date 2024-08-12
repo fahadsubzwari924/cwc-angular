@@ -22,9 +22,15 @@ import { ChangeOrderStatusModalComponent } from './components/change-order-statu
 import { EditOrderComponent } from './components/edit-order/edit-order.component';
 import { CalendarModule } from 'primeng/calendar';
 import { SkeletonModule } from 'primeng/skeleton';
+import { OrderSourceService } from '../order-source/services/order-source.service';
 
 @NgModule({
-  declarations: [OrderListComponent, CreateOrderComponent, ChangeOrderStatusModalComponent, EditOrderComponent],
+  declarations: [
+    OrderListComponent,
+    CreateOrderComponent,
+    ChangeOrderStatusModalComponent,
+    EditOrderComponent,
+  ],
   imports: [
     CommonModule,
     SharedModule,
@@ -42,8 +48,15 @@ import { SkeletonModule } from 'primeng/skeleton';
     ProgressSpinnerModule,
     ChipModule,
     CalendarModule,
-    SkeletonModule
+    SkeletonModule,
   ],
-  providers: [OrderService, MessageService, CustomerService, TitleCasePipe],
+  providers: [
+    OrderService,
+    MessageService,
+    CustomerService,
+    TitleCasePipe,
+    OrderSourceService,
+    TitleCasePipe,
+  ],
 })
 export class OrderModule {}

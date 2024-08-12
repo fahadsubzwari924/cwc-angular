@@ -30,6 +30,11 @@ import {
 } from '../../interfaces/order-product.interface';
 import { OrderProduct } from '../../models/order-product.model';
 import { ProductOrderProduct } from '../../types/order-product.type';
+import { INameValue } from 'src/app/shared/interfaces/name-value.interface';
+import { OrderSourceService } from 'src/app/modules/order-source/services/order-source.service';
+import { OrderSource } from 'src/app/modules/order-source/models/order-source.model';
+import { CustomResponse } from 'src/app/shared/models/response.model';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-create-order',
@@ -45,13 +50,14 @@ export class CreateOrderComponent implements OnInit {
 
   orderForm!: FormGroup;
   canShowProductDetailsTable = false;
-  paymentMethods: Array<{ name: string; value: string }> = [];
+  paymentMethods: Array<INameValue> = [];
   orderTotalAmount: number = 0;
 
   spinner!: ProgressSpinner;
   showSpinner = false;
 
   maxDate: Date = new Date();
+  orderSources: Array<OrderSource> = [];
 
   constructor(
     protected customerService: CustomerService,
@@ -59,12 +65,15 @@ export class CreateOrderComponent implements OnInit {
     protected formBuilder: FormBuilder,
     protected orderService: OrderService,
     protected messageService: MessageService,
-    protected router: Router
+    protected router: Router,
+    protected orderSourceService: OrderSourceService,
+    protected titleCasePipe: TitleCasePipe
   ) {
     this.spinner = new ProgressSpinner();
   }
 
   ngOnInit(): void {
+    this.getOrderSources();
     this.buildOrderForm();
     this.buildPaymentMethodOptions();
   }
@@ -82,6 +91,7 @@ export class CreateOrderComponent implements OnInit {
       ],
       orderDate: [new Date(), [Validators.required]],
       orderProducts: this.formBuilder.group({}),
+      orderSource: ['', [Validators.required]],
     });
   }
 
@@ -370,5 +380,33 @@ export class CreateOrderComponent implements OnInit {
   private getOrderProductQuantity(productName: string, isNew = false): number {
     const orderProductRows = this.getOrderProductRows(productName);
     return isNew ? orderProductRows.length + 1 : orderProductRows?.length ?? 1;
+  }
+
+  private getOrderSources(): void {
+    this.orderSourceService.getOrderSources().subscribe(
+      (response: CustomResponse<OrderSource[]>) => {
+        this.orderSources = this.mapOrderSourcesToNameValue(
+          response?.payload ?? []
+        );
+      },
+      (error) => {
+        this.orderSources = [];
+      }
+    );
+  }
+
+  private mapOrderSourcesToNameValue(
+    orderSources: Array<OrderSource>
+  ): Array<OrderSource> {
+    let mappedOrderSources: Array<any> = [];
+    if (orderSources?.length) {
+      mappedOrderSources = orderSources.map((orderSource: OrderSource) => {
+        orderSource.name = `${
+          orderSource?.name
+        } - ${this.titleCasePipe.transform(orderSource?.type)}`;
+        return orderSource;
+      });
+    }
+    return mappedOrderSources;
   }
 }

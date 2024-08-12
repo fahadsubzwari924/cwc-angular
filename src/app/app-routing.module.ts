@@ -36,6 +36,13 @@ const routes: Routes = [
         loadChildren: () =>
           import('./modules/order/order.module').then((m) => m.OrderModule),
       },
+      {
+        path: 'order-sources',
+        loadChildren: () =>
+          import('./modules/order-source/order-source.module').then(
+            (m) => m.OrderSourceModule
+          ),
+      },
     ],
   },
   {

@@ -34,7 +34,7 @@
               <div class="flex flex-column gap-2">
                 <label>Order Description</label>
                 <input id="firstname2" type="text" formControlName="description"
-                  class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full order-desc" />
+                  class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full input-padding-10px" />
               </div>
             </div>
           </div>
@@ -45,6 +45,13 @@
                 <label>Order Date</label>
                 <p-calendar appendTo="body" styleClass="w-full" [showIcon]="true" [maxDate]="maxDate"
                   formControlName="orderDate" inputId="icon"></p-calendar>
+              </div>
+            </div>
+            <div class="col-12 md:col-7">
+              <div class="flex flex-column gap-2">
+                <label>Select Order Source</label>
+                <p-dropdown formControlName="orderSource" [options]="orderSources" optionLabel="name"
+                  optionValue="id"></p-dropdown>
               </div>
             </div>
           </div>

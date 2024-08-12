@@ -1,0 +1,37 @@
+<div class="modal-content cvc-custom-modal">
+    <div class="modal-header">
+        <h4>{{ title || "Confirm" }}</h4>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="orderSourceForm">
+            <div class="formgrid grid">
+                <div class="field col">
+                    <label requiredField>Name</label>
+                    <input formControlName="name" type="text"
+                        class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full input-padding-10px" />
+                </div>
+                <div class="field col">
+                    <label requiredField>Select Type</label>
+                    <p-dropdown formControlName="type" [options]="orderSourceTypes" optionLabel="name"
+                        optionValue="value"></p-dropdown>
+                </div>
+            </div>
+            <div class="formgrid grid">
+                <div class="field col">
+                    <label requiredField>Description</label>
+                    <textarea formControlName="description" rows="3" cols="30" pInputTextarea
+                        class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <p-button label="Cancel" styleClass="p-button-secondary p-button-sm" (onClick)="close()"></p-button>
+        <p-button label="Save" styleClass="p-button-sm ml-2" [disabled]="orderSourceForm.invalid"
+            (onClick)="saveOrderSource()">
+        </p-button>
+    </div>
+</div>
+<p-blockUI [blocked]="showSpinner">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
