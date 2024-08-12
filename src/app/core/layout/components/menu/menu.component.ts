@@ -58,6 +58,16 @@ export class MenuComponent implements OnInit {
           },
         ],
       },
+      {
+        label: 'Manage Order Sources',
+        items: [
+          {
+            label: 'Order Sources',
+            icon: 'pi pi-fw pi-sitemap',
+            routerLink: ['/order-sources'],
+          },
+        ],
+      },
       // {
       //   label: 'Prime Blocks',
       //   items: [

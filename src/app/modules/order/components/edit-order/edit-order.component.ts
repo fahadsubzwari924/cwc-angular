@@ -9,6 +9,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Order } from '../../models/order.model';
 import { OrderProduct } from '../../models/order-product.model';
 import { groupBy, uniqBy } from 'lodash';
+import { OrderSourceService } from 'src/app/modules/order-source/services/order-source.service';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-edit-order',
@@ -26,7 +28,9 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
     override orderService: OrderService,
     override messageService: MessageService,
     override router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    override orderSourceService: OrderSourceService,
+    override titleCasePipe: TitleCasePipe
   ) {
     super(
       customerService,
@@ -34,7 +38,9 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
       formBuilder,
       orderService,
       messageService,
-      router
+      router,
+      orderSourceService,
+      titleCasePipe
     );
   }
 
