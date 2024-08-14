@@ -91,7 +91,7 @@ export class CreateOrderComponent implements OnInit {
       ],
       orderDate: [new Date(), [Validators.required]],
       orderProducts: this.formBuilder.group({}),
-      orderSource: ['', [Validators.required]],
+      orderSourceId: ['', [Validators.required]],
     });
   }
 
@@ -291,7 +291,8 @@ export class CreateOrderComponent implements OnInit {
       totalProductQuantity: this.buildOrderProductsPayload()?.length,
       totalWeight: this.getTotalCountByProperty('weight').toString(),
       orderItems: this.buildOrderProductsPayload(),
-      orderDate: this.orderForm.value.orderDate,
+      orderDate: this.orderForm.value?.orderDate,
+      orderSourceId: this.orderForm.value?.orderSourceId,
     };
   }
 
@@ -311,6 +312,19 @@ export class CreateOrderComponent implements OnInit {
 
   onCancel(): void {
     this.router.navigate(['/orders']);
+  }
+
+  getOrderSources(): void {
+    this.orderSourceService.getOrderSources().subscribe(
+      (response: CustomResponse<OrderSource[]>) => {
+        this.orderSources = this.mapOrderSourcesToNameValue(
+          response?.payload ?? []
+        );
+      },
+      (error) => {
+        this.orderSources = [];
+      }
+    );
   }
 
   private getTotalCountByProperty(propertyName: string): number {
@@ -380,19 +394,6 @@ export class CreateOrderComponent implements OnInit {
   private getOrderProductQuantity(productName: string, isNew = false): number {
     const orderProductRows = this.getOrderProductRows(productName);
     return isNew ? orderProductRows.length + 1 : orderProductRows?.length ?? 1;
-  }
-
-  private getOrderSources(): void {
-    this.orderSourceService.getOrderSources().subscribe(
-      (response: CustomResponse<OrderSource[]>) => {
-        this.orderSources = this.mapOrderSourcesToNameValue(
-          response?.payload ?? []
-        );
-      },
-      (error) => {
-        this.orderSources = [];
-      }
-    );
   }
 
   private mapOrderSourcesToNameValue(

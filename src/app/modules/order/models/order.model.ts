@@ -1,4 +1,5 @@
 import { Customer } from '../../customers/models/customer.model';
+import { OrderSource } from '../../order-source/models/order-source.model';
 import { OrderProduct } from './order-product.model';
 
 export class Order {
@@ -14,6 +15,7 @@ export class Order {
   status?: string;
   createdAt?: Date;
   orderDate: Date | string;
+  orderSource?: OrderSource;
 
   constructor(order: any) {
     this.id = order?.id;
@@ -31,6 +33,9 @@ export class Order {
     this.productCount = order?.products?.length ?? 0;
     if (order?.customer) {
       this.customer = new Customer(order?.customer);
+    }
+    if (order?.orderSource) {
+      this.orderSource = new OrderSource(order?.orderSource);
     }
     this.orderDate = order?.orderDate ?? 'N/A';
   }
