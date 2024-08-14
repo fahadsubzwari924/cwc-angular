@@ -43,7 +43,7 @@ export class OrderListComponent {
     {
       field: 'amount',
       header: 'Total Amount',
-      type: 'string',
+      type: 'currency',
     },
     {
       field: 'description',
