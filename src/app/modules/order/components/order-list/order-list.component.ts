@@ -60,6 +60,11 @@ export class OrderListComponent {
       header: 'Date',
       type: 'date',
     },
+    {
+      field: '{orderSource.name} - {orderSource.type}',
+      header: 'Source',
+      type: 'string',
+    },
   ];
   sortOrder: number = 0;
   sortField: string = '';
@@ -81,20 +86,24 @@ export class OrderListComponent {
 
   getOrders(params: any = {}): void {
     this.isLoading = true;
-    this.orderService.getOrders(params).subscribe(
-      (response: CustomResponse<Order[]>) => {
+    this.orderService.getOrders(params).subscribe({
+      next: (response: CustomResponse<Order[]>) => {
         this.orders = response?.payload ?? [];
         this.orderResponseMetadata = response.metadata;
-        this.isLoading = false;
+
         if (this.isOrderStatusUpdated) {
           this.setCurrentPage();
         }
       },
-      (error) => {
+      error: (error) => {
+        console.log(error);
         this.isLoading = false;
         this.orders = [];
-      }
-    );
+      },
+      complete: () => {
+        this.isLoading = false;
+      },
+    });
   }
 
   // onSortChange(event: any) {
