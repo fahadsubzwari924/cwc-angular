@@ -7,7 +7,6 @@ export class Customer {
   country?: number;
   city: string;
   address: string;
-  orders?: Array<Order>;
   ordersCount: number;
   createdAt: Date;
   updatedAt?: Date;
@@ -23,8 +22,5 @@ export class Customer {
     this.createdAt = customer?.createdAt;
     this.updatedAt = customer?.updatedAt;
     this.ordersCount = customer?.orders?.length ?? 0;
-    if (customer?.orders?.length) {
-      this.orders = customer?.orders.map((order: any) => new Order(order));
-    }
   }
 }

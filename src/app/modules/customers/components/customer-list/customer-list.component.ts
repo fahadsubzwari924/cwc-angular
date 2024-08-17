@@ -72,17 +72,17 @@ export class CustomerListComponent {
 
   getCustomers(params = {}): void {
     this.isLoading = true;
-    this.customerService.getCustomers(params).subscribe(
-      (response: CustomResponse<Customer[]>) => {
+    this.customerService.getCustomers(params).subscribe({
+      next: (response: CustomResponse<Customer[]>) => {
         this.customers = response?.payload ?? [];
         this.customerResponseMetadata = response.metadata;
         this.isLoading = false;
       },
-      (error) => {
+      error: (error) => {
         this.isLoading = false;
         this.customers = [];
-      }
-    );
+      },
+    });
   }
 
   onSortChange(event: any) {
