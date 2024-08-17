@@ -60,11 +60,6 @@ export class OrderListComponent {
       header: 'Date',
       type: 'date',
     },
-    {
-      field: '{orderSource.name} - {orderSource.type}',
-      header: 'Source',
-      type: 'string',
-    },
   ];
   sortOrder: number = 0;
   sortField: string = '';
@@ -78,6 +73,7 @@ export class OrderListComponent {
   isLoading: boolean = false;
   startingRow = 0;
   isOrderStatusUpdated = false;
+  chipsValues = ['Customize With Class', 'Shopify Store'];
 
   ngOnInit(): void {
     this.startingRow = this.paginationConstants.FIRST_ROW;
@@ -90,7 +86,6 @@ export class OrderListComponent {
       next: (response: CustomResponse<Order[]>) => {
         this.orders = response?.payload ?? [];
         this.orderResponseMetadata = response.metadata;
-
         if (this.isOrderStatusUpdated) {
           this.setCurrentPage();
         }

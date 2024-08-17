@@ -8,38 +8,38 @@ $gutter: 1rem; //for primeflex grid system
 @import "../node_modules/primeflex/primeflex.scss";
 @import "../node_modules/primeicons/primeicons.css";
 
-
 /* Demos */
 @import "assets/demo/styles/flags/flags.css";
 @import "assets/demo/styles/badges.scss";
 @import "assets/demo/styles/code.scss";
 
-
 .cvc-custom-modal {
-    position: fixed;
-    top: 20%;
-  }
-
-
+  position: fixed;
+  top: 20%;
+}
 
 /* Custom Margins*/
-.ml-2px{
+.ml-2px {
   margin-left: 2px;
 }
 
-.chip-info{
+.chip-info {
   background-color: rgb(62 243 255);
   font-weight: 500;
   color: black;
 }
 
-
+.chip-green {
+  background-color: #e0f2f1; // Light grey background
+  color: #004d40;
+  font-weight: 500;
+}
 
 /* Theme Customizations */
-.p-autocomplete{
+.p-autocomplete {
   width: 100%;
 }
-.p-autocomplete-multiple-container{
+.p-autocomplete-multiple-container {
   width: 100%;
 }
 .tabview-custom span {
@@ -54,15 +54,15 @@ $gutter: 1rem; //for primeflex grid system
   }
 }
 
-.p-dropdown{
+.p-dropdown {
   width: 100%;
 }
 
-.card{
+.card {
   position: relative;
   padding: 1rem 2rem;
-  
-  .card-footer{
+
+  .card-footer {
     background-color: white;
     position: sticky;
     bottom: 0;
@@ -70,7 +70,7 @@ $gutter: 1rem; //for primeflex grid system
     display: flex;
     justify-content: space-between;
 
-    p{
+    p {
       text-align: left;
       margin: 0;
     }
@@ -79,14 +79,14 @@ $gutter: 1rem; //for primeflex grid system
   .card-content {
     height: 100%;
     overflow-y: auto;
-  }  
+  }
 }
 
-.p-datatable{
-  th{
+.p-datatable {
+  th {
     text-wrap: nowrap;
   }
-  td{
+  td {
     text-wrap: nowrap;
   }
 }
@@ -97,12 +97,9 @@ $gutter: 1rem; //for primeflex grid system
   left: 0;
 }
 
-.input-padding-10px{
+.input-padding-10px {
   padding: 10px 0 !important;
 }
 // .p-button{
 //   display: block !important;
 // }
-
-
-
