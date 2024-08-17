@@ -23,6 +23,7 @@ import { EditOrderComponent } from './components/edit-order/edit-order.component
 import { CalendarModule } from 'primeng/calendar';
 import { SkeletonModule } from 'primeng/skeleton';
 import { OrderSourceService } from '../order-source/services/order-source.service';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { OrderSourceService } from '../order-source/services/order-source.servic
     ChipModule,
     CalendarModule,
     SkeletonModule,
+    MultiSelectModule,
   ],
   providers: [
     OrderService,

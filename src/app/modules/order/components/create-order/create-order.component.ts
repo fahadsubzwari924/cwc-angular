@@ -91,7 +91,7 @@ export class CreateOrderComponent implements OnInit {
       ],
       orderDate: [new Date(), [Validators.required]],
       orderProducts: this.formBuilder.group({}),
-      orderSourceId: ['', [Validators.required]],
+      selectedOrderSources: ['', [Validators.required]],
     });
   }
 
@@ -292,7 +292,7 @@ export class CreateOrderComponent implements OnInit {
       totalWeight: this.getTotalCountByProperty('weight').toString(),
       orderItems: this.buildOrderProductsPayload(),
       orderDate: this.orderForm.value?.orderDate,
-      orderSourceId: this.orderForm.value?.orderSourceId,
+      orderSourceIds: this.orderForm.value.selectedOrderSources,
     };
   }
 

@@ -69,7 +69,7 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
       ],
       orderDate: ['', [Validators.required]],
       orderProducts: this.formBuilder.group({}),
-      orderSourceId: ['', [Validators.required]],
+      selectedOrderSources: ['', [Validators.required]],
     });
   }
 
@@ -97,11 +97,15 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
   }
 
   populateOrderForm() {
+    const orderSourceIds = this.order.orderSources.map(
+      (orderSource: OrderSource) => orderSource.id
+    );
     this.orderForm.get('selectedCustomer')?.setValue(this.order.customer);
     this.orderForm.get('description')?.setValue(this.order.description);
     const productsByOrderId = uniqBy(this.order.products, 'id');
     this.orderForm.get('selectedProducts')?.setValue(productsByOrderId);
     this.orderForm.get('orderDate')?.setValue(new Date(this.order.orderDate));
+    this.orderForm.get('selectedOrderSources')?.setValue(orderSourceIds);
     productsByOrderId.forEach((product: OrderProduct) => {
       this.initizalizeProductDetail(product, true);
     });
