@@ -6,11 +6,12 @@ import { MarkFeildRequired } from './directives/requred-field-asterisk';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 import { ButtonModule } from 'primeng/button';
 import { FieldPipe } from './pipes/show-nested-field.pipe';
+import { CountryCityService } from './services/country-city.service';
 
 @NgModule({
   declarations: [MarkFeildRequired, ConfirmationModalComponent, FieldPipe],
   imports: [CommonModule, SimpleModalModule, ButtonModule],
-  providers: [ApiService, DatePipe, CurrencyPipe],
+  providers: [ApiService, DatePipe, CurrencyPipe, CountryCityService],
   exports: [
     SimpleModalModule,
     MarkFeildRequired,

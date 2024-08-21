@@ -11,7 +11,6 @@ import { OrderProduct } from '../../models/order-product.model';
 import { groupBy, uniqBy } from 'lodash';
 import { OrderSourceService } from 'src/app/modules/order-source/services/order-source.service';
 import { TitleCasePipe } from '@angular/common';
-import { CustomResponse } from 'src/app/shared/models/response.model';
 import { OrderSource } from 'src/app/modules/order-source/models/order-source.model';
 
 @Component({

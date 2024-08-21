@@ -35,6 +35,7 @@ import { OrderSourceService } from 'src/app/modules/order-source/services/order-
 import { OrderSource } from 'src/app/modules/order-source/models/order-source.model';
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { TitleCasePipe } from '@angular/common';
+import { City, Country } from 'src/app/shared/models';
 
 @Component({
   selector: 'app-create-order',
@@ -58,6 +59,8 @@ export class CreateOrderComponent implements OnInit {
 
   maxDate: Date = new Date();
   orderSources: Array<OrderSource> = [];
+  countries: Array<Country> = [];
+  cities: Array<City> = [];
 
   constructor(
     protected customerService: CustomerService,
