@@ -120,9 +120,10 @@ export class CustomerListComponent {
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
           const requestParams = {
-            page: this.utilService.getFromLocalStorage(
-              ListConstants.CURRENT_PAGE
-            ),
+            page:
+              this.utilService.getFromLocalStorage(
+                ListConstants.CURRENT_PAGE
+              ) ?? 1,
           };
           this.getCustomers(requestParams);
         }

@@ -4,8 +4,9 @@ export class Customer {
   fullName: string;
   contactNumber: string;
   age: number;
-  country?: number;
+  country: string;
   city: string;
+  province: string;
   address: string;
   ordersCount: number;
   createdAt: Date;
@@ -19,6 +20,7 @@ export class Customer {
     this.age = customer?.age;
     this.city = customer?.city;
     this.country = customer?.country;
+    this.province = customer?.province;
     this.createdAt = customer?.createdAt;
     this.updatedAt = customer?.updatedAt;
     this.ordersCount = customer?.orders?.length ?? 0;

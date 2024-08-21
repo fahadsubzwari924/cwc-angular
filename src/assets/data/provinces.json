@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Sindh",
+    "value": 1
+  },
+  {
+    "name": "Punjab",
+    "value": 2
+  },
+  {
+    "name": "Balochistan",
+    "value": 3
+  },
+  {
+    "name": "Khyber Pakhtunkhwa",
+    "value": 4
+  },
+  {
+    "name": "Azad Khashmir",
+    "value": 5
+  },
+  {
+    "name": "Gilgit Baltistan",
+    "value": 6
+  },
+  {
+    "name": "Islamabad",
+    "value": 6
+  }
+]

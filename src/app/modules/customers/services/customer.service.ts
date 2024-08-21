@@ -22,13 +22,15 @@ export class CustomerService {
       );
   }
 
-  public createCustomer(customerPayload: Customer): Observable<Customer> {
+  public createCustomer(
+    customerPayload: Partial<Customer>
+  ): Observable<Customer> {
     return this.apiService
       .httpPost(ApiPaths.Customers, customerPayload)
       .pipe(map((response: any) => new Customer(response.payload)));
   }
 
-  public updateCustomer(customer: Customer) {
+  public updateCustomer(customer: Partial<Customer>) {
     return this.apiService
       .httpPut(`${ApiPaths.Customers}/${customer.id}`, customer)
       .pipe(map((response: any) => new Customer(response.payload)));
