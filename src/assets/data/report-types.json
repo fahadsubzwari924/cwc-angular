@@ -1,0 +1,121 @@
+[
+  {
+    "name": "Order % By Province",
+    "value": "orders_percentage_by_province",
+    "category": "orders",
+    "title": "Orders Demographics",
+    "subTitle": "Orders By Province",
+    "chartType": "pieChart",
+    "dataConfig": {
+      "nameKey": "province",
+      "valueKey": "percentage"
+    },
+    "dependentFields": [],
+    "requiredParams": {
+      "year": false
+    },
+    "tooltipTitle": "Orders %",
+    "showLegends": false
+  },
+  {
+    "name": "Order % By Sources",
+    "value": "orders_percentage_by_source",
+    "category": "orders",
+    "title": "Order % By Sources",
+    "subTitle": "Orders By Sources",
+    "chartType": "pieChart",
+    "dataConfig": {
+      "nameKey": "sourceName",
+      "valueKey": "percentage"
+    },
+    "dependentFields": [],
+    "requiredParams": {
+      "year": false
+    },
+    "tooltipTitle": "Orders %",
+    "showLegends": false
+  },
+  {
+    "name": "Monthly Orders",
+    "value": "monthly_orders",
+    "category": "orders",
+    "title": "Monthly Orders",
+    "subTitle": "",
+    "chartType": "barGraph",
+    "dataConfig": {
+      "xAxisKey": "month",
+      "yAxisKey": "orderCount"
+    },
+    "dependentFields": [
+      {
+        "fieldName": "year",
+        "label": "Select Year",
+        "type": "dropdown",
+        "options": [2022, 2023, 2024, 2025, 2026]
+      }
+    ],
+    "requiredParams": {
+      "year": true
+    },
+    "tooltipTitle": "Orders Count"
+  },
+  {
+    "name": "Yearly Orders",
+    "value": "yearly_orders",
+    "category": "orders",
+    "title": "Yearly Orders",
+    "subTitle": "",
+    "chartType": "barGraph",
+    "dataConfig": {
+      "xAxisKey": "year",
+      "yAxisKey": "orderCount"
+    },
+    "dependentFields": [],
+    "requiredParams": {
+      "year": false
+    },
+    "tooltipTitle": "Orders Count"
+  },
+  {
+    "name": "Orders Summary",
+    "value": "order_summary",
+    "category": "orders",
+    "title": "Orders Statistic Summary",
+    "subTitle": "",
+    "chartType": "barGraphDeep",
+    "dataConfig": {
+      "xAxisKey": "year",
+      "yAxisKey": "orderCount",
+      "groupedDataKey": "orderByMonths"
+    },
+    "dependentFields": [],
+    "requiredParams": {
+      "year": false
+    },
+    "tooltipTitle": "Orders Count"
+  },
+  {
+    "name": "Customer Orders By Age Group",
+    "value": "customer_orders_by_age_group",
+    "category": "customers",
+    "requiredParams": {
+      "year": false
+    }
+  },
+  {
+    "name": "Top 10 Products",
+    "value": "top_performing_products",
+    "category": "products",
+    "title": "Top 10 Performing Products",
+    "chartType": "pieChart",
+    "dataConfig": {
+      "nameKey": "productName",
+      "valueKey": "orderCount"
+    },
+    "requiredParams": {
+      "year": false
+    },
+    "tooltipTitle": "Orders Count",
+    "showLegends": false
+  }
+]

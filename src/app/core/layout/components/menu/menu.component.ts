@@ -68,6 +68,16 @@ export class MenuComponent implements OnInit {
           },
         ],
       },
+      {
+        label: 'Busines Insights',
+        items: [
+          {
+            label: 'Reports',
+            icon: 'pi pi-fw pi-briefcase',
+            routerLink: ['/reports'],
+          },
+        ],
+      },
       // {
       //   label: 'Prime Blocks',
       //   items: [
