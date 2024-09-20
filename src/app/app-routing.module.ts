@@ -43,6 +43,13 @@ const routes: Routes = [
             (m) => m.OrderSourceModule
           ),
       },
+      {
+        path: 'reports',
+        loadChildren: () =>
+          import('./modules/reports/reports.module').then(
+            (m) => m.ReportsModule
+          ),
+      },
     ],
   },
   {

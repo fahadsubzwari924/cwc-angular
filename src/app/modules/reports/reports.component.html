@@ -1,1 +1,59 @@
-<p>reports works!</p>
+<div class="grid">
+    <div class="col-12">
+        <div class="card" style="height: 80vh; overflow-y: auto">
+            <div class="card-content">
+                <h3>Business Insights
+                </h3>
+                <div class="grid">
+                    <div class="col-4">
+                        <div class="flex flex-column gap-2">
+                            <label>Select Category</label>
+                            <p-multiSelect [options]="reportCategories" [(ngModel)]="selectedReportCategories"
+                                styleClass="w-full" optionLabel="name" optionValue="value" display="chip"
+                                appendTo="body" [showClear]="true" (onChange)="getReportTypes()" />
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="flex flex-column gap-2">
+                            <label>Select Report Type</label>
+                            <p-multiSelect [options]="reportTypes" [(ngModel)]="selectedReportTypes" styleClass="w-full"
+                                optionLabel="name" display="chip" appendTo="body" [showClear]="true"
+                                (onChange)="onSelectReportType()" />
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="flex flex-column gap-2">
+                            <label>Select Year</label>
+                            <p-dropdown [(ngModel)]="selectedYear" [options]="yearOptions" optionLabel="name"
+                                [showClear]="true" optionValue="value" [autoDisplayFirst]="false"
+                                [disabled]="yearDisabled"></p-dropdown>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="col-4">
+                        <div class="flex flex-column gap-2">
+                            <label>Select Date Range</label>
+                            <p-calendar styleClass="w-full" selectionMode="range"
+                                [(ngModel)]="selectedDateRange"></p-calendar>
+                        </div>
+                    </div>
+                    <div class="col-2 flex align-items-end">
+                        <button pButton pRipple label="Apply" class="w-full" (click)="getOrdersReport()"
+                            [disabled]="!yearDisabled && !selectedYear"></button>
+                    </div>
+                </div>
+                <div class="grid mt-5">
+                    <div *ngFor="let report of reports" [ngClass]="report.cssClasses">
+                        <div class="report-chart-wrapper">
+                            <cwc-chart-host [reportData]="report"></cwc-chart-host>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<p-blockUI [blocked]="showSpinner">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>

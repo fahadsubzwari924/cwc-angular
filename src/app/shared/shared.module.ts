@@ -7,9 +7,19 @@ import { ConfirmationModalComponent } from './components/confirmation-modal/conf
 import { ButtonModule } from 'primeng/button';
 import { FieldPipe } from './pipes/show-nested-field.pipe';
 import { CountryCityService } from './services/country-city.service';
+import { PieChartComponent } from './components/pie-chart/pie-chart.component';
+import { BarGraphComponent } from './components/bar-graph/bar-graph.component';
+import { ChartHostComponent } from './components/chart-host/chart-host.component';
 
 @NgModule({
-  declarations: [MarkFeildRequired, ConfirmationModalComponent, FieldPipe],
+  declarations: [
+    MarkFeildRequired,
+    ConfirmationModalComponent,
+    FieldPipe,
+    PieChartComponent,
+    BarGraphComponent,
+    ChartHostComponent,
+  ],
   imports: [CommonModule, SimpleModalModule, ButtonModule],
   providers: [ApiService, DatePipe, CurrencyPipe, CountryCityService],
   exports: [
@@ -17,6 +27,9 @@ import { CountryCityService } from './services/country-city.service';
     MarkFeildRequired,
     ConfirmationModalComponent,
     FieldPipe,
+    PieChartComponent,
+    BarGraphComponent,
+    ChartHostComponent,
   ],
 })
 export class SharedModule {}

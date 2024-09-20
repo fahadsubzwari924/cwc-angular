@@ -101,46 +101,6 @@ export class OrderListComponent {
     });
   }
 
-  // onSortChange(event: any) {
-  //   const value = event.value;
-
-  //   if (value.indexOf('!') === 0) {
-  //     this.sortOrder = -1;
-  //     this.sortField = value.substring(1, value.length);
-  //   } else {
-  //     this.sortOrder = 1;
-  //     this.sortField = value;
-  //   }
-  // }
-
-  // openCreateCustomerModal(): void {
-  //   const inputs = {
-  //     title: 'Create Customer',
-  //   };
-  //   this.modalService
-  //     .addModal(CreateCustomerComponent, inputs)
-  //     .subscribe((isConfirmed) => {
-  //       console.log('isConfirmed : ', isConfirmed);
-  //       if (isConfirmed) {
-  //         this.getCustomers();
-  //       }
-  //     });
-  // }
-
-  // openEditCustomerModal(customer: Customer): void {
-  //   const inputs = {
-  //     title: 'Edit Customer',
-  //     customer,
-  //   };
-  //   this.modalService
-  //     .addModal(EditCustomerComponent, inputs)
-  //     .subscribe((isConfirmed) => {
-  //       if (isConfirmed) {
-  //         this.getCustomers();
-  //       }
-  //     });
-  // }
-
   onDelete(order: Order): void {
     const description = `Are you sure you want to delete this order with order ID:  "${order.id}" and customer name: ${order?.customer?.fullName}?`;
     const toastMessage = 'Order deleted!';

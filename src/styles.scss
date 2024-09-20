@@ -103,3 +103,9 @@ $gutter: 1rem; //for primeflex grid system
 // .p-button{
 //   display: block !important;
 // }
+
+#cwc-pie-chart-container,
+#cwc-bar-graph-chart-container {
+  width: 100%;
+  height: 100%;
+}
