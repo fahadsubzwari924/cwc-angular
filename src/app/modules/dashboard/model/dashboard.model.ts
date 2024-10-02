@@ -9,6 +9,7 @@ export class DashboardStatsModel {
   repeatedCustomerPercentage: DashboardStatsPropertyModel;
   totalRevenue: DashboardStatsPropertyModel;
   totalProfit: DashboardStatsPropertyModel;
+  totalVendorOrders: DashboardStatsPropertyModel;
 
   constructor(data: any) {
     this.totalCustomers = new DashboardStatsPropertyModel({
@@ -38,6 +39,13 @@ export class DashboardStatsModel {
       icon: 'pi pi-clock',
       widegtIconBackgroundColor: 'bg-purple-100',
       widegtIconTextColor: 'text-purple-500',
+    });
+    this.totalVendorOrders = new DashboardStatsPropertyModel({
+      name: 'Orders At Vendor',
+      count: data?.totalVendorOrders,
+      icon: 'pi pi-users',
+      widegtIconBackgroundColor: 'bg-blue-100',
+      widegtIconTextColor: 'text-blue-500',
     });
     this.totalDispatchedOrders = new DashboardStatsPropertyModel({
       name: 'Dispatched Orders',
