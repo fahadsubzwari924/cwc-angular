@@ -7,12 +7,22 @@ import { SimpleModalService } from 'ngx-simple-modal';
 import { CreateComponent } from '../create/create.component';
 import { ConfirmationModalComponent } from 'src/app/shared/components/confirmation-modal/confirmation-modal.component';
 import { MessageService } from 'primeng/api';
-import { of, switchMap, tap } from 'rxjs';
+import {
+  Observable,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { EditProductComponent } from '../edit/edit-product.component';
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
 import { UtilService } from 'src/app/util/util.service';
 import { ListConstants } from 'src/app/constants/list-constants';
+import { AutoCompleteCompleteEvent } from 'src/app/modules/order/interfaces/order-product.interface';
+import { ListSortOrder } from 'src/app/shared/enums/sort-order.enum';
 
 @Component({
   selector: 'app-list',
@@ -35,6 +45,7 @@ export class ListComponent implements OnInit {
   sortField: string = '';
   isLoading = false;
   startingRow = 0;
+  productSuggestions: Array<Product> = [];
 
   ngOnInit(): void {
     this.startingRow = this.paginationConstants.FIRST_ROW;
@@ -154,11 +165,45 @@ export class ListComponent implements OnInit {
 
   private getSortFieldAndOrde(value: string): void {
     if (value.indexOf('!') === 0) {
-      this.sortOrder = 'desc';
+      this.sortOrder = ListSortOrder.DESCENDING;
       this.sortField = value.substring(1, value.length);
     } else {
-      this.sortOrder = 'asc';
+      this.sortOrder = ListSortOrder.ASCENDING;
       this.sortField = value;
     }
+  }
+
+  searchProduct(event: AutoCompleteCompleteEvent): void {
+    of(event)
+      .pipe(
+        debounceTime(500),
+        map(
+          (productAutocompleteEvent: AutoCompleteCompleteEvent) =>
+            productAutocompleteEvent.query
+        ),
+        distinctUntilChanged(),
+        switchMap((searchTerm: string) => this.searchForProducts(searchTerm))
+      )
+      .subscribe((products: Array<Product>) => {
+        this.productSuggestions = products;
+      });
+  }
+
+  getSelectedProduct(selectedProduct: Product): void {
+    const queryParams = {
+      filters: JSON.stringify({ name: selectedProduct?.name }),
+    };
+    this.getProducts(queryParams);
+  }
+
+  searchForProducts(searchTerm: string): Observable<Array<Product>> {
+    let queryParams = {
+      searchTerm,
+    };
+    return this.productService.searchProducts(queryParams);
+  }
+
+  onProductUnSelect(): void {
+    this.getProducts();
   }
 }

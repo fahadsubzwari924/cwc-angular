@@ -30,9 +30,11 @@
                     </ng-template>
 
                 </p-table>
-                <p-paginator (onPageChange)="onPageChange($event)" [first]="startingRow"
-                    [rows]="paginationConstants.PAGE_LIMIT"
-                    [totalRecords]="orderSourcesResponseMetadata?.totalItems"></p-paginator>
+                <ng-container *ngIf="orderSourcesResponseMetadata?.totalItems > paginationConstants.PAGE_LIMIT">
+                    <p-paginator (onPageChange)="onPageChange($event)" [first]="startingRow"
+                        [rows]="paginationConstants.PAGE_LIMIT"
+                        [totalRecords]="orderSourcesResponseMetadata?.totalItems"></p-paginator>
+                </ng-container>
             </ng-container>
             <ng-template #noOrderSource>
                 <div class="grid mt-3">

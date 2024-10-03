@@ -16,6 +16,8 @@ import { EditProductComponent } from './components/edit/edit-product.component';
 import { ButtonModule } from 'primeng/button';
 import { DataViewModule } from 'primeng/dataview';
 import { SkeletonModule } from 'primeng/skeleton';
+import { DividerModule } from 'primeng/divider';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 
 @NgModule({
   declarations: [ListComponent, CreateComponent, EditProductComponent],
@@ -32,7 +34,9 @@ import { SkeletonModule } from 'primeng/skeleton';
     PaginatorModule,
     ButtonModule,
     DataViewModule,
-    SkeletonModule
+    SkeletonModule,
+    DividerModule,
+    AutoCompleteModule,
   ],
   providers: [ProductService, MessageService],
 })
