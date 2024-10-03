@@ -10,6 +10,8 @@ import { CountryCityService } from './services/country-city.service';
 import { PieChartComponent } from './components/pie-chart/pie-chart.component';
 import { BarGraphComponent } from './components/bar-graph/bar-graph.component';
 import { ChartHostComponent } from './components/chart-host/chart-host.component';
+import { ProductCardComponent } from './components/product-card/product-card.component';
+import { DividerModule } from 'primeng/divider';
 
 @NgModule({
   declarations: [
@@ -19,8 +21,9 @@ import { ChartHostComponent } from './components/chart-host/chart-host.component
     PieChartComponent,
     BarGraphComponent,
     ChartHostComponent,
+    ProductCardComponent,
   ],
-  imports: [CommonModule, SimpleModalModule, ButtonModule],
+  imports: [CommonModule, SimpleModalModule, ButtonModule, DividerModule],
   providers: [ApiService, DatePipe, CurrencyPipe, CountryCityService],
   exports: [
     SimpleModalModule,
@@ -30,6 +33,7 @@ import { ChartHostComponent } from './components/chart-host/chart-host.component
     PieChartComponent,
     BarGraphComponent,
     ChartHostComponent,
+    ProductCardComponent,
   ],
 })
 export class SharedModule {}

@@ -1,0 +1,17 @@
+<div class="product-card">
+    <div class="image-container">
+        <img [src]="product.thumbnailImage" [alt]="product.name" class="product-image">
+        <div class="icons-overlay">
+            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text edit-icon"
+                (click)="onEdit()"></button>
+            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger delete-icon"
+                (click)="onDelete()"></button>
+        </div>
+    </div>
+    <div class="product-details">
+        <h3 class="product-name">{{product?.name}}</h3>
+        <p class="product-description">{{product?.description}}</p>
+        <p-divider></p-divider>
+        <div class="price">Rs.{{ product?.cost }}</div>
+    </div>
+</div>
