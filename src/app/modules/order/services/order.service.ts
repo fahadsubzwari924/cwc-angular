@@ -50,6 +50,7 @@ export class OrderService {
   }
 
   private mapOrders(data: any): Array<Order> {
+    console.log('data: ', data);
     return data.map((order: any) => new Order(order));
   }
 }

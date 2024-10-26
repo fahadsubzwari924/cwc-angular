@@ -6,7 +6,6 @@ import { INameValue } from 'src/app/shared/interfaces';
 import { ReportFilters } from './interfaces';
 import { first, last } from 'lodash';
 import { ReportData } from './models/report-data.model';
-import { ReportCssService } from './services/report-css.service';
 
 @Component({
   selector: 'app-reports',
@@ -46,8 +45,7 @@ export class ReportsComponent implements OnInit {
 
   constructor(
     private reportsService: ReportsService,
-    private cdRef: ChangeDetectorRef,
-    private reportCssService: ReportCssService
+    private cdRef: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -88,13 +86,12 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  getOrdersReport(): void {
+  getReports(): void {
     const filters = { filters: this.buildReportFilters() };
     this.showSpinner = true;
     this.reportsService.getReport(this.selectedReportTypes, filters).subscribe({
-      next: (reports: CustomResponse<Record<string, any>>) => {
-        const rawReports = Object.values(reports.payload);
-        this.reports = this.reportCssService.assignCssClasses(rawReports);
+      next: (reports: CustomResponse<Array<ReportData>>) => {
+        this.reports = reports.payload;
         this.showSpinner = false;
         this.cdRef.detectChanges();
       },

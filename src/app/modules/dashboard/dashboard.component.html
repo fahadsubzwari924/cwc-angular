@@ -28,3 +28,11 @@
     </div>
   </ng-container>
 </div>
+
+<div class="grid mt-5">
+  <div *ngFor="let report of reports" [ngClass]="report.cssClasses">
+    <div class="card report-chart-wrapper">
+      <cwc-chart-host [reportData]="report"></cwc-chart-host>
+    </div>
+  </div>
+</div>

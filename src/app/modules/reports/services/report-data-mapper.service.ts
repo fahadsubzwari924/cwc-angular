@@ -2,18 +2,16 @@ import { Injectable } from '@angular/core';
 import { ReportType } from '../models/report-type.model';
 import { REPORT_MODEL_REGISTRY } from '../models/models-registry';
 import { ReportData } from '../models/report-data.model';
+import { ReportCssService } from './report-css.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReportDataMapperService {
-  constructor() {}
+  constructor(private reportsCssService: ReportCssService) {}
 
-  mapReportsData(
-    reportTypes: Array<ReportType>,
-    data: any
-  ): Record<string, any> {
-    const mappedResults: Record<string, any> = {};
+  mapReportsData(reportTypes: Array<ReportType>, data: any): Array<ReportData> {
+    const mappedResults: Record<string, ReportData> = {};
 
     reportTypes.forEach((reportType) => {
       const { value: name, category } = reportType;
@@ -41,6 +39,9 @@ export class ReportDataMapperService {
       mappedResults[name] = new ReportData(reportType, mappedData);
     });
 
-    return mappedResults;
+    const reportsAfterCssClassesAssigned =
+      this.reportsCssService.assignCssClasses(Object.values(mappedResults));
+
+    return reportsAfterCssClassesAssigned;
   }
 }
