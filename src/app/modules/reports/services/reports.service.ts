@@ -5,10 +5,9 @@ import { CustomResponse, NameValueOption } from 'src/app/shared/models';
 import { ReportType } from '../models/report-type.model';
 import { ApiService } from 'src/app/shared/services/api.service';
 import { ApiPaths } from 'src/app/shared/enums/api-paths';
-import { REPORT_MODEL_REGISTRY } from '../models/models-registry';
-import { OrdersReport } from '../types/reports.types';
 import { ReportDataMapperService } from './report-data-mapper.service';
 import { map as lodashMap } from 'lodash';
+import { ReportData } from '../models/report-data.model';
 
 @Injectable({
   providedIn: 'root',
@@ -36,7 +35,7 @@ export class ReportsService {
   getReport(
     reportTypes: Array<ReportType>,
     params?: any
-  ): Observable<CustomResponse<Record<string, any>>> {
+  ): Observable<CustomResponse<Array<ReportData>>> {
     const formattedReportTypes = lodashMap(
       reportTypes,
       (reportType: ReportType) => ({

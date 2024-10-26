@@ -44,9 +44,14 @@ export class ReportCssService {
     pieChartReports: Array<ReportData>,
     barGraphReports: Array<ReportData>
   ): Array<ReportData> {
-    pieChartReports.forEach(
-      (report) => (report.cssClasses = this.HALF_WIDTH_CLASS)
-    );
+    const isOdd = pieChartReports.length % 2 !== 0;
+    pieChartReports.forEach((report, index) => {
+      if (isOdd && index === pieChartReports.length - 1) {
+        report.cssClasses = this.FULL_WIDTH_CLASS;
+      } else {
+        report.cssClasses = this.HALF_WIDTH_CLASS;
+      }
+    });
     barGraphReports.forEach(
       (report) => (report.cssClasses = this.FULL_WIDTH_CLASS)
     );
