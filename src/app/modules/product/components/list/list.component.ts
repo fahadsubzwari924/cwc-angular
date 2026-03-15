@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Product } from '../../models/product.model';
 import { ProductService } from '../../services/product-api.service';
 import { SelectItem } from 'primeng/api';
 import { DataView } from 'primeng/dataview';
-import { SimpleModalService } from 'ngx-simple-modal';
+import { ModalService } from 'src/app/shared/services/modal.service';
 import { CreateComponent } from '../create/create.component';
 import { ConfirmationModalComponent } from 'src/app/shared/components/confirmation-modal/confirmation-modal.component';
 import { MessageService } from 'primeng/api';
@@ -23,32 +25,56 @@ import { UtilService } from 'src/app/util/util.service';
 import { ListConstants } from 'src/app/constants/list-constants';
 import { AutoCompleteCompleteEvent } from 'src/app/modules/order/interfaces/order-product.interface';
 import { ListSortOrder } from 'src/app/shared/enums/sort-order.enum';
+import { ButtonModule } from 'primeng/button';
+import { DataViewModule } from 'primeng/dataview';
+import { SkeletonModule } from 'primeng/skeleton';
+import { BlockUIModule } from 'primeng/blockui';
+import { ToastModule } from 'primeng/toast';
+import { PaginatorModule } from 'primeng/paginator';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { InputTextModule } from 'primeng/inputtext';
+import { DropdownModule } from 'primeng/dropdown';
+import { ProductCardComponent } from 'src/app/shared/components/product-card/product-card.component';
 
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    ButtonModule,
+    DataViewModule,
+    SkeletonModule,
+    BlockUIModule,
+    ToastModule,
+    PaginatorModule,
+    AutoCompleteModule,
+    InputTextModule,
+    DropdownModule,
+    ProductCardComponent,
+  ],
 })
 export class ListComponent implements OnInit {
-  constructor(
-    private productService: ProductService,
-    private modalService: SimpleModalService,
-    private messageService: MessageService,
-    public paginationConstants: PaginationConstants,
-    private utilService: UtilService
-  ) {}
+  private readonly productService = inject(ProductService);
+  private readonly modalService = inject(ModalService);
+  private readonly messageService = inject(MessageService);
+  private readonly utilService = inject(UtilService);
+  private readonly destroyRef = inject(DestroyRef);
+  readonly paginationConstants = inject(PaginationConstants);
 
-  products: Array<Product> = [];
-  productResponseMetadata: any;
+  products = signal<Array<Product>>([]);
+  productResponseMetadata = signal<any>(null);
   sortOptions: SelectItem[] = [];
   sortOrder!: string;
-  sortField: string = '';
-  isLoading = false;
-  startingRow = 0;
-  productSuggestions: Array<Product> = [];
+  sortField = signal('');
+  isLoading = signal(false);
+  startingRow = signal(0);
+  productSuggestions = signal<Array<Product>>([]);
 
   ngOnInit(): void {
-    this.startingRow = this.paginationConstants.FIRST_ROW;
+    this.startingRow.set(this.paginationConstants.FIRST_ROW);
     this.buildSortOptions();
     this.getProducts();
   }
@@ -58,24 +84,25 @@ export class ListComponent implements OnInit {
       ...params,
       pageSize: this.paginationConstants.PRODUCT_LIST_PAGE_LIMIT,
     };
-    this.isLoading = true;
-    this.productService.getProducts(params).subscribe(
-      (response: CustomResponse<Product[]>) => {
-        this.products = response?.payload;
-        this.productResponseMetadata = response.metadata;
-        this.isLoading = false;
-      },
-      (error) => {
-        this.isLoading = false;
-      }
-    );
+    this.isLoading.set(true);
+    this.productService
+      .getProducts(params)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response: CustomResponse<Product[]>) => {
+          this.products.set(response?.payload ?? []);
+          this.productResponseMetadata.set(response.metadata);
+          this.isLoading.set(false);
+        },
+        error: () => this.isLoading.set(false),
+      });
   }
 
   onSortChange(event: any) {
     const value = event.value;
     this.getSortFieldAndOrde(value);
     const queryParams = {
-      sortBy: this.sortField,
+      sortBy: this.sortField(),
       sortOrder: this.sortOrder,
     };
     this.getProducts(queryParams);
@@ -86,29 +113,20 @@ export class ListComponent implements OnInit {
   }
 
   openCreateProductModal(): void {
-    const inputs = {
-      title: 'Create Product',
-    };
     this.modalService
-      .addModal(CreateComponent, inputs)
+      .open(CreateComponent, { title: 'Create Product' }, { header: 'Create Product', width: '42rem' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
-        if (isConfirmed) {
-          this.getProducts();
-        }
+        if (isConfirmed) this.getProducts();
       });
   }
 
   openEditProductModal(product: Product): void {
-    const inputs = {
-      title: 'Edit Product',
-      product,
-    };
     this.modalService
-      .addModal(EditProductComponent, inputs)
+      .open(EditProductComponent, { title: 'Edit Product', product }, { header: 'Edit Product', width: '42rem' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
-        if (isConfirmed) {
-          this.getProducts();
-        }
+        if (isConfirmed) this.getProducts();
       });
   }
 
@@ -116,17 +134,19 @@ export class ListComponent implements OnInit {
     const description = `Are you sure you want to delete this product with name "${product.name}"?`;
     const toastMessage = 'Product deleted!';
     this.modalService
-      .addModal(ConfirmationModalComponent, {
+      .open(ConfirmationModalComponent, {
         modalTitle: 'Delete Product',
         modalDescription: description,
-      })
+      }, { header: 'Delete Product' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
           this.productService
             .deleteProduct(product.id as number)
             .pipe(
               tap(() => this.showToast(toastMessage)),
-              switchMap(() => of(this.getProducts()))
+              switchMap(() => of(this.getProducts())),
+              takeUntilDestroyed(this.destroyRef)
             )
             .subscribe();
         }
@@ -148,10 +168,10 @@ export class ListComponent implements OnInit {
   }
 
   onPageChange(paginationEvent: any): void {
-    this.startingRow = paginationEvent?.first ?? 0;
+    this.startingRow.set(paginationEvent?.first ?? 0);
     this.utilService.setValueInLocalStorage(
       ListConstants.CURRENT_ROWS,
-      this.startingRow
+      this.startingRow()
     );
     this.utilService.setValueInLocalStorage(
       ListConstants.CURRENT_PAGE,
@@ -166,14 +186,14 @@ export class ListComponent implements OnInit {
   private getSortFieldAndOrde(value: string): void {
     if (value.indexOf('!') === 0) {
       this.sortOrder = ListSortOrder.DESCENDING;
-      this.sortField = value.substring(1, value.length);
+      this.sortField.set(value.substring(1, value.length));
     } else {
       this.sortOrder = ListSortOrder.ASCENDING;
-      this.sortField = value;
+      this.sortField.set(value);
     }
   }
 
-  searchProduct(event: AutoCompleteCompleteEvent): void {
+  searchProduct(event: any): void {
     of(event)
       .pipe(
         debounceTime(500),
@@ -182,14 +202,15 @@ export class ListComponent implements OnInit {
             productAutocompleteEvent.query
         ),
         distinctUntilChanged(),
-        switchMap((searchTerm: string) => this.searchForProducts(searchTerm))
+        switchMap((searchTerm: string) => this.searchForProducts(searchTerm)),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((products: Array<Product>) => {
-        this.productSuggestions = products;
+        this.productSuggestions.set(products);
       });
   }
 
-  getSelectedProduct(selectedProduct: Product): void {
+  getSelectedProduct(selectedProduct: any): void {
     const queryParams = {
       filters: JSON.stringify({ name: selectedProduct?.name }),
     };

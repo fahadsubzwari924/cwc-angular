@@ -1,12 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
+  ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { flatMap, sumBy } from 'lodash';
+import { requireNonEmptyArray } from '../../validators/order.validators';
+import { flatMap, sumBy } from 'lodash-es';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -22,9 +25,10 @@ import { ProductService } from 'src/app/modules/product/services/product-api.ser
 import { OrderService } from '../../services/order.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
-import { ProgressSpinner } from 'primeng/progressspinner';
 import {
   AutoCompleteCompleteEvent,
+  AutoCompleteSelectEvent,
+  AutoCompleteUnselectEvent,
   OrderProductRecordTuple,
   TabCloseEvent,
 } from '../../interfaces/order-product.interface';
@@ -36,44 +40,74 @@ import { OrderSource } from 'src/app/modules/order-source/models/order-source.mo
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { TitleCasePipe } from '@angular/common';
 import { City, Country } from 'src/app/shared/models';
+import { FormsModule } from '@angular/forms';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { DropdownModule } from 'primeng/dropdown';
+import { DatePickerModule } from 'primeng/datepicker';
+import { TabViewModule } from 'primeng/tabview';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { ButtonModule } from 'primeng/button';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { TableModule } from 'primeng/table';
+import { LoadingService } from 'src/app/core/services/loading.service';
 
 @Component({
   selector: 'app-create-order',
   templateUrl: './create-order.component.html',
   styleUrls: ['./create-order.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    TitleCasePipe,
+    AutoCompleteModule,
+    DropdownModule,
+    DatePickerModule,
+    TabViewModule,
+    MultiSelectModule,
+    ButtonModule,
+    InputNumberModule,
+    TableModule,
+  ],
 })
 export class CreateOrderComponent implements OnInit {
+  protected readonly customerService = inject(CustomerService);
+  protected readonly productService = inject(ProductService);
+  protected readonly formBuilder = inject(FormBuilder);
+  protected readonly orderService = inject(OrderService);
+  protected readonly messageService = inject(MessageService);
+  protected readonly router = inject(Router);
+  protected readonly orderSourceService = inject(OrderSourceService);
+  protected readonly titleCasePipe = inject(TitleCasePipe);
+  protected readonly destroyRef = inject(DestroyRef);
+  protected readonly loadingService = inject(LoadingService);
+
+  /** Map to store product details by product name — source of truth for product data in tabs */
+  protected productDataMap = new Map<string, ProductOrderProduct>();
+
   selectedCustomer!: Customer;
-  customerSuggestions: Array<any> = [];
-
+  customerSuggestions = signal<Array<any>>([]);
   selectedProducts: Array<Product> = [];
-  productSuggestions: Array<Product> = [];
-
+  productSuggestions = signal<Array<Product>>([]);
   orderForm!: FormGroup;
-  canShowProductDetailsTable = false;
+  canShowProductDetailsTable = signal(false);
   paymentMethods: Array<INameValue> = [];
-  orderTotalAmount: number = 0;
-
-  spinner!: ProgressSpinner;
-  showSpinner = false;
-
+  orderTotalAmount = signal(0);
   maxDate: Date = new Date();
-  orderSources: Array<OrderSource> = [];
+  orderSources = signal<Array<OrderSource>>([]);
   countries: Array<Country> = [];
   cities: Array<City> = [];
 
-  constructor(
-    protected customerService: CustomerService,
-    protected productService: ProductService,
-    protected formBuilder: FormBuilder,
-    protected orderService: OrderService,
-    protected messageService: MessageService,
-    protected router: Router,
-    protected orderSourceService: OrderSourceService,
-    protected titleCasePipe: TitleCasePipe
-  ) {
-    this.spinner = new ProgressSpinner();
-  }
+  /** Precomputed for template iteration to avoid method calls in @for. */
+  orderProductsMap = signal<
+    Array<{
+      product: ProductOrderProduct;
+      formGroup: FormGroup;
+      rows: FormArray;
+      rowGroups: FormGroup[];
+    }>
+  >([]);
 
   ngOnInit(): void {
     this.getOrderSources();
@@ -84,7 +118,7 @@ export class CreateOrderComponent implements OnInit {
   buildOrderForm(): void {
     this.orderForm = this.formBuilder.group({
       selectedCustomer: ['', [Validators.required]],
-      selectedProducts: ['', [Validators.required]],
+      selectedProducts: [[], [requireNonEmptyArray]],
       description: ['', [Validators.required]],
       paymentMethod: [
         {
@@ -129,7 +163,26 @@ export class CreateOrderComponent implements OnInit {
     return form.controls[rowIndex] as FormGroup;
   }
 
-  searchCustomer(event: AutoCompleteCompleteEvent): void {
+  refreshOrderProductsMap(): void {
+    const orderProducts = this.orderForm.get('orderProducts') as FormGroup;
+    const productNames = Object.keys(orderProducts?.controls ?? {});
+    
+    const map = productNames
+      .map((productName) => {
+        const product = this.productDataMap.get(productName);
+        if (!product) return null;
+        
+        const formGroup = this.getOrderProductFormGroup(productName);
+        const rows = this.getOrderProductRows(productName);
+        const rowGroups = (rows?.controls ?? []) as FormGroup[];
+        return { product, formGroup, rows, rowGroups };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+    
+    this.orderProductsMap.set(map);
+  }
+
+  searchCustomer(event: any): void {
     of(event)
       .pipe(
         debounceTime(500),
@@ -138,10 +191,11 @@ export class CreateOrderComponent implements OnInit {
             customerAutocompleteEvent.query
         ),
         distinctUntilChanged(),
-        switchMap((searchTerm: string) => this.searchForCustomers(searchTerm))
+        switchMap((searchTerm: string) => this.searchForCustomers(searchTerm)),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((customers: Array<Customer>) => {
-        this.customerSuggestions = customers;
+        this.customerSuggestions.set(customers);
       });
   }
 
@@ -161,10 +215,11 @@ export class CreateOrderComponent implements OnInit {
             productAutocompleteEvent.query
         ),
         distinctUntilChanged(),
-        switchMap((searchTerm: string) => this.searchForProducts(searchTerm))
+        switchMap((searchTerm: string) => this.searchForProducts(searchTerm)),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((products: Array<Product>) => {
-        this.productSuggestions = products;
+        this.productSuggestions.set(products);
       });
   }
 
@@ -173,6 +228,7 @@ export class CreateOrderComponent implements OnInit {
       product?.name,
       this.newOrderProduct(product, isEmptyRows)
     );
+    this.refreshOrderProductsMap();
   }
 
   newOrderProduct(
@@ -212,9 +268,11 @@ export class CreateOrderComponent implements OnInit {
     return this.productService.searchProducts(queryParams);
   }
 
-  onProductSelect(selectedProduct: Product): void {
-    this.initizalizeProductDetail(selectedProduct);
-    this.canShowProductDetailsTable = true;
+  onProductSelect(event: AutoCompleteSelectEvent): void {
+    const product = event.value as ProductOrderProduct;
+    this.productDataMap.set(product?.name, product);
+    this.initizalizeProductDetail(product);
+    this.canShowProductDetailsTable.set(true);
   }
 
   addOrderProductRow(product: ProductOrderProduct, isNew = false): void {
@@ -222,31 +280,37 @@ export class CreateOrderComponent implements OnInit {
     productRows.push(this.newOrderProductRow(product, isNew));
     this.incrementProductQuantityCount(product.name);
     this.calculateOrderTotalAmount();
+    this.refreshOrderProductsMap();
   }
 
   calculateOrderTotalAmount(): void {
-    this.orderTotalAmount = 0;
+    let total = 0;
     Object.keys(this.orderForm.value.orderProducts).forEach(
       (productName: string) => {
         const orderProducts = this.orderForm.value.orderProducts[productName];
         const orderProductQuantity = orderProducts.rows?.length;
         if (orderProducts?.price > 0) {
-          this.orderTotalAmount += orderProducts?.price * orderProductQuantity;
-        } else {
-          this.orderTotalAmount = this.orderTotalAmount;
+          total += orderProducts?.price * orderProductQuantity;
         }
       }
     );
+    this.orderTotalAmount.set(total);
   }
 
   createOrder(): void {
-    this.showSpinner = true;
+    this.loadingService.show('Saving order...');
     const createOrderPayload = this.buildCreateOrderPayload();
-    this.orderService.createOrder(createOrderPayload).subscribe((res) => {
-      this.showSpinner = false;
-      this.showToast('Order created!');
-      this.router.navigate(['/orders']);
-    });
+    this.orderService
+      .createOrder(createOrderPayload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.loadingService.hide();
+          this.showToast('Order created!');
+          this.router.navigate(['/orders']);
+        },
+        error: () => this.loadingService.hide(),
+      });
   }
 
   saveOrder(): void {
@@ -270,26 +334,31 @@ export class CreateOrderComponent implements OnInit {
     ];
   }
 
-  onProductClear(orderProduct: OrderProduct) {
-    this.removeProductFormGroup(orderProduct.name);
+  onProductClear(event: AutoCompleteUnselectEvent): void {
+    const product = event.value as ProductOrderProduct;
+    this.productDataMap.delete(product.name);
+    this.removeProductFormGroup(product.name);
     this.calculateOrderTotalAmount();
+    this.refreshOrderProductsMap();
   }
 
-  onProductTabClose(tabCloseEvent: TabCloseEvent) {
+  onProductTabClose(tabCloseEvent: any) {
     const productToBeRemoved = this.selectedProductsControl.value[
       tabCloseEvent.index
     ] as OrderProduct;
+    this.productDataMap.delete(productToBeRemoved.name);
     this.removeProductFormGroup(productToBeRemoved.name);
     this.selectedProductsControl.value.splice(tabCloseEvent.index, 1);
     this.selectedProductsControl.setValue(this.selectedProductsControl.value);
     this.calculateOrderTotalAmount();
+    this.refreshOrderProductsMap();
   }
 
   buildCreateOrderPayload() {
     return {
       description: this.orderForm.value.description,
       paymentMethod: this.orderForm.value.paymentMethod?.value,
-      amount: this.orderTotalAmount,
+      amount: this.orderTotalAmount(),
       customerId: this.orderForm.value.selectedCustomer?.id,
       totalProductQuantity: this.buildOrderProductsPayload()?.length,
       totalWeight: this.getTotalCountByProperty('weight').toString(),
@@ -304,6 +373,7 @@ export class CreateOrderComponent implements OnInit {
     orderProductRows.removeAt(rowIndex);
     this.decrementProductQuantityCount(productName);
     this.calculateOrderTotalAmount();
+    this.refreshOrderProductsMap();
   }
 
   showToast(message: string, type = 'success') {
@@ -318,16 +388,17 @@ export class CreateOrderComponent implements OnInit {
   }
 
   getOrderSources(): void {
-    this.orderSourceService.getOrderSources().subscribe(
-      (response: CustomResponse<OrderSource[]>) => {
-        this.orderSources = this.mapOrderSourcesToNameValue(
-          response?.payload ?? []
-        );
-      },
-      (error) => {
-        this.orderSources = [];
-      }
-    );
+    this.orderSourceService
+      .getOrderSources()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response: CustomResponse<OrderSource[]>) => {
+          this.orderSources.set(
+            this.mapOrderSourcesToNameValue(response?.payload ?? [])
+          );
+        },
+        error: () => this.orderSources.set([]),
+      });
   }
 
   private getTotalCountByProperty(propertyName: string): number {
@@ -387,7 +458,7 @@ export class CreateOrderComponent implements OnInit {
     }
   }
 
-  private removeProductFormGroup(productName: string): void {
+  protected removeProductFormGroup(productName: string): void {
     const orderProductFormGroup = this.orderForm.get(
       'orderProducts'
     ) as FormGroup;

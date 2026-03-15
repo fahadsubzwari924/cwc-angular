@@ -3,8 +3,7 @@
 $gutter: 1rem; //for primeflex grid system
 @import "assets/layout/styles/layout/layout.scss";
 
-/* PrimeNG */
-@import "../node_modules/primeng/resources/primeng.min.css";
+/* PrimeNG - v19 uses providePrimeNG theme in app.config; base layout from primeflex */
 @import "../node_modules/primeflex/primeflex.scss";
 @import "../node_modules/primeicons/primeicons.css";
 
@@ -13,62 +12,111 @@ $gutter: 1rem; //for primeflex grid system
 @import "assets/demo/styles/badges.scss";
 @import "assets/demo/styles/code.scss";
 
-.cvc-custom-modal {
-  position: fixed;
-  top: 20%;
+/* ============================================
+   MODERN DESIGN SYSTEM - COMPREHENSIVE UPDATE
+   ============================================ */
+
+/* ============================================
+   DESIGN TOKENS — single source of truth (indigo theme)
+   No component-level overrides for buttons/typography/spacing.
+   ============================================ */
+:root {
+  /* Primary action color: indigo app-wide */
+  --primary: #6366f1;
+  --primary-light: #818cf8;
+  --primary-dark: #4f46e5;
+  --accent: #ec4899;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* Neutrals */
+  --neutral-50: #f9fafb;
+  --neutral-100: #f3f4f6;
+  --neutral-200: #e5e7eb;
+  --neutral-300: #d1d5db;
+  --neutral-400: #9ca3af;
+  --neutral-500: #6b7280;
+  --neutral-600: #4b5563;
+  --neutral-700: #374151;
+  --neutral-800: #1f2937;
+  --neutral-900: #111827;
+
+  /* Form controls — indigo-themed borders */
+  --form-control-height: 2.5rem;
+  --form-control-padding-x: 0.75rem;
+  --form-control-inner-padding-x: 0.75rem; /* Horizontal padding where text starts — single source for all controls */
+  --form-control-padding-y: 0.5rem;
+  --form-control-font-size: 0.9375rem;
+  --form-control-border-width: 1.5px;
+  --form-control-radius: 8px;
+  --form-border-default: rgba(99, 102, 241, 0.35);
+  --form-border-hover: rgba(99, 102, 241, 0.5);
+  --form-border-focus: #6366f1;
+  --form-shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.12);
+
+  /* Spacing scale (use in components via var()) */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
 }
 
-/* Custom Margins*/
-.ml-2px {
-  margin-left: 2px;
+/* Global Typography - Modern & Clean */
+html {
+  font-size: 16px;
 }
 
-.chip-info {
-  background-color: rgb(62 243 255);
-  font-weight: 500;
-  color: black;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--neutral-50);
+  color: var(--neutral-800);
 }
 
-.chip-green {
-  background-color: #e0f2f1; // Light grey background
-  color: #004d40;
-  font-weight: 500;
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.5px;
 }
 
-/* Theme Customizations */
-.p-autocomplete {
-  width: 100%;
-}
-.p-autocomplete-multiple-container {
-  width: 100%;
-}
-.tabview-custom span {
-  margin: 0 0.5rem;
+p {
+  line-height: 1.6;
+  color: var(--neutral-600);
 }
 
-.tabview-custom {
-  .p-tabview-nav {
-    li {
-      text-wrap: nowrap;
-    }
-  }
-}
-
-.p-dropdown {
-  width: 100%;
-}
+/* ============================================
+   MODERN CARD DESIGN
+   ============================================ */
 
 .card {
   position: relative;
-  padding: 1rem 2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--neutral-200);
+
+  &:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+  }
 
   .card-footer {
-    background-color: white;
+    background-color: var(--neutral-50);
     position: sticky;
     bottom: 0;
     width: 100%;
     display: flex;
     justify-content: space-between;
+    border-top: 1px solid var(--neutral-200);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
 
     p {
       text-align: left;
@@ -80,15 +128,986 @@ $gutter: 1rem; //for primeflex grid system
     height: 100%;
     overflow-y: auto;
   }
+
+  .card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--neutral-200);
+  }
 }
 
+/* ============================================
+   GLOBAL BUTTONS — indigo primary (no green/custom per component)
+   ============================================ */
+
+$btn-radius: var(--form-control-radius, 8px);
+$btn-padding-y: 0.5rem;
+$btn-padding-x: 1.25rem;
+
+.p-button {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: $btn-radius;
+  padding: $btn-padding-y $btn-padding-x;
+  min-height: var(--form-control-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+/* Primary and Success both use indigo for consistent app theme */
+.p-button.p-button-primary,
+.p-button.p-button-success {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, #4338ca 100%) !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.p-button.p-button-secondary {
+  background: var(--neutral-100) !important;
+  color: var(--neutral-800) !important;
+  border: 1px solid var(--neutral-200) !important;
+
+  &:hover:not(:disabled) {
+    background: var(--neutral-200) !important;
+    border-color: var(--neutral-300) !important;
+  }
+}
+
+.p-button.p-button-outlined {
+  &.p-button-secondary {
+    background: transparent !important;
+    color: var(--neutral-700) !important;
+    border: 1.5px solid var(--neutral-300) !important;
+
+    &:hover:not(:disabled) {
+      background: var(--neutral-50) !important;
+      border-color: var(--neutral-400) !important;
+    }
+  }
+}
+
+.p-button.p-button-danger {
+  background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%) !important;
+  border: none !important;
+  color: white !important;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.05);
+  }
+}
+
+/* Default (no severity): treat as primary indigo */
+.p-button:not(.p-button-secondary):not(.p-button-danger):not(.p-button-text):not(.p-button-outlined) {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, #4338ca 100%) !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+/* ============================================
+   MODERN FORMS & INPUTS — consistent height everywhere
+   ============================================ */
+
+$form-height: var(--form-control-height);
+$form-padding-x: var(--form-control-padding-x);
+$form-padding-y: var(--form-control-padding-y);
+$form-font-size: var(--form-control-font-size);
+$form-border: var(--form-control-border-width) solid var(--form-border-default);
+$form-radius: var(--form-control-radius);
+
+/* Shared form control base — indigo-themed default / hover / focus */
+%form-control-base {
+  box-sizing: border-box !important;
+  height: $form-height !important;
+  padding: $form-padding-y $form-padding-x !important;
+  font-size: $form-font-size !important;
+  border: $form-border !important;
+  border-radius: $form-radius !important;
+  background: white !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus,
+  &.ng-focus {
+    border-color: var(--form-border-focus) !important;
+    box-shadow: var(--form-shadow-focus) !important;
+    outline: none !important;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--form-border-hover) !important;
+  }
+
+  &:disabled {
+    background: var(--neutral-50) !important;
+    color: var(--neutral-400) !important;
+    border-color: var(--neutral-200) !important;
+  }
+}
+
+/* Text inputs & number */
+.p-inputtext,
+.p-inputnumber input {
+  @extend %form-control-base;
+}
+
+/* Autocomplete — fill container width + same height; unified input + dropdown */
+p-autocomplete {
+  display: block;
+  width: 100%;
+}
+
+.p-autocomplete {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  border-radius: var(--form-control-radius, 8px);
+  border: var(--form-control-border-width, 1.5px) solid var(--form-border-default);
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover:not(.p-disabled) {
+    border-color: var(--form-border-hover);
+  }
+
+  &.p-focus,
+  &.p-inputwrapper-focus {
+    border-color: var(--form-border-focus);
+    box-shadow: var(--form-shadow-focus);
+    outline: none;
+  }
+
+  .p-autocomplete-input {
+    @extend %form-control-base;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+
+    &:focus {
+      box-shadow: none !important;
+    }
+  }
+
+  /* Dropdown button: same background as field, no separate gray box — feels inside the autocomplete */
+  .p-autocomplete-dropdown {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    flex-shrink: 0;
+    background: transparent !important;
+    border: none !important;
+    border-inline-start: 1px solid var(--form-border-default) !important;
+    border-radius: 0 !important;
+    border-start-end-radius: var(--form-control-radius, 8px) !important;
+    border-end-end-radius: var(--form-control-radius, 8px) !important;
+    color: var(--neutral-600, #4b5563) !important;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:not(:disabled):hover {
+      background: var(--neutral-100, #f3f4f6) !important;
+      border-inline-start-color: var(--form-border-default) !important;
+      color: var(--neutral-800, #1f2937) !important;
+    }
+
+    &:not(:disabled):active {
+      background: var(--neutral-200, #e5e7eb) !important;
+      color: var(--neutral-800, #1f2937) !important;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  /* When dropdown is present, input has no right radius so it joins the button */
+  &:has(.p-autocomplete-dropdown) .p-autocomplete-input {
+    border-start-end-radius: 0 !important;
+    border-end-end-radius: 0 !important;
+  }
+}
+
+/* Dropdown — same height; wrapper controls size; clear + arrow spacing */
+.p-dropdown {
+  @extend %form-control-base;
+  display: flex !important;
+  align-items: center !important;
+  width: 100%;
+  min-height: unset !important;
+
+  &.p-focus {
+    border-color: var(--form-border-focus) !important;
+    box-shadow: var(--form-shadow-focus) !important;
+  }
+
+  .p-dropdown-label {
+    padding: 0 !important;
+    line-height: 1.4 !important;
+  }
+
+  .p-dropdown-trigger {
+    width: 2.25rem;
+    flex-shrink: 0;
+  }
+
+  /* Clear icon (X) and dropdown arrow: add gap so they aren’t adjacent (design best practice) */
+  .p-select-clear-icon {
+    margin-inline-end: 0.375rem;
+  }
+}
+
+/* Multiselect — match dropdown height; clear + arrow spacing */
+.p-multiselect {
+  @extend %form-control-base;
+  display: flex !important;
+  align-items: center !important;
+  min-height: unset !important;
+
+  &.p-focus {
+    border-color: var(--form-border-focus) !important;
+    box-shadow: var(--form-shadow-focus) !important;
+  }
+
+  .p-multiselect-label {
+    padding: 0 !important;
+    line-height: 1.4 !important;
+  }
+
+  .p-multiselect-clear-icon {
+    margin-inline-end: 0.375rem;
+  }
+}
+
+/* DatePicker — single outline, same height as other inputs; no inner card/wrapper look */
+.p-datepicker.p-inputwrapper {
+  display: flex !important;
+  align-items: center !important;
+  height: var(--form-control-height, 2.5rem) !important;
+  min-height: var(--form-control-height, 2.5rem) !important;
+  padding: 0 var(--form-control-padding-x, 0.75rem) !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  border: var(--form-control-border-width, 1.5px) solid var(--form-border-default) !important;
+  border-radius: var(--form-control-radius, 8px) !important;
+  background: white !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover:not(.p-disabled) {
+    border-color: var(--form-border-hover) !important;
+  }
+
+  &.p-focus,
+  &.p-inputwrapper-focus {
+    border-color: var(--form-border-focus) !important;
+    box-shadow: var(--form-shadow-focus) !important;
+    outline: none !important;
+  }
+
+  /* Remove any inner wrapper border/outline (no nested “card” look) */
+  .p-datepicker-dropdown,
+  .p-datepicker-input-icon-container,
+  &.p-variant-filled .p-datepicker-dropdown,
+  &.p-inputwrapper-filled .p-datepicker-input {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background: transparent !important;
+  }
+
+  .p-datepicker-input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background: transparent !important;
+    font-size: var(--form-control-font-size, 0.9375rem) !important;
+    border-radius: 0 !important;
+    line-height: 1.5 !important;
+
+    &:focus {
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+  }
+}
+
+/* Form control inner content — consistent left/right padding everywhere (dropdown, multiselect, autocomplete, datepicker, native inputs) */
+.p-inputtext,
+.p-inputnumber input {
+  padding-inline-start: var(--form-control-inner-padding-x) !important;
+  padding-inline-end: var(--form-control-inner-padding-x) !important;
+}
+
+.p-dropdown {
+  padding-inline-start: 0 !important;
+
+  .p-dropdown-label {
+    padding-inline-start: var(--form-control-inner-padding-x) !important;
+    padding-inline-end: var(--form-control-inner-padding-x) !important;
+  }
+}
+
+.p-multiselect {
+  padding-inline-start: 0 !important;
+
+  .p-multiselect-label {
+    padding-inline-start: var(--form-control-inner-padding-x) !important;
+    padding-inline-end: var(--form-control-inner-padding-x) !important;
+  }
+}
+
+.p-autocomplete .p-autocomplete-input {
+  padding-inline-start: var(--form-control-inner-padding-x) !important;
+  padding-inline-end: var(--form-control-inner-padding-x) !important;
+}
+
+/* Datepicker wrapper already uses --form-control-padding-x for horizontal padding; input has no extra padding so text starts after wrapper inset + icon */
+
+/* Native form inputs (e.g. order description) — same horizontal padding as PrimeNG controls */
+form input[type="text"],
+form input[type="number"],
+form textarea {
+  padding-inline-start: var(--form-control-inner-padding-x) !important;
+  padding-inline-end: var(--form-control-inner-padding-x) !important;
+}
+
+/* Dropdown/Select overlay — selected option: indigo theme (override green) */
+.p-select-overlay .p-select-option-selected,
+.p-select-overlay .p-select-option.p-highlight,
+.p-dropdown-panel .p-select-option-selected,
+.p-dropdown-panel .p-select-option.p-highlight,
+.p-select-overlay [class*="option-selected"],
+.p-select-overlay [class*="option"].p-highlight,
+.p-select-overlay .p-highlight,
+.p-dropdown-panel .p-highlight {
+  background: var(--primary) !important;
+  color: white !important;
+}
+.p-select-overlay .p-select-option-selected:hover,
+.p-select-overlay .p-select-option.p-highlight:hover,
+.p-dropdown-panel .p-select-option-selected:hover,
+.p-dropdown-panel .p-select-option.p-highlight:hover,
+.p-select-overlay .p-highlight:hover,
+.p-dropdown-panel .p-highlight:hover {
+  background: var(--primary-dark) !important;
+  color: white !important;
+}
+
+/* Multiselect overlay — selected option row: indigo theme (override green) */
+.p-multiselect-option.p-multiselect-option-selected,
+.p-multiselect-option-selected,
+[class*="multiselect"] .p-multiselect-option-selected {
+  background: var(--primary) !important;
+  color: white !important;
+
+  &:hover {
+    background: var(--primary-dark) !important;
+    color: white !important;
+  }
+}
+
+/* Checkbox — checked state: indigo theme (override green) — applies to all checkboxes including multiselect */
+.p-checkbox.p-checkbox-checked .p-checkbox-box,
+.p-checkbox.p-highlight .p-checkbox-box,
+.p-checkbox-box.p-highlight {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: white !important;
+}
+
+.p-checkbox.p-checkbox-checked:hover .p-checkbox-box,
+.p-checkbox.p-highlight:hover .p-checkbox-box {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+}
+
+/* Datepicker panel — selected day/month/year: indigo theme (override green) */
+.p-datepicker-panel .p-datepicker-day.p-datepicker-day-selected,
+.p-datepicker-panel .p-datepicker-day.p-datepicker-day-selected:hover,
+.p-datepicker-panel .p-datepicker-day-cell.p-datepicker-day-selected .p-datepicker-day,
+.p-datepicker-panel .p-datepicker-month.p-datepicker-month-selected,
+.p-datepicker-panel .p-datepicker-year.p-datepicker-year-selected,
+.p-datepicker-panel .p-datepicker-day-cell .p-datepicker-day.p-datepicker-day-selected,
+.p-datepicker-panel .p-datepicker-day.p-highlight,
+.p-datepicker-panel .p-datepicker-day-cell .p-datepicker-day.p-highlight,
+.p-datepicker-panel .p-datepicker-month.p-highlight,
+.p-datepicker-panel .p-datepicker-year.p-highlight {
+  background: var(--primary) !important;
+  color: white !important;
+}
+.p-datepicker-panel .p-datepicker-day.p-datepicker-day-selected:hover,
+.p-datepicker-panel .p-datepicker-day-cell.p-datepicker-day-selected .p-datepicker-day:hover,
+.p-datepicker-panel .p-datepicker-day.p-highlight:hover,
+.p-datepicker-panel .p-datepicker-day-cell .p-datepicker-day.p-highlight:hover {
+  background: var(--primary-dark) !important;
+  color: white !important;
+}
+.p-datepicker-panel .p-datepicker-month.p-datepicker-month-selected:hover,
+.p-datepicker-panel .p-datepicker-year.p-datepicker-year-selected:hover,
+.p-datepicker-panel .p-datepicker-month.p-highlight:hover,
+.p-datepicker-panel .p-datepicker-year.p-highlight:hover {
+  background: var(--primary-dark) !important;
+  color: white !important;
+}
+
+textarea {
+  box-sizing: border-box !important;
+  padding: $form-padding-y $form-padding-x !important;
+  font-size: $form-font-size !important;
+  border: $form-border !important;
+  border-radius: $form-radius !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+
+  &:hover:not(:disabled) {
+    border-color: var(--form-border-hover) !important;
+  }
+
+  &:focus {
+    border-color: var(--form-border-focus) !important;
+    box-shadow: var(--form-shadow-focus) !important;
+    outline: none !important;
+  }
+}
+
+/* ============================================
+   PAGE LAYOUT — viewport-fit flex chain
+   Ensures grids (p-table) + paginator fill the
+   viewport. Toolbar/filters stay collapsed.
+   ============================================ */
+
+/* PrimeFlex .grid rows inside a flex column: participate in flex.
+   Reset the negative top-margin from PrimeFlex gutter system so
+   grids stack cleanly inside flex containers without extra spacing. */
+.layout-main .grid {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+/* .grid that wraps a p-table (or .grid-container for cards): grow to fill space */
+.layout-main .grid:has(p-table),
+.layout-main .grid-container {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* col inside a table-grid: flex column so p-table + paginator stack */
+.layout-main .grid:has(p-table) > [class*="col"] {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+/* p-table Angular host: block-level flex child that fills its col */
+p-table {
+  display: block;
+  flex: 1 1 0;
+  min-height: 0;
+  position: relative;
+}
+
+/* p-paginator Angular host: fixed height, pinned at bottom */
+p-paginator {
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* ============================================
+   MODERN DATA TABLE (p-table / p-datatable)
+   scrollHeight="flex" + [scrollable]="true"
+   ============================================ */
+
+$dt-radius: 12px;
+$dt-header-padding-y: 1rem;
+$dt-header-padding-x: 1.25rem;
+$dt-cell-padding-y: 0.875rem;
+$dt-cell-padding-x: 1.25rem;
+$dt-row-border: 1px solid var(--neutral-100, #f3f4f6);
+
 .p-datatable {
-  th {
-    text-wrap: nowrap;
+  position: relative;
+  border-radius: $dt-radius;
+  background: #fff;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.06),
+    0 4px 16px 0 rgba(0, 0, 0, 0.05),
+    0 0 0 1px var(--neutral-200, #e5e7eb);
+  border: 1px solid var(--neutral-200, #e5e7eb);
+  overflow: hidden;
+
+  /* scrollHeight="flex" → PrimeNG adds .p-datatable-flex-scrollable
+     which sets display:flex, flex-direction:column, height:100%.
+     We give the host p-table element absolute positioning so PrimeNG's
+     height:100% resolves against a real pixel height. */
+  &.p-datatable-flex-scrollable {
+    position: absolute;
+    inset: 0;
+
+    > .p-datatable-table-container {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      /* Custom scrollbar — thin, neutral */
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--neutral-300, #d1d5db);
+        border-radius: 10px;
+
+        &:hover {
+          background: var(--neutral-400, #9ca3af);
+        }
+      }
+    }
   }
-  td {
-    text-wrap: nowrap;
+
+  .p-datatable-table {
+    border-spacing: 0;
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: auto;
   }
+
+  /* Sticky header */
+  .p-datatable-thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .p-datatable-thead > tr > th {
+    background: rgba(99, 102, 241, 0.06) !important; /* subtle theme tint for hierarchy */
+    color: var(--primary-dark, #4f46e5) !important;
+    font-weight: 700 !important;
+    font-size: 0.8125rem !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: start;
+    padding: $dt-header-padding-y $dt-header-padding-x !important;
+    border: none !important;
+    border-bottom: 1.5px solid rgba(99, 102, 241, 0.25) !important;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+
+  /* Body: clean rows, row-divider only */
+  .p-datatable-tbody > tr {
+    background: #fff;
+    color: var(--neutral-800, #1f2937);
+    transition: background-color 0.15s ease;
+
+    > td {
+      padding: $dt-cell-padding-y $dt-cell-padding-x !important;
+      border: none !important;
+      border-bottom: $dt-row-border !important;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      color: var(--neutral-700, #374151);
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &:last-child > td {
+      border-bottom: none !important;
+    }
+  }
+
+  /* Hover */
+  .p-datatable-tbody > tr:hover {
+    background: var(--neutral-50, #f9fafb) !important;
+  }
+
+  /* Selected row */
+  .p-datatable-tbody > tr.p-datatable-row-selected {
+    background: rgba(99, 102, 241, 0.08) !important;
+
+    > td {
+      border-bottom-color: rgba(99, 102, 241, 0.2) !important;
+    }
+  }
+
+  /* Focus ring a11y */
+  .p-datatable-tbody > tr:focus-visible {
+    outline: 0;
+    box-shadow: inset 0 0 0 2px var(--primary, #6366f1);
+  }
+
+  /* Table action buttons — icons only, themed indigo, no background/shape (only inside p-datatable; excludes product grid) */
+  .p-datatable-tbody td .p-button,
+  .p-datatable-tbody td button.p-button,
+  .p-datatable-tbody td .p-button.p-button-primary,
+  .p-datatable-tbody td .p-button.p-button-text,
+  .p-datatable-tbody td .p-button.p-button-icon-only,
+  .p-datatable-tbody td button.p-button.p-button-primary,
+  .p-datatable-tbody td button.p-button.p-button-text,
+  .p-datatable-tbody td button.p-button.p-button-rounded {
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0.25rem !important;
+    background: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: var(--primary-dark) !important;
+    box-shadow: none !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+    }
+
+    .p-button-icon,
+    .pi {
+      font-size: 1.25rem !important;
+      color: inherit !important;
+    }
+
+    &:not(:disabled):hover {
+      background: none !important;
+      background-color: transparent !important;
+      color: var(--primary) !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    &:not(:disabled):active {
+      background: none !important;
+      background-color: transparent !important;
+      color: var(--primary-dark) !important;
+    }
+  }
+
+  /* Delete (trash) icon — themed indigo, danger on hover */
+  .p-datatable-tbody td .p-button:has(.pi-trash),
+  .p-datatable-tbody td button.p-button:has(.pi-trash) {
+    color: var(--primary-dark) !important;
+  }
+  .p-datatable-tbody td .p-button:has(.pi-trash):not(:disabled):hover,
+  .p-datatable-tbody td button.p-button:has(.pi-trash):not(:disabled):hover {
+    color: var(--danger) !important;
+  }
+
+  /* Hide text label in table actions — icons only */
+  .p-datatable-tbody td .p-button .p-button-label,
+  .p-datatable-tbody td button.p-button .p-button-label {
+    display: none !important;
+  }
+
+  .p-datatable-tbody td .p-button + .p-button,
+  .p-datatable-tbody td .p-button + button.p-button,
+  .p-datatable-tbody td button.p-button + .p-button,
+  .p-datatable-tbody td button.p-button + button.p-button {
+    margin-left: 0.5rem !important;
+  }
+
+  /* Gridlines variant */
+  &.p-datatable-gridlines {
+    .p-datatable-tbody > tr > td {
+      border-bottom: $dt-row-border !important;
+      border-inline-end: 1px solid var(--neutral-100, #f3f4f6) !important;
+
+      &:first-child {
+        border-inline-start: none;
+      }
+    }
+
+    .p-datatable-thead > tr > th {
+      border-inline-end: 1px solid var(--neutral-200, #e5e7eb) !important;
+
+      &:last-child {
+        border-inline-end: none !important;
+      }
+    }
+  }
+
+  /* Empty state */
+  .p-datatable-emptymessage > td {
+    padding: var(--spacing-8, 2rem) !important;
+    text-align: center;
+    color: var(--neutral-500, #6b7280);
+    font-size: 0.9375rem;
+    border-bottom: none !important;
+  }
+}
+
+/* Order status dropdown in tables — oval / pill chip shape (global override for PrimeNG structure) */
+.order-status-dropdown,
+.order-status-dropdown.p-dropdown,
+.order-status-dropdown.p-inputwrapper,
+.order-status-dropdown .p-inputwrapper,
+.order-status-dropdown p-select,
+.order-status-dropdown .p-select,
+.p-datatable .order-status-dropdown,
+.p-datatable .order-status-dropdown.p-dropdown {
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.order-status-dropdown .p-select-label,
+.order-status-dropdown .p-dropdown-label {
+  border-radius: 9999px 0 0 9999px !important;
+  padding-left: 1rem !important;
+  padding-right: 0.5rem !important;
+}
+
+.order-status-dropdown .p-select-dropdown-icon,
+.order-status-dropdown .p-dropdown-trigger,
+.order-status-dropdown [class*="dropdown-icon"] {
+  border-radius: 0 9999px 9999px 0 !important;
+}
+
+/* ============================================
+   MODERN MODALS & OVERLAYS
+   ============================================ */
+
+.p-dialog {
+  /* Remove white outline/border from panel (top and sides) */
+  border: none !important;
+  outline: none !important;
+  overflow: hidden;
+
+  .p-dialog-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 0.625rem 1.25rem;
+    border: none !important;
+    border-bottom: none !important;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+    outline: none !important;
+
+    .p-dialog-title {
+      font-weight: 700;
+      font-size: 1.0625rem;
+      letter-spacing: -0.02em;
+    }
+
+    /* Close button: icon only, no circular background */
+    .p-dialog-header-close,
+    .p-dialog-close-button,
+    .p-dialog-header-actions .p-button {
+      color: rgba(255, 255, 255, 0.95) !important;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      width: 2rem;
+      height: 2rem;
+      box-shadow: none !important;
+
+      &:hover {
+        background: transparent !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+    }
+  }
+
+  .p-dialog-content {
+    padding: 1.5rem 2rem;
+    border-top: none !important;
+    outline: none !important;
+  }
+}
+
+.cvc-custom-modal {
+  position: fixed;
+  top: 20%;
+}
+
+/* ============================================
+   CUSTOM UTILITIES
+   ============================================ */
+
+.cvc-custom-modal {
+  position: fixed;
+  top: 20%;
+}
+
+.ml-2px {
+  margin-left: 2px;
+}
+
+.chip-info {
+  background-color: rgba(99, 102, 241, 0.15);
+  font-weight: 500;
+  color: var(--primary-dark);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+}
+
+.chip-green {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+  font-weight: 500;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+}
+
+/* ============================================
+   PRIMENG COMPONENT OVERRIDES - MODERN
+   ============================================ */
+
+.p-autocomplete {
+  width: 100%;
+}
+
+.p-autocomplete-multiple-container {
+  width: 100%;
+  border-radius: var(--form-control-radius) !important;
+  min-height: var(--form-control-height) !important;
+}
+
+.p-chip {
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  background: var(--neutral-100);
+  color: var(--neutral-800);
+}
+
+.p-tag {
+  border-radius: 20px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Paginator: visually part of the table block — attached to bottom of .p-datatable */
+.p-paginator {
+  background: var(--neutral-50, #f9fafb);
+  border: none;
+  border-top: 1px solid var(--neutral-200, #e5e7eb);
+  /* Match the table's border so paginator looks like table's footer */
+  border-inline: 1px solid var(--neutral-200, #e5e7eb);
+  border-bottom: 1px solid var(--neutral-200, #e5e7eb);
+  border-radius: 0 0 12px 12px;
+  padding: 0.75rem 1.25rem;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  .p-paginator-current,
+  .p-paginator-first,
+  .p-paginator-prev,
+  .p-paginator-next,
+  .p-paginator-last,
+  .p-paginator-pages .p-paginator-page {
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0 0.5rem;
+    border-radius: var(--form-control-radius, 8px);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--neutral-700, #374151);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+
+    &:not(.p-disabled):hover {
+      background: var(--neutral-200, #e5e7eb);
+      color: var(--neutral-800, #1f2937);
+    }
+
+    &.p-highlight {
+      background: var(--primary, #6366f1);
+      color: #fff;
+      border-color: var(--primary, #6366f1);
+
+      &:hover {
+        background: var(--primary-dark, #4f46e5);
+        color: #fff;
+      }
+    }
+  }
+}
+
+.p-skeleton {
+  border-radius: 8px;
+}
+
+/* ============================================
+   TABS & NAVIGATION
+   ============================================ */
+
+.tabview-custom {
+  .p-tabview-nav {
+    border-bottom: 2px solid var(--neutral-200);
+
+    li {
+      text-wrap: nowrap;
+
+      &.p-highlight a {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+
+      a {
+        padding: 1rem 1.5rem !important;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .p-tabview-content {
+    padding: 2rem;
+  }
+}
+
+/* ============================================
+   LAYOUT & SPACING MODERN
+   ============================================ */
+
+/* Vertical-only padding for inputs; horizontal padding comes from --form-control-inner-padding-x via form input rules */
+.input-padding-10px {
+  padding-block: 0.5rem !important;
 }
 
 .menu-popup {
@@ -97,15 +1116,102 @@ $gutter: 1rem; //for primeflex grid system
   left: 0;
 }
 
-.input-padding-10px {
-  padding: 10px 0 !important;
+/* Chart wrapper: ensure minimum height so ECharts/Chart.js can render (e.g. bar graph default 400px + title). */
+.report-chart-wrapper {
+  min-height: 28rem; /* ~448px — room for title + chart */
+  overflow: visible !important;
 }
-// .p-button{
-//   display: block !important;
-// }
 
-#cwc-pie-chart-container,
-#cwc-bar-graph-chart-container {
+/* Chart container sizing for ECharts library */
+.cwc-bar-graph-chart-container,
+#cwc-bar-graph-chart-container,
+#cwc-pie-chart-container {
   width: 100%;
   height: 100%;
+  overflow: visible !important;
+}
+
+/* ============================================
+   MODERN SHADOWS & EFFECTS
+   ============================================ */
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Topbar: icon-only on white, no gray circle or rounded outline */
+.layout-topbar .layout-topbar-button {
+  color: var(--text-color-secondary, #6c757d);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+
+  &:hover {
+    color: var(--text-color, #495057);
+    background: transparent !important;
+    border: none !important;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    box-shadow: none !important;
+  }
+
+  i {
+    font-size: 1.5rem;
+  }
+}
+
+/* Theme Customizations */
+.p-autocomplete {
+  width: 100%;
+}
+
+.p-autocomplete-multiple-container {
+  width: 100%;
+}
+
+/* Product card action buttons - global override for PrimeNG button icon visibility */
+.action-btn .p-button-icon,
+button.action-btn .p-button-icon {
+  color: white !important;
+  font-size: 1rem !important;
+}
+
+/* Scrollable table: same scrollbar thickness for vertical and horizontal */
+.p-datatable.p-datatable-scrollable {
+  .p-datatable-wrapper,
+  .p-scroller-viewport {
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: var(--neutral-100, #f3f4f6);
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: var(--neutral-300, #d1d5db);
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--neutral-400, #9ca3af);
+    }
+  }
+}
+
+/* Firefox: thin scrollbars so horizontal matches vertical thickness */
+.p-datatable.p-datatable-scrollable .p-datatable-wrapper,
+.p-datatable.p-datatable-scrollable .p-scroller-viewport {
+  scrollbar-width: thin;
 }

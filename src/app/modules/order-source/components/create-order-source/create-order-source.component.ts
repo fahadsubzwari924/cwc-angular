@@ -1,38 +1,46 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OrderSourceService } from '../../services/order-source.service';
-import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
-import { SimpleModalComponent, SimpleModalService } from 'ngx-simple-modal';
-import { MessageService } from 'primeng/api';
-import { UtilService } from 'src/app/util/util.service';
-import { OrderSource } from '../../models/order-source.model';
-import { CustomResponse } from 'src/app/shared/models/response.model';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ProgressSpinner } from 'primeng/progressspinner';
+import { BaseDialogComponent } from 'src/app/shared/components/base-dialog/base-dialog.component';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { INameValue } from 'src/app/shared/interfaces/name-value.interface';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputTextarea } from 'primeng/inputtextarea';
+import { LoadingService } from 'src/app/core/services/loading.service';
 
 @Component({
   selector: 'app-create-order-source',
   templateUrl: './create-order-source.component.html',
   styleUrls: ['./create-order-source.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    InputTextModule,
+    DropdownModule,
+    InputTextarea,
+  ],
 })
-export class CreateOrderSourceComponent
-  extends SimpleModalComponent<null, boolean>
-  implements OnInit
-{
-  title!: string;
+export class CreateOrderSourceComponent extends BaseDialogComponent implements OnInit {
+  protected readonly formBuilder = inject(FormBuilder);
+  protected readonly orderSourceService = inject(OrderSourceService);
+  protected readonly destroyRef = inject(DestroyRef);
+  protected readonly loadingService = inject(LoadingService);
+
+  get title(): string {
+    return this.data?.['title'] ?? 'Create Order Source';
+  }
 
   orderSourceForm!: FormGroup;
-  spinner!: ProgressSpinner;
-  showSpinner = false;
   orderSourceTypes: Array<INameValue> = [];
-
-  constructor(
-    protected formBuilder: FormBuilder,
-    protected orderSourceService: OrderSourceService
-  ) {
-    super();
-    this.spinner = new ProgressSpinner();
-  }
 
   ngOnInit(): void {
     this.buildForm();
@@ -49,18 +57,9 @@ export class CreateOrderSourceComponent
 
   buildOrderSourceOptions(): void {
     this.orderSourceTypes = [
-      {
-        name: 'Instagram',
-        value: 'instagram',
-      },
-      {
-        name: 'Facebook',
-        value: 'facebook',
-      },
-      {
-        name: 'Web',
-        value: 'web',
-      },
+      { name: 'Instagram', value: 'instagram' },
+      { name: 'Facebook', value: 'facebook' },
+      { name: 'Web', value: 'web' },
     ];
   }
 
@@ -69,17 +68,18 @@ export class CreateOrderSourceComponent
   }
 
   createOrderSource(): void {
-    this.showSpinner = true;
+    this.loadingService.show('Saving order source...');
     this.orderSourceService
       .createOrderSource(this.orderSourceForm.value)
-      .subscribe((response: OrderSource) => {
-        this.closeModal();
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.closeModal(),
+        error: () => this.loadingService.hide(),
       });
   }
 
-  closeModal() {
-    this.showSpinner = false;
-    this.result = true;
-    this.close();
+  closeModal(): void {
+    this.loadingService.hide();
+    this.close(true);
   }
 }

@@ -1,49 +1,47 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CreateOrderComponent } from '../create-order/create-order.component';
-import { CustomerService } from 'src/app/modules/customers/services/customer.service';
-import { ProductService } from 'src/app/modules/product/services/product-api.service';
+import { requireNonEmptyArray } from '../../validators/order.validators';
 import { FormBuilder, Validators } from '@angular/forms';
-import { OrderService } from '../../services/order.service';
-import { MessageService } from 'primeng/api';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Order } from '../../models/order.model';
 import { OrderProduct } from '../../models/order-product.model';
-import { groupBy, uniqBy } from 'lodash';
-import { OrderSourceService } from 'src/app/modules/order-source/services/order-source.service';
-import { TitleCasePipe } from '@angular/common';
+import { groupBy, uniqBy } from 'lodash-es';
 import { OrderSource } from 'src/app/modules/order-source/models/order-source.model';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { DropdownModule } from 'primeng/dropdown';
+import { DatePickerModule } from 'primeng/datepicker';
+import { TabViewModule } from 'primeng/tabview';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { ButtonModule } from 'primeng/button';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { TableModule } from 'primeng/table';
 
 @Component({
   selector: 'app-edit-order',
   templateUrl: '../create-order/create-order.component.html',
   styleUrls: ['../create-order/create-order.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    AutoCompleteModule,
+    DropdownModule,
+    DatePickerModule,
+    TabViewModule,
+    MultiSelectModule,
+    ButtonModule,
+    InputNumberModule,
+    TableModule,
+  ],
 })
 export class EditOrderComponent extends CreateOrderComponent implements OnInit {
+  private readonly activatedRoute = inject(ActivatedRoute);
+
   orderId!: number;
   order!: Order;
-
-  constructor(
-    override customerService: CustomerService,
-    override productService: ProductService,
-    override formBuilder: FormBuilder,
-    override orderService: OrderService,
-    override messageService: MessageService,
-    override router: Router,
-    private activatedRoute: ActivatedRoute,
-    override orderSourceService: OrderSourceService,
-    override titleCasePipe: TitleCasePipe
-  ) {
-    super(
-      customerService,
-      productService,
-      formBuilder,
-      orderService,
-      messageService,
-      router,
-      orderSourceService,
-      titleCasePipe
-    );
-  }
 
   override ngOnInit(): void {
     this.buildOrderForm();
@@ -58,7 +56,7 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
   override buildOrderForm(): void {
     this.orderForm = this.formBuilder.group({
       selectedCustomer: ['', [Validators.required]],
-      selectedProducts: ['', [Validators.required]],
+      selectedProducts: [[], [requireNonEmptyArray]],
       description: ['', [Validators.required]],
       paymentMethod: [
         {
@@ -74,14 +72,18 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
 
   override saveOrder(): void {
     if (this.orderId) {
-      this.showSpinner = true;
+      this.loadingService.show('Updating order...');
       const updateOrderPayload = this.buildCreateOrderPayload();
       this.orderService
         .updateOrder(this.orderId, updateOrderPayload)
-        .subscribe((res) => {
-          this.showSpinner = false;
-          this.showToast('Order updated!');
-          this.router.navigate(['/orders']);
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.loadingService.hide();
+            this.showToast('Order updated!');
+            this.router.navigate(['/orders']);
+          },
+          error: () => this.loadingService.hide(),
         });
     } else {
       this.showToast('Order ID not found!', 'warning');
@@ -89,10 +91,13 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
   }
 
   getOrder() {
-    this.orderService.getOrderById(this.orderId).subscribe((order: Order) => {
-      this.order = order;
-      this.populateOrderForm();
-    });
+    this.orderService
+      .getOrderById(this.orderId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((order: Order) => {
+        this.order = order;
+        this.populateOrderForm();
+      });
   }
 
   populateOrderForm() {
@@ -106,10 +111,13 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
     this.orderForm.get('orderDate')?.setValue(new Date(this.order.orderDate));
     this.orderForm.get('selectedOrderSources')?.setValue(orderSourceIds);
     productsByOrderId.forEach((product: OrderProduct) => {
+      // Store product data so it's available for map building
+      this['productDataMap'].set(product.name, product);
       this.initizalizeProductDetail(product, true);
     });
     this.populateProductRows();
     this.calculateOrderTotalAmount();
+    this.refreshOrderProductsMap();
   }
 
   private populateProductRows(): void {
@@ -121,6 +129,6 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
         }
       });
     });
-    this.canShowProductDetailsTable = true;
+    this.canShowProductDetailsTable.set(true);
   }
 }

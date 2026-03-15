@@ -23,6 +23,11 @@ a {
     color: var(--primary-color);
 }
 
+/* Constrain layout to viewport so grid pages don't cause page-level scroll */
 .layout-wrapper {
     min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }

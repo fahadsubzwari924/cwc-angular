@@ -1,7 +1,9 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   Input,
   OnDestroy,
 } from '@angular/core';
@@ -15,10 +17,14 @@ type EChartsOption = echarts.EChartsOption;
   selector: 'cwc-deep-bar-graph',
   templateUrl: './deep-bar-graph.component.html',
   styleUrls: ['./deep-bar-graph.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [],
 })
 export class DeepBarGraphComponent implements AfterViewInit, OnDestroy {
-  @Input() chartHeight: number = 400;
+  private readonly elementRef = inject(ElementRef);
 
+  @Input() chartHeight: number = 400;
   @Input() data!: DeepBarGraphData;
   @Input() title!: string;
   @Input() chartId!: string;
@@ -27,8 +33,6 @@ export class DeepBarGraphComponent implements AfterViewInit, OnDestroy {
 
   private deepBarGraphChart!: echarts.ECharts;
   private chartInitialized: boolean = false;
-
-  constructor(private elementRef: ElementRef) {}
 
   ngAfterViewInit(): void {
     this.initChart();

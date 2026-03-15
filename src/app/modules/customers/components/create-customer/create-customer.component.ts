@@ -1,41 +1,52 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SimpleModalComponent } from 'ngx-simple-modal';
-import { ProgressSpinner } from 'primeng/progressspinner';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { BaseDialogComponent } from 'src/app/shared/components/base-dialog/base-dialog.component';
 import { Customer } from '../../models/customer.model';
 import { CustomerService } from '../../services/customer.service';
 import { CountryCityService } from 'src/app/shared/services/country-city.service';
 import { City, Country, Province } from 'src/app/shared/models';
 import { forkJoin, switchMap, tap } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputTextModule } from 'primeng/inputtext';
+import { LoadingService } from 'src/app/core/services/loading.service';
 
 @Component({
   selector: 'app-create-customer',
   templateUrl: './create-customer.component.html',
   styleUrls: ['./create-customer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    DropdownModule,
+    InputTextModule,
+  ],
 })
-export class CreateCustomerComponent
-  extends SimpleModalComponent<null, boolean>
-  implements OnInit
-{
-  title!: string;
+export class CreateCustomerComponent extends BaseDialogComponent implements OnInit {
+  protected readonly formBuilder = inject(FormBuilder);
+  protected readonly customerService = inject(CustomerService);
+  protected readonly countryCityService = inject(CountryCityService);
+  protected readonly destroyRef = inject(DestroyRef);
+  protected readonly loadingService = inject(LoadingService);
+
+  get title(): string {
+    return this.data?.['title'] ?? 'Create Customer';
+  }
 
   customerForm!: FormGroup;
-  spinner!: ProgressSpinner;
-  showSpinner = false;
 
   countries: Array<Country> = [];
   cities: Array<City> = [];
   provinces: Array<Province> = [];
   defaultCountryCode = 'PK';
-
-  constructor(
-    protected formBuilder: FormBuilder,
-    protected customerService: CustomerService,
-    protected countryCityService: CountryCityService
-  ) {
-    super();
-    this.spinner = new ProgressSpinner();
-  }
 
   ngOnInit(): void {
     this.initializeDataAndBuildForm();
@@ -58,19 +69,20 @@ export class CreateCustomerComponent
   }
 
   createCustomer(): void {
-    this.showSpinner = true;
+    this.loadingService.show('Saving customer...');
     const payload = this.buildPayload();
     this.customerService
       .createCustomer(payload)
-      .subscribe((response: Customer) => {
-        this.closeModal();
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.closeModal(),
+        error: () => this.loadingService.hide(),
       });
   }
 
-  closeModal() {
-    this.showSpinner = false;
-    this.result = true;
-    this.close();
+  closeModal(): void {
+    this.loadingService.hide();
+    this.close(true);
   }
 
   buildPayload(): Partial<Customer> {
@@ -87,18 +99,19 @@ export class CreateCustomerComponent
   }
 
   initializeDataAndBuildForm(): void {
-    this.showSpinner = true;
-    this.fetchDataForFormInitialization().subscribe({
-      next: () => {
-        this.buildForm();
-        this.setDefaultCountry();
-        this.showSpinner = false;
-      },
-    });
+    this.loadingService.show('Loading...');
+    this.fetchDataForFormInitialization()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.buildForm();
+          this.setDefaultCountry();
+          this.loadingService.hide();
+        },
+      });
   }
 
   fetchDataForFormInitialization() {
-    this.showSpinner = true;
     return forkJoin({
       countries: this.countryCityService.getCountries(),
       provinces: this.countryCityService.getProvinces(),

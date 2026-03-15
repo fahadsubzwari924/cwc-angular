@@ -1,13 +1,15 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from 'src/app/shared/services/api.service';
 import { ApiPaths } from 'src/app/shared/enums/api-paths';
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { Customer } from '../models/customer.model';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class CustomerService {
-  constructor(private apiService: ApiService) {}
+  private readonly apiService = inject(ApiService);
 
   public getCustomers(
     params = {}

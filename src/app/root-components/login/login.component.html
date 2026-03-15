@@ -1,36 +1,81 @@
-<div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
-    <div class="flex flex-column align-items-center justify-content-center">
-        <div
-            style="border-radius:56px; padding:0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%);">
-            <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius:53px">
-                <div class="text-center mb-5">
-                    <img src="assets/layout/images/cwc_logo.png" alt="Image" height="50" class="cwc-logo mb-3">
-                    <div class="text-900 text-3xl font-medium mb-3">Customize With Class Portal</div>
-                </div>
+<div class="login-page">
+  <div class="login-bg-gradient" aria-hidden="true"></div>
+  <div class="login-bg-shapes" aria-hidden="true">
+    <span class="login-shape login-shape--circle login-shape--1"></span>
+    <span class="login-shape login-shape--circle login-shape--2"></span>
+    <span class="login-shape login-shape--circle login-shape--3"></span>
+    <span class="login-shape login-shape--square login-shape--4"></span>
+    <span class="login-shape login-shape--square login-shape--5"></span>
+    <span class="login-shape login-shape--circle login-shape--6"></span>
+    <span class="login-shape login-shape--square login-shape--7"></span>
+    <span class="login-shape login-shape--circle login-shape--8"></span>
+    <span class="login-shape login-shape--ring login-shape--9"></span>
+    <span class="login-shape login-shape--ring login-shape--10"></span>
+  </div>
+  <div class="login-card">
+    <img src="assets/layout/images/cwc_logo.png" alt="Logo" class="login-logo" />
+    <h1 class="login-title">Customize With Class</h1>
+    <p class="login-subtitle">Sign in to your account</p>
 
-                <form [formGroup]="loginForm">
-                    <label for="email1" class="block text-900 text-xl font-medium mb-2">Email</label>
-                    <input formControlName="email" id="email1" type="text" autocomplete="off webauthn"
-                        placeholder="Email address" pInputText class="w-full md:w-30rem mb-5" style="padding:1rem">
+    <form [formGroup]="loginForm" class="login-form">
+      <div class="login-field">
+        <label for="email" class="login-label">Email</label>
+        <input
+          formControlName="email"
+          id="email"
+          type="email"
+          pInputText
+          class="login-input w-full"
+          placeholder="you@company.com"
+          autocomplete="email"
+        />
+        @if (controls['email'].invalid && controls['email'].touched) {
+          <small class="login-error">Enter a valid email address.</small>
+        }
+      </div>
 
-                    <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
-                    <p-password formControlName="password" id="password1" placeholder="Password" [toggleMask]="true"
-                        autocomplete="false" [feedback]="false" styleClass="mb-5"
-                        inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+      <div class="login-field">
+        <label for="password" class="login-label">Password</label>
+        <p-password
+          formControlName="password"
+          id="password"
+          placeholder="••••••••"
+          [toggleMask]="true"
+          [feedback]="false"
+          inputStyleClass="w-full login-input"
+          styleClass="login-password w-full"
+        />
+        @if (controls['password'].invalid && controls['password'].touched) {
+          <small class="login-error">Password is required.</small>
+        }
+      </div>
 
-                    <div class="flex align-items-center justify-content-between mb-5 gap-5">
-                        <div class="flex align-items-center">
-                            <p-checkbox id="rememberme1" [binary]="true" styleClass="mr-2"></p-checkbox>
-                            <label for="rememberme1">Remember me</label>
-                        </div>
-                        <!-- <a class="font-medium no-underline ml-2 text-right cursor-pointer"
-                            style="color: var(--primary-color)">Forgot password?</a> -->
-                    </div>
-
-                    <p-button label="Submit" [loading]="isLoading" [disabled]="loginForm.invalid" (onClick)="login()"
-                        styleClass="w-full md:w-30rem p-3 text-xl"></p-button>
-                </form>
-            </div>
+      <div class="login-options">
+        <div class="login-remember">
+          <p-checkbox [binary]="true" inputId="remember" styleClass="login-checkbox" />
+          <label for="remember" class="login-remember-label">Remember me</label>
         </div>
-    </div>
+      </div>
+
+      <button
+        pButton
+        pRipple
+        type="button"
+        class="login-submit w-full"
+        [disabled]="isLoading() || loginForm.invalid"
+        (click)="login()"
+      >
+        @if (isLoading()) {
+          <span class="login-submit-loading">
+            <span class="login-submit-label">Signing in</span>
+            <span class="login-submit-dots" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </span>
+          </span>
+        } @else {
+          Sign in
+        }
+      </button>
+    </form>
+  </div>
 </div>

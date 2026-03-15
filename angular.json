@@ -30,8 +30,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss",
-              "./node_modules/ngx-simple-modal/styles/simple-modal.scss"
+              "src/styles.scss"
             ],
             "scripts": []
           },
@@ -45,8 +44,13 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "4kb",
+                  "maximumError": "8kb"
+                },
+                {
+                  "type": "anyScript",
+                  "maximumWarning": "600kb",
+                  "maximumError": "1.2mb"
                 }
               ],
               "outputHashing": "all"
@@ -64,12 +68,15 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "cvc-web:build"
+          },
           "configurations": {
             "production": {
-              "browserTarget": "cvc-web:build:production"
+              "buildTarget": "cvc-web:build:production"
             },
             "development": {
-              "browserTarget": "cvc-web:build:development"
+              "buildTarget": "cvc-web:build:development"
             }
           },
           "defaultConfiguration": "development"

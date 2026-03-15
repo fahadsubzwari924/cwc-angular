@@ -1,89 +1,84 @@
-import { Component, OnInit } from '@angular/core';
-import { SimpleModalComponent } from 'ngx-simple-modal';
-import { ProgressSpinner } from 'primeng/progressspinner';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { BaseDialogComponent } from 'src/app/shared/components/base-dialog/base-dialog.component';
 import { OrderStatus } from '../../enums/order-setatus.enum';
+import { LoadingService } from 'src/app/core/services/loading.service';
 import { INameValue } from 'src/app/shared/interfaces/name-value.interface';
 import { OrderService } from '../../services/order.service';
 import { MessageService } from 'primeng/api';
+import { DropdownModule } from 'primeng/dropdown';
+import { ButtonModule } from 'primeng/button';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-change-order-status-modal',
   templateUrl: './change-order-status-modal.component.html',
   styleUrls: ['./change-order-status-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [FormsModule, DropdownModule, ButtonModule],
 })
-export class ChangeOrderStatusModalComponent
-  extends SimpleModalComponent<null, boolean>
-  implements OnInit
-{
-  title!: string;
-  orderStatus!: string;
-  orderId!: number;
+export class ChangeOrderStatusModalComponent extends BaseDialogComponent implements OnInit {
+  private readonly orderService = inject(OrderService);
+  private readonly messageService = inject(MessageService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly loadingService = inject(LoadingService);
 
-  selectedStatus: INameValue | undefined;
-  spinner: ProgressSpinner;
-  orderStatusOptions: Array<INameValue> = [];
-  showSpinner = false;
-
-  constructor(
-    private orderService: OrderService,
-    private messageService: MessageService
-  ) {
-    super();
-    this.spinner = new ProgressSpinner();
+  get title(): string {
+    return this.data?.['title'] ?? 'Change Order Status';
   }
 
-  ngOnInit() {
+  get orderStatus(): string {
+    return this.data?.['orderStatus'] ?? '';
+  }
+
+  get orderId(): number {
+    return this.data?.['orderId'];
+  }
+
+  selectedStatus: INameValue | undefined;
+  orderStatusOptions: Array<INameValue> = [];
+
+  ngOnInit(): void {
     this.buildOrderStatusOptions();
     this.setOrderStatus();
   }
 
   changeOrderStatus(): void {
-    this.showSpinner = true;
+    this.loadingService.show('Updating status...');
     const updateOrderPayload = {
       status: this.selectedStatus?.value,
     };
     if (this.orderId) {
       this.orderService
         .updateOrder(this.orderId, updateOrderPayload)
-        .subscribe((res) => {
-          this.showSpinner = false;
-          this.messageService.add({
-            severity: 'success',
-            detail: 'Order status changed!',
-          });
-          this.closeModal();
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.loadingService.hide();
+            this.messageService.add({
+              severity: 'success',
+              detail: 'Order status changed!',
+            });
+            this.closeModal();
+          },
+          error: () => this.loadingService.hide(),
         });
     }
   }
 
-  closeModal() {
-    this.showSpinner = false;
-    this.result = true;
-    this.close();
+  closeModal(): void {
+    this.loadingService.hide();
+    this.close(true);
   }
 
   private buildOrderStatusOptions(): void {
     this.orderStatusOptions = [
-      {
-        name: 'Pending',
-        value: OrderStatus.PENDING,
-      },
-      {
-        name: 'Placed To Vendor',
-        value: OrderStatus.VENDOR,
-      },
-      {
-        name: 'Delivered',
-        value: OrderStatus.DELIVERED,
-      },
-      {
-        name: 'Dispatched',
-        value: OrderStatus.DISPATCHED,
-      },
-      {
-        name: 'Returned',
-        value: OrderStatus.RETURNED,
-      },
+      { name: 'Pending', value: OrderStatus.PENDING },
+      { name: 'Placed To Vendor', value: OrderStatus.VENDOR },
+      { name: 'Delivered', value: OrderStatus.DELIVERED },
+      { name: 'Dispatched', value: OrderStatus.DISPATCHED },
+      { name: 'Returned', value: OrderStatus.RETURNED },
     ];
   }
 

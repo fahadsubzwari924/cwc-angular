@@ -1,25 +1,33 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Validators } from '@angular/forms';
 import { CreateOrderSourceComponent } from '../create-order-source/create-order-source.component';
 import { OrderSource } from '../../models/order-source.model';
-import { OrderSourceService } from '../../services/order-source.service';
-
+import { ReactiveFormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputTextarea } from 'primeng/inputtextarea';
 @Component({
   selector: 'app-edit-order-source',
   templateUrl: '../create-order-source/create-order-source.component.html',
   styleUrls: ['../create-order-source/create-order-source.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    InputTextModule,
+    DropdownModule,
+    InputTextarea,
+  ],
 })
 export class EditOrderSourceComponent
   extends CreateOrderSourceComponent
   implements OnInit
 {
-  orderSource!: OrderSource;
-
-  constructor(
-    override formBuilder: FormBuilder,
-    override orderSourceService: OrderSourceService
-  ) {
-    super(formBuilder, orderSourceService);
+  get orderSource(): any {
+    return this.data?.['orderSource'];
   }
 
   override ngOnInit(): void {
@@ -44,11 +52,13 @@ export class EditOrderSourceComponent
   }
 
   updateOrderSource(): void {
-    this.showSpinner = true;
+    this.loadingService.show('Updating order source...');
     this.orderSourceService
       .updateOrderSource(this.orderSourceForm.value)
-      .subscribe((response: any) => {
-        this.closeModal();
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.closeModal(),
+        error: () => this.loadingService.hide(),
       });
   }
 }

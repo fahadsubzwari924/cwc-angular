@@ -1,0 +1,50 @@
+<div class="summary-card">
+  <div class="summary-card__header">
+    <i class="pi pi-receipt"></i>
+    <span>Order Summary</span>
+  </div>
+
+  @if (orderItems().length) {
+    <div class="summary-lines">
+      @for (item of orderItems(); track item.product?.name) {
+        <div class="summary-line">
+          <div class="summary-line__left">
+            <span class="summary-line__name">{{ item.product?.name }}</span>
+            <span class="summary-line__qty">
+              {{ item.formGroup.get('price')?.value ?? 0 | number }} × {{ item.rowGroups.length }}
+            </span>
+          </div>
+          <span class="summary-line__amount">{{ getLineTotal(item) | number }}</span>
+        </div>
+      }
+    </div>
+    <div class="summary-total-divider" aria-hidden="true"></div>
+  } @else {
+    <div class="summary-empty">
+      <i class="pi pi-shopping-bag"></i>
+      <span>Add products to see summary</span>
+    </div>
+  }
+
+  <div class="summary-total">
+    <span class="summary-total__label">Grand Total</span>
+    <span class="summary-total__amount">{{ grandTotal() | number }}</span>
+  </div>
+
+  <div class="summary-actions">
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      [outlined]="true"
+      styleClass="w-full"
+      (onClick)="cancel.emit()"
+    />
+    <p-button
+      label="Save Order"
+      icon="pi pi-check"
+      styleClass="w-full"
+      [disabled]="isFormInvalid()"
+      (onClick)="save.emit()"
+    />
+  </div>
+</div>

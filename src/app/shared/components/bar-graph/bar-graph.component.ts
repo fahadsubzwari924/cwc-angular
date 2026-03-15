@@ -1,7 +1,9 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   Input,
   OnDestroy,
 } from '@angular/core';
@@ -15,10 +17,14 @@ type EChartsOption = echarts.EChartsOption;
   selector: 'app-bar-graph',
   templateUrl: './bar-graph.component.html',
   styleUrls: ['./bar-graph.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [],
 })
 export class BarGraphComponent implements AfterViewInit, OnDestroy {
-  @Input() chartHeight: number = 400;
+  private readonly elementRef = inject(ElementRef);
 
+  @Input() chartHeight: number = 400;
   @Input() data!: BarGraphData;
   @Input() title!: string;
   @Input() chartId!: string;
@@ -27,8 +33,6 @@ export class BarGraphComponent implements AfterViewInit, OnDestroy {
 
   private barGraphChart!: echarts.ECharts;
   private chartInitialized: boolean = false;
-
-  constructor(private elementRef: ElementRef) {}
 
   ngAfterViewInit(): void {
     this.initChart();
@@ -77,6 +81,13 @@ export class BarGraphComponent implements AfterViewInit, OnDestroy {
   }
 
   private getChartOption(): EChartsOption {
+    const yValues = this.data?.yAxis ?? [];
+    const dataMax = yValues.length
+      ? Math.max(...yValues, 0)
+      : 0;
+    // When all values are 0, set a visible scale so the chart and axis are shown
+    const yAxisMax = dataMax === 0 ? 10 : undefined;
+
     return {
       tooltip: {
         trigger: 'axis',
@@ -92,18 +103,20 @@ export class BarGraphComponent implements AfterViewInit, OnDestroy {
       },
       xAxis: {
         type: 'category',
-        data: this.data.xAxis,
+        data: this.data?.xAxis ?? [],
         axisTick: {
           alignWithLabel: true,
         },
       },
       yAxis: {
         type: 'value',
+        min: 0,
+        ...(yAxisMax !== undefined && { max: yAxisMax }),
       },
       series: [
         {
           name: this.tooltipTitle,
-          data: this.data.yAxis,
+          data: yValues,
           type: 'bar',
           barWidth: '60%',
         },

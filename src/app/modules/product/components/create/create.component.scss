@@ -1,9 +1,130 @@
-.product-thumbnail-container{
-    background-color: #f7f7f7;
-    padding: 20px;
-    text-align: center;
-    color: black;
-    font-weight: 500;
-    border: 1px black dashed;
-    cursor: pointer;
+/* =============================================
+   CREATE PRODUCT MODAL — clean, minimal spacing
+   ============================================= */
+
+.product-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Minimal spacing between rows */
+.form-row {
+  margin-bottom: 0.5rem !important;
+
+  &:last-of-type {
+    margin-bottom: 0 !important;
+  }
+}
+
+.product-form .field {
+  padding: 0 0.25rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--neutral-700, #374151);
+  margin-bottom: 0.375rem;
+  letter-spacing: 0.01em;
+}
+
+.field-required {
+  color: var(--danger, #ef4444);
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--neutral-500, #6b7280);
+  margin-top: 0.25rem;
+}
+
+/* Upload zone — compact single row */
+.upload-zone {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0 1rem;
+  border: 1px dashed var(--neutral-300, #d1d5db);
+  border-radius: var(--form-control-radius, 8px);
+  background: var(--neutral-50, #f9fafb);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+
+  &:hover {
+    border-color: var(--primary, #6366f1);
+    background: rgba(99, 102, 241, 0.04);
+
+    .upload-browse {
+      background: var(--primary, #6366f1);
+      color: white;
+    }
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary, #6366f1);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
+  }
+}
+
+.upload-icon {
+  font-size: 1.25rem;
+  color: var(--neutral-400, #9ca3af);
+  flex-shrink: 0;
+
+  .upload-zone:hover & {
+    color: var(--primary, #6366f1);
+  }
+}
+
+.upload-text {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--neutral-600, #4b5563);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+
+  .upload-zone:hover & {
+    color: var(--neutral-700, #374151);
+  }
+}
+
+.upload-browse {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary, #6366f1);
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.1);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Form actions — full width, right-aligned */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--neutral-200, #e5e7eb);
+
+  .p-button {
+    min-width: 5.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-actions {
+    flex-direction: column;
+
+    .p-button {
+      width: 100%;
+    }
+  }
 }

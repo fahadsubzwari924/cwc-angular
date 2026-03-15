@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ReportType } from '../models/report-type.model';
 import { REPORT_MODEL_REGISTRY } from '../models/models-registry';
 import { ReportData } from '../models/report-data.model';
@@ -8,7 +8,7 @@ import { ReportCssService } from './report-css.service';
   providedIn: 'root',
 })
 export class ReportDataMapperService {
-  constructor(private reportsCssService: ReportCssService) {}
+  private readonly reportsCssService = inject(ReportCssService);
 
   mapReportsData(reportTypes: Array<ReportType>, data: any): Array<ReportData> {
     const mappedResults: Record<string, ReportData> = {};

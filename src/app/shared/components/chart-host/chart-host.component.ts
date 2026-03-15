@@ -1,7 +1,9 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ComponentRef,
-  Input,
+  inject,
+  input,
   OnInit,
   Type,
   ViewChild,
@@ -18,43 +20,45 @@ import { DeepBarGraphComponent } from '../deep-bar-graph/deep-bar-graph.componen
   selector: 'cwc-chart-host',
   templateUrl: './chart-host.component.html',
   styleUrls: ['./chart-host.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [],
 })
 export class ChartHostComponent implements OnInit {
-  @Input() reportData!: ReportData;
+  private readonly chartService = inject(ChartService);
+  private readonly reportsDataService = inject(ReportDataService);
+
+  reportData = input.required<ReportData>();
 
   @ViewChild('chartContainer', { read: ViewContainerRef, static: true })
   chartContainer!: ViewContainerRef;
   private componentRef: ComponentRef<any> | null = null;
-
-  constructor(
-    private chartService: ChartService,
-    private reportsDataService: ReportDataService
-  ) {}
 
   ngOnInit(): void {
     this.loadChartComponent();
   }
 
   private loadChartComponent(): void {
+    const data = this.reportData();
     const chartData = this.reportsDataService.generateReportData(
-      this.reportData.chartType,
-      this.reportData.data,
-      this.reportData.dataConfig
+      data.chartType,
+      data.data,
+      data.dataConfig
     );
     const chartComponent: Type<
       PieChartComponent | BarGraphComponent | DeepBarGraphComponent
-    > = this.chartService.getChartComponent(this.reportData.chartType);
+    > = this.chartService.getChartComponent(data.chartType);
     this.componentRef = this.chartContainer.createComponent(chartComponent);
     const chartId = `chart-${Math.random().toString(36).substr(2, 9)}`;
 
     Object.assign(this.componentRef.instance, {
       data: chartData,
-      title: this.reportData?.title,
+      title: data?.title,
       chartId: chartId,
-      subTitle: this.reportData.subTitle,
-      tooltipFormat: this.reportData.tooltipFormat,
-      tooltipTitle: this.reportData.tooltipTitle,
-      showLegends: this.reportData.showLegends,
+      subTitle: data.subTitle,
+      tooltipFormat: data.tooltipFormat,
+      tooltipTitle: data.tooltipTitle,
+      showLegends: data.showLegends,
     });
   }
 

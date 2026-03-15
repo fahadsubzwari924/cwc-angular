@@ -1,29 +1,51 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NgClass, NgStyle } from '@angular/common';
+import { SkeletonModule } from 'primeng/skeleton';
+import { LoadingService } from 'src/app/core/services/loading.service';
 import { CustomResponse } from 'src/app/shared/models/response.model';
 import { ReportsService as DashboardReportService } from 'src/app/shared/services/reports.service';
-import { DashboardStatsModel } from './model/dashboard.model';
+import { DashboardStatsModel, DashboardStatsPropertyModel } from './model/dashboard.model';
 import { ReportsService } from '../reports/services/reports.service';
 import { ReportCssService } from '../reports/services/report-css.service';
 import { ReportData } from '../reports/models/report-data.model';
 import { ReportType } from '../reports/models/report-type.model';
 import { catchError, iif, of, switchMap, tap } from 'rxjs';
+import { ChartHostComponent } from 'src/app/shared/components/chart-host/chart-host.component';
 
 @Component({
   templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [NgClass, NgStyle, SkeletonModule, ChartHostComponent],
 })
-export class DashboardComponent {
-  dashboardStats!: DashboardStatsModel;
-  isLoading = false;
-  dashboardStatusProperties = 8;
-  showSpinner = false;
-  reports: Array<ReportData> = [];
-  monthlyReport!: ReportType | undefined;
+export class DashboardComponent implements OnInit {
+  private readonly dashboardReportService = inject(DashboardReportService);
+  private readonly reportService = inject(ReportsService);
+  private readonly reportCssService = inject(ReportCssService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly loadingService = inject(LoadingService);
 
-  constructor(
-    private dashboardReportService: DashboardReportService,
-    private reportService: ReportsService,
-    private reportCssService: ReportCssService
-  ) {}
+  dashboardStats = signal<DashboardStatsModel | null>(null);
+  /** Precomputed array for template iteration; replaces keyvalue pipe. */
+  dashboardStatsArray = computed(() => {
+    const stats = this.dashboardStats();
+    if (!stats) return [];
+    return Object.entries(stats).map(([key, value]) => ({
+      key,
+      value: value as DashboardStatsPropertyModel,
+    }));
+  });
+  isLoading = signal(false);
+  dashboardStatusProperties = 8;
+  /** Stable array for @for to avoid ExpressionChangedAfterItHasBeenCheckedError (iterator creates new ref each run). */
+  readonly skeletonIndices: number[] = Array.from(
+    { length: 8 },
+    (_, i) => i
+  );
+  reports = signal<ReportData[]>([]);
+  monthlyReport = signal<ReportType | undefined>(undefined);
 
   ngOnInit() {
     this.getDashboardStats();
@@ -31,54 +53,49 @@ export class DashboardComponent {
   }
 
   getDashboardStats(): void {
-    this.isLoading = true;
-    this.dashboardReportService.getDashboardStats().subscribe(
-      (response: CustomResponse<DashboardStatsModel>) => {
-        this.dashboardStats = response?.payload ?? {};
-        this.isLoading = false;
-      },
-      (error) => {
-        this.isLoading = false;
-        console.log(error);
-      }
-    );
+    this.isLoading.set(true);
+    this.dashboardReportService
+      .getDashboardStats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response: CustomResponse<DashboardStatsModel>) => {
+          this.dashboardStats.set(response?.payload ?? {});
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          this.isLoading.set(false);
+          console.log(error);
+        },
+      });
   }
 
-  /**
-   * High-level method to load report data.
-   * It first fetches report types, selects the monthly report, and then fetches the relevant reports.
-   */
   loadReports(): void {
-    this.showSpinner = true;
+    this.loadingService.show('Loading reports...');
 
     this.getReportTypes()
       .pipe(
         switchMap((reportTypes: Array<ReportType>) => {
-          this.monthlyReport = this.findMonthlyReport(reportTypes);
+          const monthly = this.findMonthlyReport(reportTypes);
+          queueMicrotask(() => this.monthlyReport.set(monthly));
           return iif(
-            () => !!this.monthlyReport,
-            this.fetchReports(),
+            () => !!monthly,
+            this.fetchReportsForType(monthly!),
             of({ payload: [] })
           );
         }),
         tap((response) => this.handleReports(response)),
-        catchError(this.handleError.bind(this))
+        catchError(this.handleError.bind(this)),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         error: this.stopSpinner.bind(this),
       });
   }
 
-  /**
-   * Fetch report types from the service.
-   */
   private getReportTypes() {
     return this.reportService.getReportTypes();
   }
 
-  /**
-   * Find the 'monthly_orders' report type.
-   */
   private findMonthlyReport(
     reportTypes: Array<ReportType>
   ): ReportType | undefined {
@@ -87,40 +104,30 @@ export class DashboardComponent {
     );
   }
 
-  /**
-   * Fetch reports based on the selected report type and filters.
-   */
-  private fetchReports() {
-    const selectedReportTypes = [this.monthlyReport] as Array<ReportType>;
+  private fetchReportsForType(reportType: ReportType) {
+    const selectedReportTypes = [reportType];
     const filters = { filters: { year: new Date().getFullYear() } };
-
     return this.reportService.getReport(selectedReportTypes, filters);
   }
 
-  /**
-   * Handle the fetched report data.
-   */
   private handleReports(
     response: CustomResponse<Array<ReportData>> | { payload: never[] }
   ): void {
-    this.reports = response.payload || [];
-    this.stopSpinner();
-    console.log(this.reports);
+    const payload = response.payload || [];
+    // Defer signal update to next tick to avoid NG0100
+    queueMicrotask(() => {
+      this.reports.set(payload);
+      this.stopSpinner();
+    });
   }
 
-  /**
-   * Handle errors during fetching report types or reports.
-   */
   private handleError(error: any) {
     console.error('Error fetching report types or reports:', error);
     this.stopSpinner();
-    return of({ payload: [] }); // Return an empty payload on error
+    return of({ payload: [] });
   }
 
-  /**
-   * Stop the spinner.
-   */
-  private stopSpinner() {
-    this.showSpinner = false;
+  private stopSpinner(): void {
+    this.loadingService.hide();
   }
 }

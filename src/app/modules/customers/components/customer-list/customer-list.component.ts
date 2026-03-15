@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { SimpleModalService } from 'ngx-simple-modal';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { ModalService } from 'src/app/shared/services/modal.service';
 import { MessageService } from 'primeng/api';
 import {
   Observable,
@@ -20,23 +22,43 @@ import { EditCustomerComponent } from '../edit-customer/edit-customer.component'
 import { UtilService } from '../../../../util/util.service';
 import { ListConstants } from 'src/app/constants/list-constants';
 import { AutoCompleteCompleteEvent } from 'src/app/modules/order/interfaces/order-product.interface';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { PaginatorModule } from 'primeng/paginator';
+import { BlockUIModule } from 'primeng/blockui';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    ToastModule,
+    PaginatorModule,
+    BlockUIModule,
+    AutoCompleteModule,
+    SkeletonModule,
+    ProgressSpinnerModule,
+  ],
 })
-export class CustomerListComponent {
-  constructor(
-    private customerService: CustomerService,
-    public paginationConstants: PaginationConstants,
-    private modalService: SimpleModalService,
-    private messageService: MessageService,
-    private utilService: UtilService
-  ) {}
+export class CustomerListComponent implements OnInit {
+  private readonly customerService = inject(CustomerService);
+  readonly paginationConstants = inject(PaginationConstants);
+  private readonly modalService = inject(ModalService);
+  private readonly messageService = inject(MessageService);
+  private readonly utilService = inject(UtilService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  customers: Array<Customer> = [];
-  customerResponseMetadata: any;
+  customers = signal<Array<Customer>>([]);
+  customerResponseMetadata = signal<any>(null);
   columns = [
     {
       field: 'fullName',
@@ -61,28 +83,31 @@ export class CustomerListComponent {
   ];
   sortOrder: number = 0;
   sortField: string = '';
-  isLoading = false;
-  startingRow = 0;
-  customerSuggestions: Array<Customer> = [];
+  isLoading = signal(false);
+  startingRow = signal(0);
+  customerSuggestions = signal<Array<Customer>>([]);
 
   ngOnInit(): void {
-    this.startingRow = this.paginationConstants.FIRST_ROW;
+    this.startingRow.set(this.paginationConstants.FIRST_ROW);
     this.getCustomers();
   }
 
   getCustomers(params = {}): void {
-    this.isLoading = true;
-    this.customerService.getCustomers(params).subscribe({
-      next: (response: CustomResponse<Customer[]>) => {
-        this.customers = response?.payload ?? [];
-        this.customerResponseMetadata = response.metadata;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.customers = [];
-      },
-    });
+    this.isLoading.set(true);
+    this.customerService
+      .getCustomers(params)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response: CustomResponse<Customer[]>) => {
+          this.customers.set(response?.payload ?? []);
+          this.customerResponseMetadata.set(response.metadata);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.isLoading.set(false);
+          this.customers.set([]);
+        },
+      });
   }
 
   onSortChange(event: any) {
@@ -98,32 +123,28 @@ export class CustomerListComponent {
   }
 
   openCreateCustomerModal(): void {
-    const inputs = {
-      title: 'Create Customer',
-    };
     this.modalService
-      .addModal(CreateCustomerComponent, inputs)
+      .open(CreateCustomerComponent, { title: 'Create Customer' }, {
+        header: 'Create Customer',
+        width: '580px',
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
-        if (isConfirmed) {
-          this.getCustomers();
-        }
+        if (isConfirmed) this.getCustomers();
       });
   }
 
   openEditCustomerModal(customer: Customer): void {
-    const inputs = {
-      title: 'Edit Customer',
-      customer,
-    };
     this.modalService
-      .addModal(EditCustomerComponent, inputs)
+      .open(EditCustomerComponent, { title: 'Edit Customer', customer }, {
+        header: 'Edit Customer',
+        width: '580px',
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
           const requestParams = {
-            page:
-              this.utilService.getFromLocalStorage(
-                ListConstants.CURRENT_PAGE
-              ) ?? 1,
+            page: this.utilService.getFromLocalStorage(ListConstants.CURRENT_PAGE) ?? 1,
           };
           this.getCustomers(requestParams);
         }
@@ -134,10 +155,11 @@ export class CustomerListComponent {
     const description = `Are you sure you want to delete this customer with name "${customer.fullName}"?`;
     const toastMessage = 'Customer deleted!';
     this.modalService
-      .addModal(ConfirmationModalComponent, {
+      .open(ConfirmationModalComponent, {
         modalTitle: 'Delete Customer',
         modalDescription: description,
-      })
+      }, { header: 'Delete Customer' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
           this.customerService
@@ -145,7 +167,8 @@ export class CustomerListComponent {
             .pipe(
               tap(() => this.showToast(toastMessage)),
               tap(() => this.setCurrentPage()),
-              switchMap(() => of(this.getCustomers()))
+              switchMap(() => of(this.getCustomers())),
+              takeUntilDestroyed(this.destroyRef)
             )
             .subscribe();
         }
@@ -160,10 +183,10 @@ export class CustomerListComponent {
   }
 
   onPageChange(paginationEvent: any): void {
-    this.startingRow = paginationEvent?.first ?? 0;
+    this.startingRow.set(paginationEvent?.first ?? 0);
     this.utilService.setValueInLocalStorage(
       ListConstants.CURRENT_ROWS,
-      this.startingRow
+      this.startingRow()
     );
     this.utilService.setValueInLocalStorage(
       ListConstants.CURRENT_PAGE,
@@ -182,7 +205,7 @@ export class CustomerListComponent {
     return this.customerService.searchCustomers(queryParams);
   }
 
-  searchCustomer(event: AutoCompleteCompleteEvent): void {
+  searchCustomer(event: any): void {
     of(event)
       .pipe(
         debounceTime(500),
@@ -191,14 +214,15 @@ export class CustomerListComponent {
             customerAutocompleteEvent.query
         ),
         distinctUntilChanged(),
-        switchMap((searchTerm: string) => this.searchForCustomers(searchTerm))
+        switchMap((searchTerm: string) => this.searchForCustomers(searchTerm)),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((customers: Array<Customer>) => {
-        this.customerSuggestions = customers;
+        this.customerSuggestions.set(customers);
       });
   }
 
-  getSelectedCustomer(selectedCustomer: Customer): void {
+  getSelectedCustomer(selectedCustomer: any): void {
     const queryParams = {
       filters: JSON.stringify({ fullName: selectedCustomer?.fullName }),
     };
@@ -210,8 +234,8 @@ export class CustomerListComponent {
   }
 
   private setCurrentPage(): void {
-    this.startingRow = this.utilService.getFromLocalStorage(
-      ListConstants.CURRENT_ROWS
+    this.startingRow.set(
+      this.utilService.getFromLocalStorage(ListConstants.CURRENT_ROWS)
     );
   }
 }

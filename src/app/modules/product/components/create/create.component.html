@@ -1,52 +1,87 @@
-<div class="modal-content cvc-custom-modal">
-  <div class="modal-header">
-    <h4>{{ title || "Confirm" }}</h4>
-  </div>
-  <div class="modal-body">
-    <form [formGroup]="productForm">
-      <div class="formgrid grid">
-        <div class="field col">
-          <label for="firstname2" requiredField>Name</label>
-          <input formControlName="name" id="firstname2" type="text"
-            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
-        </div>
+<div class="product-form">
+  <form [formGroup]="productForm" class="p-fluid">
+    <!-- Row 1: Name full width -->
+    <div class="formgrid grid form-row">
+      <div class="field col-12">
+        <label for="productName" class="field-label">Name <span class="field-required">*</span></label>
+        <input
+          pInputText
+          formControlName="name"
+          id="productName"
+          type="text"
+          placeholder="Enter product name"
+          class="w-full" />
+        @if (productForm.get('name')?.invalid && productForm.get('name')?.touched) {
+          <small class="field-hint">Min 5 characters</small>
+        }
       </div>
-      <div class="formgrid grid">
-        <div class="field col">
-          <label for="description">Description</label>
-          <textarea formControlName="description" id="description" rows="5" cols="30" pInputTextarea
-            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"></textarea>
-        </div>
+    </div>
+
+    <!-- Row 2: Description full width -->
+    <div class="formgrid grid form-row">
+      <div class="field col-12">
+        <label for="description" class="field-label">Description</label>
+        <textarea
+          pInputTextarea
+          formControlName="description"
+          id="description"
+          rows="3"
+          placeholder="Brief product description"
+          class="w-full"></textarea>
       </div>
-      <div class="formgrid grid">
-        <div class="field col">
-          <label for="lastname2" requiredField>Cost</label>
-          <input formControlName="cost" id="lastname2" type="number"
-            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
-        </div>
-        <div class="field col">
-          <label for="lastname2">Weight</label>
-          <input formControlName="weight" id="lastname2" type="text"
-            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
-        </div>
+    </div>
+
+    <!-- Row 3: Cost and Weight side by side -->
+    <div class="formgrid grid form-row">
+      <div class="field col-12 md:col-6">
+        <label for="cost" class="field-label">Cost <span class="field-required">*</span></label>
+        <input
+          pInputText
+          formControlName="cost"
+          id="cost"
+          type="number"
+          placeholder="0"
+          class="w-full" />
       </div>
-      <div class="formgrid grid">
-        <div class="field col">
-          <div class="product-thumbnail-container" (click)="openFileUploader()">
-            Browse
-          </div>
-          <p *ngIf="productThumbnailName" class="text-primary font-bold mt-1">{{ productThumbnailName }}</p>
-          <input type="file" #fileInput [hidden]="true" (change)="onUploadProductThumbnail($event)">
-        </div>
+      <div class="field col-12 md:col-6">
+        <label for="weight" class="field-label">Weight</label>
+        <input
+          pInputText
+          formControlName="weight"
+          id="weight"
+          type="text"
+          placeholder="e.g. 0.5 kg"
+          class="w-full" />
       </div>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <p-button label="Cancel" styleClass="p-button-secondary p-button-sm" (onClick)="close()"></p-button>
-    <p-button label="Save" styleClass="p-button-sm ml-2" [disabled]="productForm.invalid"
-      (onClick)="saveProduct()"></p-button>
+    </div>
+
+    <!-- Row 4: Thumbnail full width -->
+    <div class="formgrid grid form-row">
+      <div class="field col-12">
+        <label class="field-label">Thumbnail</label>
+        <div
+          class="upload-zone"
+          (click)="openFileUploader()"
+          (keydown.enter)="openFileUploader()"
+          (keydown.space)="openFileUploader()"
+          tabindex="0"
+          role="button">
+          <i class="pi pi-image upload-icon"></i>
+          <span class="upload-text">{{ productThumbnailName || 'Drop image or click to choose' }}</span>
+          <span class="upload-browse">Choose file</span>
+        </div>
+        <input
+          type="file"
+          #fileInput
+          [hidden]="true"
+          accept="image/*"
+          (change)="onUploadProductThumbnail($event)" />
+      </div>
+    </div>
+  </form>
+
+  <div class="form-actions">
+    <button pButton type="button" label="Cancel" class="p-button-outlined p-button-secondary" (click)="close()"></button>
+    <button pButton type="button" label="Save Product" icon="pi pi-check" class="p-button-primary" [disabled]="productForm.invalid" (click)="saveProduct()"></button>
   </div>
 </div>
-<p-blockUI [blocked]="showSpinner">
-  <p-progressSpinner></p-progressSpinner>
-</p-blockUI>

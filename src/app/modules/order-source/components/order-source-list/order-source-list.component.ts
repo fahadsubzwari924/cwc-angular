@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
-import { SimpleModalService } from 'ngx-simple-modal';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CurrencyPipe, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ModalService } from 'src/app/shared/services/modal.service';
 import { MessageService } from 'primeng/api';
 import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
 import { UtilService } from 'src/app/util/util.service';
@@ -11,23 +14,45 @@ import { CreateOrderSourceComponent } from '../create-order-source/create-order-
 import { ConfirmationModalComponent } from 'src/app/shared/components/confirmation-modal/confirmation-modal.component';
 import { of, switchMap, tap } from 'rxjs';
 import { EditOrderSourceComponent } from '../edit-order-source/edit-order-source.component';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { PaginatorModule } from 'primeng/paginator';
+import { BlockUIModule } from 'primeng/blockui';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FieldPipe } from 'src/app/shared/pipes/show-nested-field.pipe';
 
 @Component({
   selector: 'app-order-source-list',
   templateUrl: './order-source-list.component.html',
   styleUrls: ['./order-source-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    ToastModule,
+    PaginatorModule,
+    BlockUIModule,
+    SkeletonModule,
+    ProgressSpinnerModule,
+    DatePipe,
+    CurrencyPipe,
+    FieldPipe,
+  ],
 })
-export class OrderSourceListComponent {
-  constructor(
-    private orderSourceService: OrderSourceService,
-    public paginationConstants: PaginationConstants,
-    private modalService: SimpleModalService,
-    private messageService: MessageService,
-    private utilService: UtilService
-  ) {}
+export class OrderSourceListComponent implements OnInit {
+  private readonly orderSourceService = inject(OrderSourceService);
+  readonly paginationConstants = inject(PaginationConstants);
+  private readonly modalService = inject(ModalService);
+  private readonly messageService = inject(MessageService);
+  private readonly utilService = inject(UtilService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  orderSources: Array<OrderSource> = [];
-  orderSourcesResponseMetadata: any;
+  orderSources = signal<Array<OrderSource>>([]);
+  orderSourcesResponseMetadata = signal<any>(null);
   columns = [
     {
       field: 'name',
@@ -52,34 +77,37 @@ export class OrderSourceListComponent {
   ];
   sortOrder: number = 0;
   sortField: string = '';
-  isLoading = false;
-  startingRow = 0;
+  isLoading = signal(false);
+  startingRow = signal(0);
 
   ngOnInit(): void {
-    this.startingRow = this.paginationConstants.FIRST_ROW;
+    this.startingRow.set(this.paginationConstants.FIRST_ROW);
     this.getOrderSources();
   }
 
   getOrderSources(params = {}): void {
-    this.isLoading = true;
-    this.orderSourceService.getOrderSources(params).subscribe(
-      (response: CustomResponse<OrderSource[]>) => {
-        this.orderSources = response?.payload ?? [];
-        this.orderSourcesResponseMetadata = response?.metadata;
-        this.isLoading = false;
-      },
-      (error) => {
-        this.isLoading = false;
-        this.orderSources = [];
-      }
-    );
+    this.isLoading.set(true);
+    this.orderSourceService
+      .getOrderSources(params)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response: CustomResponse<OrderSource[]>) => {
+          this.orderSources.set(response?.payload ?? []);
+          this.orderSourcesResponseMetadata.set(response?.metadata);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.isLoading.set(false);
+          this.orderSources.set([]);
+        },
+      });
   }
 
   onPageChange(paginationEvent: any): void {
-    this.startingRow = paginationEvent?.first ?? 0;
+    this.startingRow.set(paginationEvent?.first ?? 0);
     this.utilService.setValueInLocalStorage(
       ListConstants.CURRENT_ROWS,
-      this.startingRow
+      this.startingRow()
     );
     this.utilService.setValueInLocalStorage(
       ListConstants.CURRENT_PAGE,
@@ -92,32 +120,22 @@ export class OrderSourceListComponent {
   }
 
   openCreateOrderSourcerModal(): void {
-    const inputs = {
-      title: 'Create Order Source',
-    };
     this.modalService
-      .addModal(CreateOrderSourceComponent, inputs)
+      .open(CreateOrderSourceComponent, { title: 'Create Order Source' }, { header: 'Create Order Source' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
-        if (isConfirmed) {
-          this.getOrderSources();
-        }
+        if (isConfirmed) this.getOrderSources();
       });
   }
 
   openEditOrderSourceModal(orderSource: OrderSource): void {
-    const inputs = {
-      title: 'Edit Order Source',
-      orderSource,
-    };
     this.modalService
-      .addModal(EditOrderSourceComponent, inputs)
+      .open(EditOrderSourceComponent, { title: 'Edit Order Source', orderSource }, { header: 'Edit Order Source' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
           const requestParams = {
-            page:
-              this.utilService.getFromLocalStorage(
-                ListConstants.CURRENT_PAGE
-              ) ?? 1,
+            page: this.utilService.getFromLocalStorage(ListConstants.CURRENT_PAGE) ?? 1,
           };
           this.getOrderSources(requestParams);
         }
@@ -128,10 +146,11 @@ export class OrderSourceListComponent {
     const description = `Are you sure you want to delete this order source with name "${orderSource?.name}"?`;
     const toastMessage = 'Order source deleted!';
     this.modalService
-      .addModal(ConfirmationModalComponent, {
+      .open(ConfirmationModalComponent, {
         modalTitle: 'Delete Order Source',
         modalDescription: description,
-      })
+      }, { header: 'Delete Order Source' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isConfirmed) => {
         if (isConfirmed) {
           this.orderSourceService
@@ -139,7 +158,8 @@ export class OrderSourceListComponent {
             .pipe(
               tap(() => this.showToast(toastMessage)),
               tap(() => this.setCurrentPage()),
-              switchMap(() => of(this.getOrderSources()))
+              switchMap(() => of(this.getOrderSources())),
+              takeUntilDestroyed(this.destroyRef)
             )
             .subscribe();
         }
@@ -154,8 +174,8 @@ export class OrderSourceListComponent {
   }
 
   private setCurrentPage(): void {
-    this.startingRow = this.utilService.getFromLocalStorage(
-      ListConstants.CURRENT_ROWS
+    this.startingRow.set(
+      this.utilService.getFromLocalStorage(ListConstants.CURRENT_ROWS)
     );
   }
 }

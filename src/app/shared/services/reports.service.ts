@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable, map } from 'rxjs';
 import { CustomResponse } from '../models/response.model';
@@ -6,11 +6,10 @@ import { ApiPaths } from '../enums/api-paths';
 import { DashboardStatsModel } from 'src/app/modules/dashboard/model/dashboard.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ReportsService {
-
-  constructor(private apiService: ApiService) { }
+  private readonly apiService = inject(ApiService);
 
   getDashboardStats(): Observable<CustomResponse<DashboardStatsModel>> {
     return this.apiService.httpGet(ApiPaths.DashboardStats).pipe(
