@@ -1,50 +1,67 @@
-<div class="grid">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <div class="grid">
-          <div class="col-12 md:col-3">
-            <p-button icon="pi pi-plus" label="Add Product" styleClass="mb-2 p-button-sm w-full md:w-auto"
-              (onClick)="openCreateProductModal()">
-            </p-button>
-          </div>
-          <div class="col-12 md:col-5 md:col-offset-4">
-            <p-autoComplete placeholder="Search product" [dropdown]="true" [suggestions]="productSuggestions"
-              [showClear]="true" (completeMethod)="searchProduct($event)" (onSelect)="getSelectedProduct($event)"
-              (onClear)="onProductUnSelect()" field="name"></p-autoComplete>
-          </div>
-        </div>
-      </div>
-      <ng-container *ngIf="!isLoading && products?.length; else noProducts">
-        <p-dataView #dv [value]="products" filterBy="name" layout="grid">
-          <ng-template pTemplate="header">
-            <div class="flex flex-column md:flex-row md:justify-content-between gap-2">
-              <p-dropdown [options]="sortOptions" placeholder="Sort By Cost"
-                (onChange)="onSortChange($event)"></p-dropdown>
-            </div>
-          </ng-template>
+<div class="products-page">
 
-          <ng-template let-product pTemplate="gridItem">
-            <div class="col-12 md:col-4 p-2">
-              <cwc-product-card [product]="product" (edit)="openEditProductModal($event)"
-                (delete)="onDelete($event)"></cwc-product-card>
-            </div>
-          </ng-template>
-        </p-dataView>
-        <p-paginator (onPageChange)="onPageChange($event)" [first]="startingRow"
-          [rows]="paginationConstants.PRODUCT_LIST_PAGE_LIMIT"
-          [totalRecords]="productResponseMetadata?.totalItems"></p-paginator>
-      </ng-container>
-      <ng-template #noProducts>
-        <div class="grid mt-3">
-          <ng-container *ngFor="let item of [1,2,3]">
-            <div class="card m-3 border-1 surface-border relative">
-              <p-skeleton width="15rem" height="20rem"></p-skeleton>
-            </div>
-          </ng-container>
-        </div>
-      </ng-template>
-      <p-toast></p-toast>
+  <!-- Toolbar: search (4) + sort (3) left-aligned | spacer (3) | button (2) right-aligned -->
+  <div class="grid products-toolbar">
+    <div class="col-12 md:col-4">
+      <p-autoComplete
+        placeholder="Search products..."
+        [dropdown]="false"
+        [suggestions]="productSuggestions()"
+        [showClear]="true"
+        (completeMethod)="searchProduct($event)"
+        (onSelect)="getSelectedProduct($event)"
+        (onClear)="onProductUnSelect()"
+        field="name">
+      </p-autoComplete>
+    </div>
+    <div class="col-12 md:col-3">
+      <p-dropdown
+        [options]="sortOptions"
+        placeholder="Sort By"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="onSortChange($event)">
+      </p-dropdown>
+    </div>
+    <div class="col-12 md:col-3" aria-hidden="true">
+      <!-- Spacer: keeps button in last 2 cols so it aligns with product grid right edge -->
+    </div>
+    <div class="col-12 md:col-2 flex justify-content-end">
+      <p-button icon="pi pi-plus" label="Add Product" styleClass="p-button-sm w-full md:w-auto"
+      (onClick)="openCreateProductModal()"></p-button>
     </div>
   </div>
+
+  <!-- Product Grid -->
+  <div class="grid-container">
+    @if (!isLoading() && products()?.length) {
+      <div class="products-grid">
+        @for (product of products(); track product.id) {
+          <cwc-product-card [product]="product" (edit)="openEditProductModal($event)"
+            (delete)="onDelete($event)">
+          </cwc-product-card>
+        }
+      </div>
+
+      <div class="pagination-section">
+        <p-paginator (onPageChange)="onPageChange($event)" [first]="startingRow()"
+          [rows]="paginationConstants.PRODUCT_LIST_PAGE_LIMIT"
+          [totalRecords]="productResponseMetadata()?.totalItems ?? 0">
+        </p-paginator>
+      </div>
+    } @else {
+      <div class="products-grid">
+        @for (item of [1,2,3,4,5,6]; track item) {
+          <div class="skeleton-card">
+            <p-skeleton [borderRadius]="'14px'" width="100%" height="220px" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="70%" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="45%"></p-skeleton>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
 </div>
+
+<p-toast></p-toast>

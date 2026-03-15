@@ -3,3 +3,42 @@
     border-radius: 50%;
   }
 }
+
+/* Pre-migration header: icon-only on white, no circle or outline */
+.layout-topbar {
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.layout-topbar-button {
+  color: var(--text-color-secondary, #6c757d);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+  transition: all 0.2s ease;
+
+  i.pi {
+    font-size: 1.25rem;
+    font-family: 'primeicons';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  &:hover {
+    color: var(--text-color, #495057);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: none !important;
+  }
+}

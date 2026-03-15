@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { City } from '../models/city.model';
@@ -9,7 +9,7 @@ import { Province } from '../models';
   providedIn: 'root',
 })
 export class CountryCityService {
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   // Fetch and map countries
   getCountries(): Observable<Array<Country>> {

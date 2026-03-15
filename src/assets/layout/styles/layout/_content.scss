@@ -1,12 +1,71 @@
 .layout-main-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    justify-content: space-between;
-    padding: 7rem 2rem 2rem 4rem;
+    height: 100vh;
+    padding: 7rem 2rem 1.5rem 4rem;
     transition: margin-left $transitionDuration;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .layout-main {
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    /* router-outlet: zero-size, don't participate in flex */
+    > router-outlet {
+        display: none;
+    }
+
+    /* Route component host: fill all remaining space as a flex column */
+    > *:not(router-outlet) {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0;
+        min-height: 0;
+        overflow: hidden;
+    }
+}
+
+/* -----------------------------------------------------------------------------
+   Dashboard page exception: allow vertical scroll so the Monthly Orders graph
+   (and any content below the fold) is visible. Other pages keep overflow hidden.
+   
+   Key changes for dashboard:
+   1. layout-main-container: overflow-y: auto for vertical scroll
+   2. dashboard component host: flex: 0 1 auto (shrink-to-fit) + overflow: visible
+   3. grid inside dashboard: flex: 0 0 auto (no flex growth) + overflow: visible
+   4. col inside grid: overflow: visible so content can expand
+   ----------------------------------------------------------------------------- */
+.layout-wrapper.layout-dashboard {
+    .layout-main-container {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .layout-main {
+        overflow: visible;
+        
+        > *:not(router-outlet) {
+            flex: 0 1 auto;
+            min-height: min-content;
+            overflow: visible;
+            display: block;
+        }
+    }
+
+/* Grids on dashboard don't grow with flex; they flow with content */
+    .grid {
+        flex: 0 0 auto !important;
+        overflow: visible !important;
+        /* Don't override display: grid — let PrimeFlex handle it */
+        
+        > [class*="col"] {
+            overflow: visible !important;
+        }
+    }
 }

@@ -8,7 +8,7 @@
                     <div class="col-4">
                         <div class="flex flex-column gap-2">
                             <label>Select Category</label>
-                            <p-multiSelect [options]="reportCategories" [(ngModel)]="selectedReportCategories"
+                            <p-multiSelect [options]="reportCategories()" [(ngModel)]="selectedReportCategories"
                                 styleClass="w-full" optionLabel="name" optionValue="value" display="chip"
                                 appendTo="body" [showClear]="true" (onChange)="getReportTypes()" />
                         </div>
@@ -16,7 +16,7 @@
                     <div class="col-4">
                         <div class="flex flex-column gap-2">
                             <label>Select Report Type</label>
-                            <p-multiSelect [options]="reportTypes" [(ngModel)]="selectedReportTypes" styleClass="w-full"
+                            <p-multiSelect [options]="reportTypes()" [(ngModel)]="selectedReportTypes" styleClass="w-full"
                                 optionLabel="name" display="chip" appendTo="body" [showClear]="true"
                                 (onChange)="onSelectReportType()" />
                         </div>
@@ -26,7 +26,7 @@
                             <label>Select Year</label>
                             <p-dropdown [(ngModel)]="selectedYear" [options]="yearOptions" optionLabel="name"
                                 [showClear]="true" optionValue="value" [autoDisplayFirst]="false"
-                                [disabled]="yearDisabled" appendTo="body"></p-dropdown>
+                                [disabled]="yearDisabled()" appendTo="body"></p-dropdown>
                         </div>
                     </div>
                 </div>
@@ -34,8 +34,8 @@
                     <div class="col-4">
                         <div class="flex flex-column gap-2">
                             <label>Select Date Range</label>
-                            <p-calendar styleClass="w-full" selectionMode="range" appendTo="body"
-                                [(ngModel)]="selectedDateRange"></p-calendar>
+                            <p-datepicker styleClass="w-full" selectionMode="range" appendTo="body"
+                                [(ngModel)]="selectedDateRange"></p-datepicker>
                         </div>
                     </div>
                     <div class="col-2 flex align-items-end">
@@ -49,12 +49,11 @@
 </div>
 
 <div class="grid mt-5">
-    <div *ngFor="let report of reports" [ngClass]="report.cssClasses">
-        <div class="card report-chart-wrapper">
-            <cwc-chart-host [reportData]="report"></cwc-chart-host>
-        </div>
+  @for (report of reports(); track $index) {
+    <div [ngClass]="report.cssClasses">
+      <div class="card report-chart-wrapper">
+        <cwc-chart-host [reportData]="report"></cwc-chart-host>
+      </div>
     </div>
+  }
 </div>
-<p-blockUI [blocked]="showSpinner">
-    <p-progressSpinner></p-progressSpinner>
-</p-blockUI>

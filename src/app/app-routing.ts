@@ -1,10 +1,9 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { LayoutComponent } from './core/layout/layout.component';
 import { LoginComponent } from './root-components/login/login.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
-const routes: Routes = [
+export const appRoutes: Routes = [
   {
     path: '',
     canActivate: [AuthGuard],
@@ -13,41 +12,41 @@ const routes: Routes = [
       {
         path: 'dashboard',
         loadChildren: () =>
-          import('./modules/dashboard/dashboard.module').then(
-            (m) => m.DashboardModule
+          import('./modules/dashboard/dashboard.routes').then(
+            (m) => m.dashboardRoutes
           ),
       },
       {
         path: 'products',
         loadChildren: () =>
-          import('./modules/product/product.module').then(
-            (m) => m.ProductModule
+          import('./modules/product/product.routes').then(
+            (m) => m.productRoutes
           ),
       },
       {
         path: 'customers',
         loadChildren: () =>
-          import('./modules/customers/customers.module').then(
-            (m) => m.CustomersModule
+          import('./modules/customers/customers.routes').then(
+            (m) => m.customersRoutes
           ),
       },
       {
         path: 'orders',
         loadChildren: () =>
-          import('./modules/order/order.module').then((m) => m.OrderModule),
+          import('./modules/order/order.routes').then((m) => m.orderRoutes),
       },
       {
         path: 'order-sources',
         loadChildren: () =>
-          import('./modules/order-source/order-source.module').then(
-            (m) => m.OrderSourceModule
+          import('./modules/order-source/order-source.routes').then(
+            (m) => m.orderSourceRoutes
           ),
       },
       {
         path: 'reports',
         loadChildren: () =>
-          import('./modules/reports/reports.module').then(
-            (m) => m.ReportsModule
+          import('./modules/reports/reports.routes').then(
+            (m) => m.reportsRoutes
           ),
       },
     ],
@@ -58,9 +57,3 @@ const routes: Routes = [
   },
   { path: '**', redirectTo: '/login' },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

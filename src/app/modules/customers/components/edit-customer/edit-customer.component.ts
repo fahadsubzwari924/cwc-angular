@@ -1,27 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Validators } from '@angular/forms';
 import { CreateCustomerComponent } from '../create-customer/create-customer.component';
-import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
-import { CountryCityService } from 'src/app/shared/services/country-city.service';
-
+import { ReactiveFormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputTextModule } from 'primeng/inputtext';
 @Component({
-  selector: 'app-edit-product',
+  selector: 'app-edit-customer',
   templateUrl: '../create-customer/create-customer.component.html',
   styleUrls: ['../create-customer/create-customer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    DropdownModule,
+    InputTextModule,
+  ],
 })
 export class EditCustomerComponent
   extends CreateCustomerComponent
   implements OnInit
 {
-  customer!: Customer;
-
-  constructor(
-    override formBuilder: FormBuilder,
-    override customerService: CustomerService,
-    override countryCityService: CountryCityService
-  ) {
-    super(formBuilder, customerService, countryCityService);
+  get customer(): Customer {
+    return this.data?.['customer'] as Customer;
   }
 
   override ngOnInit(): void {
@@ -49,23 +53,29 @@ export class EditCustomerComponent
   }
 
   override initializeDataAndBuildForm(): void {
-    this.showSpinner = true;
-    this.fetchDataForFormInitialization().subscribe({
-      next: () => {
-        this.buildForm();
-        this.populateCountryProvinceCity();
-        this.showSpinner = false;
-      },
-    });
+    this.loadingService.show('Loading...');
+    this.fetchDataForFormInitialization()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.buildForm();
+          this.populateCountryProvinceCity();
+          this.loadingService.hide();
+        },
+      });
   }
 
   updateProduct(): void {
-    this.showSpinner = true;
+    this.loadingService.show('Updating customer...');
     const payload = this.buildPayload();
     payload.id = this.customer?.id;
-    this.customerService.updateCustomer(payload).subscribe((response: any) => {
-      this.closeModal();
-    });
+    this.customerService
+      .updateCustomer(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.closeModal(),
+        error: () => this.loadingService.hide(),
+      });
   }
 
   populateCountryProvinceCity(): void {

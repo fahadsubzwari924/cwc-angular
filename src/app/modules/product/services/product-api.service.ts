@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from 'src/app/shared/services/api.service';
 import { Product } from '../models/product.model';
@@ -9,7 +9,7 @@ import { CustomResponse } from 'src/app/shared/models/response.model';
   providedIn: 'root',
 })
 export class ProductService {
-  constructor(private apiService: ApiService) {}
+  private readonly apiService = inject(ApiService);
 
   public getProducts(params = {}): Observable<CustomResponse<Product[]>> {
     return this.apiService

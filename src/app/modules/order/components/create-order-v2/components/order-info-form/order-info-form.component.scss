@@ -1,0 +1,62 @@
+.section-card {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  padding: var(--spacing-6, 1.5rem);
+  margin-bottom: var(--spacing-4, 1rem);
+}
+
+.section-header {
+  margin-bottom: var(--spacing-5, 1.25rem);
+  padding-bottom: var(--spacing-2, 0.5rem);
+  border-bottom: 1.5px solid rgba(99, 102, 241, 0.2);
+
+  &__label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary-dark, #4f46e5);
+    margin-bottom: 4px;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4, 1rem) var(--spacing-5, 1.25rem);
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1, 0.25rem);
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.description-textarea {
+  resize: vertical;
+  font-family: inherit;
+  font-size: var(--form-control-font-size, 0.9375rem);
+  line-height: 1.5;
+  min-height: 80px;
+}
+
+.field-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--neutral-600);
+
+  .required {
+    color: var(--danger, #ef4444);
+    margin-left: 2px;
+  }
+}

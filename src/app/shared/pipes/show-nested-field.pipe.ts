@@ -3,9 +3,13 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'field',
+  standalone: true,
 })
 export class FieldPipe implements PipeTransform {
-  constructor(private datePipe: DatePipe, private currencyPipe: CurrencyPipe) {}
+  constructor(
+    private datePipe: DatePipe,
+    private currencyPipe: CurrencyPipe
+  ) {}
 
   transform(value: any, ...args: any[]): any {
     const column: any = args[0];

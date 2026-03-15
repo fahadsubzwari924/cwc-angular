@@ -1,22 +1,27 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { Product } from 'src/app/modules/product/models/product.model';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'cwc-product-card',
   templateUrl: './product-card.component.html',
   styleUrls: ['./product-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [ButtonModule, TooltipModule],
 })
 export class ProductCardComponent {
-  @Input() product!: Product;
+  product = input.required<Product>();
 
-  @Output() edit = new EventEmitter<Product>();
-  @Output() delete = new EventEmitter<Product>();
+  edit = output<Product>();
+  delete = output<Product>();
 
   onEdit() {
-    this.edit.emit(this.product);
+    this.edit.emit(this.product());
   }
 
   onDelete() {
-    this.delete.emit(this.product);
+    this.delete.emit(this.product());
   }
 }

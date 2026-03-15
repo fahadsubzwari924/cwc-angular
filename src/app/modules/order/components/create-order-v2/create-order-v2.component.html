@@ -1,0 +1,59 @@
+<div class="order-create-v2">
+  <div class="order-layout">
+    <div class="order-layout__main">
+      <app-order-info-form
+        [formGroup]="orderForm"
+        [orderSources]="orderSources()"
+        [paymentMethods]="paymentMethods"
+        [customerSuggestions]="customerSuggestions()"
+        [maxDate]="maxDate"
+        (customerSearch)="searchCustomer($event)"
+      />
+
+      <app-product-search
+        [formGroup]="orderForm"
+        [suggestions]="productSuggestions()"
+        (productSearch)="searchProducts($event)"
+        (productSelected)="onProductSelect($event)"
+        (productDeselected)="onProductClear($event)"
+      />
+
+      @if (orderProductsMap().length) {
+        <div class="product-cards-header">
+          <span class="section-header__label">Product Details</span>
+          <span class="product-cards-header__count">{{ orderProductsMap().length }} product(s)</span>
+        </div>
+      }
+
+      @for (item of orderProductsMap(); track item.product?.name) {
+        <app-product-card
+          [item]="item"
+          (removeProduct)="removeProductCard($event)"
+          (removeRow)="onRemoveProductRow($event, item.product.name)"
+          (addRow)="addOrderProductRow(item.product, true)"
+          (priceBlur)="calculateOrderTotalAmount()"
+        />
+      }
+
+      @if (!orderProductsMap().length) {
+        <div class="empty-products">
+          <div class="empty-products__icon">
+            <i class="pi pi-shopping-cart"></i>
+          </div>
+          <p class="empty-products__title">No products added yet</p>
+          <p class="empty-products__hint">Use the product search above to add items to this order.</p>
+        </div>
+      }
+    </div>
+
+    <div class="order-layout__summary">
+      <app-order-summary
+        [orderItems]="orderProductsMap()"
+        [grandTotal]="orderTotalAmount()"
+        [isFormInvalid]="formInvalid()"
+        (save)="saveOrder()"
+        (cancel)="onCancel()"
+      />
+    </div>
+  </div>
+</div>

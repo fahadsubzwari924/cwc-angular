@@ -1,7 +1,9 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -15,8 +17,13 @@ type EChartsOption = echarts.EChartsOption;
   selector: 'cwc-pie-chart',
   templateUrl: './pie-chart.component.html',
   styleUrls: ['./pie-chart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [],
 })
 export class PieChartComponent implements AfterViewInit, OnChanges, OnDestroy {
+  private readonly elementRef = inject(ElementRef);
+
   @Input() chartHeight: number = 400;
   @Input() tooltipFormat?: string = '<b>{b}: {c}%</b>';
   @Input() tooltipTitle!: string;
@@ -28,8 +35,6 @@ export class PieChartComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private pieChart!: echarts.ECharts;
   private chartInitialized: boolean = false;
-
-  constructor(private elementRef: ElementRef) {}
 
   ngAfterViewInit(): void {
     this.initChart();

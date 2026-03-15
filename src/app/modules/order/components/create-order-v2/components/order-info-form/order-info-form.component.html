@@ -1,0 +1,73 @@
+<div class="section-card" [formGroup]="formGroup()">
+  <div class="section-header">
+    <span class="section-header__label">Order Information</span>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-field">
+      <label class="field-label">Customer <span class="required">*</span></label>
+      <p-autoComplete
+        formControlName="selectedCustomer"
+        [dropdown]="true"
+        [suggestions]="customerSuggestions()"
+        (completeMethod)="customerSearch.emit($event)"
+        field="fullName"
+        styleClass="w-full"
+        [style]="{ width: '100%' }"
+        [inputStyle]="{ width: '100%' }"
+        placeholder="Search customer..."
+      />
+    </div>
+
+    <div class="form-field">
+      <label class="field-label">Order Date <span class="required">*</span></label>
+      <p-datepicker
+        appendTo="body"
+        styleClass="w-full"
+        [showIcon]="true"
+        [maxDate]="maxDate()"
+        formControlName="orderDate"
+        inputId="orderDateV2"
+      />
+    </div>
+
+    <div class="form-field">
+      <label class="field-label">Payment Method <span class="required">*</span></label>
+      <p-dropdown
+        formControlName="paymentMethod"
+        [options]="paymentMethods()"
+        optionLabel="name"
+        dataKey="value"
+        styleClass="w-full"
+        placeholder="Select payment method"
+      />
+    </div>
+
+    <div class="form-field">
+      <label class="field-label">Order Sources <span class="required">*</span></label>
+      <p-multiSelect
+        [options]="orderSources()"
+        formControlName="selectedOrderSources"
+        styleClass="w-full"
+        placeholder="Select sources"
+        optionLabel="name"
+        optionValue="id"
+        display="chip"
+        appendTo="body"
+        [showClear]="true"
+        [maxSelectedLabels]="1"
+      />
+    </div>
+
+    <div class="form-field form-field--full">
+      <label class="field-label">Order Description <span class="required">*</span></label>
+      <textarea
+        pInputText
+        formControlName="description"
+        rows="3"
+        class="w-full description-textarea"
+        placeholder="Enter order description or any notes..."
+      ></textarea>
+    </div>
+  </div>
+</div>

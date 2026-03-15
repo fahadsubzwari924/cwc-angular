@@ -1,22 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CreateComponent } from '../create/create.component';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ProductService } from '../../services/product-api.service';
+import { FormGroup, Validators } from '@angular/forms';
 import { Product } from '../../models/product.model';
-
+import { ReactiveFormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextarea } from 'primeng/inputtextarea';
 @Component({
   selector: 'app-edit-product',
   templateUrl: '../create/create.component.html',
   styleUrls: ['../create/create.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    InputTextModule,
+    InputTextarea,
+  ],
 })
 export class EditProductComponent extends CreateComponent implements OnInit {
-  product!: Product;
-
-  constructor(
-    override formBuilder: FormBuilder,
-    override productService: ProductService
-  ) {
-    super(formBuilder, productService);
+  get product(): Product {
+    return this.data?.['product'] as Product;
   }
 
   override ngOnInit(): void {
@@ -33,10 +39,10 @@ export class EditProductComponent extends CreateComponent implements OnInit {
       cost: [this.product?.cost, [Validators.required]],
       description: [this.product?.description],
       weight: [this.product?.weight],
-      thumbnailImage: [this.product.thumbnailImage],
+      thumbnailImage: [this.product?.thumbnailImage],
     });
     this.productThumbnailName = this.extractFileName(
-      this.product.thumbnailImage
+      this.product?.thumbnailImage
     );
   }
 
@@ -46,17 +52,20 @@ export class EditProductComponent extends CreateComponent implements OnInit {
 
   updateProduct(): void {
     if (this.productForm.valid) {
-      this.showSpinner = true;
+      this.loadingService.show('Updating product...');
       const payload = this.buildCreateProductPayload();
       this.productService
         .updateProduct(Number(this.product.id), payload)
-        .subscribe((response: any) => {
-          this.closeModal();
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => this.closeModal(),
+          error: () => this.loadingService.hide(),
         });
     }
   }
 
   private extractFileName(thumbnailImageURL: string): string {
+    if (!thumbnailImageURL) return '';
     return thumbnailImageURL.split('/')[
       thumbnailImageURL.split('/').length - 1
     ];

@@ -1,0 +1,19 @@
+<div class="section-card" [formGroup]="formGroup()">
+  <div class="section-header">
+    <span class="section-header__label">Products</span>
+    <span class="section-header__hint">Search and add products to this order</span>
+  </div>
+  <p-autoComplete
+    formControlName="selectedProducts"
+    [multiple]="true"
+    [suggestions]="suggestions()"
+    (completeMethod)="productSearch.emit($event)"
+    (onSelect)="productSelected.emit($event)"
+    (onUnselect)="productDeselected.emit($event)"
+    field="name"
+    styleClass="w-full"
+    [style]="{ width: '100%' }"
+    [inputStyle]="{ width: '100%' }"
+    placeholder="Type to search products..."
+  />
+</div>

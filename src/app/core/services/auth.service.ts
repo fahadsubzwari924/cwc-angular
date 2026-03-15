@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiPaths } from 'src/app/shared/enums/api-paths';
 import { ApiService } from 'src/app/shared/services/api.service';
@@ -8,7 +8,7 @@ import { LoginResponse } from '../models/login-response.model';
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(private apiService: ApiService) {}
+  private readonly apiService = inject(ApiService);
 
   signIn(loginPayload: {
     email: string;

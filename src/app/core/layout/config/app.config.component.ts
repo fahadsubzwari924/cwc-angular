@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { LayoutService } from '../service/app.layout.service';
 import { MenuService } from '../service/app.menu.service';
 
@@ -7,7 +7,7 @@ import { MenuService } from '../service/app.menu.service';
   templateUrl: './app.config.component.html',
 })
 export class AppConfigComponent {
-  @Input() minimal: boolean = false;
+  minimal = input<boolean>(false);
 
   scales: number[] = [12, 13, 14, 15, 16];
 

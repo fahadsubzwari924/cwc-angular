@@ -1,36 +1,56 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SimpleModalComponent } from 'ngx-simple-modal';
-import { ProgressSpinner } from 'primeng/progressspinner';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { BaseDialogComponent } from 'src/app/shared/components/base-dialog/base-dialog.component';
+import { LoadingService } from 'src/app/core/services/loading.service';
 import { ProductService } from '../../services/product-api.service';
 import { Product } from '../../models/product.model';
-import { first, forEach } from 'lodash';
+import { first, forEach } from 'lodash-es';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextarea } from 'primeng/inputtextarea';
 
 @Component({
   selector: 'app-create-product',
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    InputTextModule,
+    InputTextarea,
+  ],
 })
-export class CreateComponent
-  extends SimpleModalComponent<null, boolean>
-  implements OnInit
-{
-  title!: string;
+export class CreateComponent extends BaseDialogComponent implements OnInit {
+  protected readonly formBuilder = inject(FormBuilder);
+  protected readonly productService = inject(ProductService);
+  protected readonly destroyRef = inject(DestroyRef);
+  protected readonly loadingService = inject(LoadingService);
+
+  get title(): string {
+    return this.data?.['title'] ?? 'Create Product';
+  }
 
   productForm!: FormGroup;
-  spinner!: ProgressSpinner;
-  showSpinner = false;
   productThumbnailName!: string;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
-
-  constructor(
-    protected formBuilder: FormBuilder,
-    protected productService: ProductService
-  ) {
-    super();
-    this.spinner = new ProgressSpinner();
-  }
 
   ngOnInit(): void {
     this.buildForm();
@@ -52,20 +72,21 @@ export class CreateComponent
 
   createProduct(): void {
     if (this.productForm.valid) {
-      this.showSpinner = true;
+      this.loadingService.show('Saving product...');
       const payload = this.buildCreateProductPayload();
       this.productService
         .createProduct(payload)
-        .subscribe((response: Product) => {
-          this.closeModal();
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => this.closeModal(),
+          error: () => this.loadingService.hide(),
         });
     }
   }
 
-  closeModal() {
-    this.showSpinner = false;
-    this.result = true;
-    this.close();
+  closeModal(): void {
+    this.loadingService.hide();
+    this.close(true);
   }
 
   openFileUploader() {
@@ -87,12 +108,5 @@ export class CreateComponent
       formData.append(key, value);
     });
     return formData;
-  }
-
-  private logFormData(formData: FormData): void {
-    const formDataObj: { [key: string]: any } = {};
-    formData.forEach((value, key) => {
-      formDataObj[key] = value;
-    });
   }
 }

@@ -11,7 +11,7 @@ import { ChartData } from '../interfaces/chart-data.interface';
 import { CustomReport, ReportDataItem, ReportTypeHandlers } from '../types';
 import { ChartTypes } from '../enums/chart-types.enum';
 import { ChartDataConfig } from '../interfaces';
-import { map, toLower } from 'lodash';
+import { map, toLower } from 'lodash-es';
 
 @Injectable({
   providedIn: 'root',

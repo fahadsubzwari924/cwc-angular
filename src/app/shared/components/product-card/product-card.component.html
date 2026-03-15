@@ -1,17 +1,40 @@
 <div class="product-card">
-    <div class="image-container">
-        <img [src]="product.thumbnailImage" [alt]="product.name" class="product-image">
-        <div class="icons-overlay">
-            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text edit-icon"
-                (click)="onEdit()"></button>
-            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger delete-icon"
-                (click)="onDelete()"></button>
-        </div>
+  <div class="card-image-container">
+    <img [src]="product().thumbnailImage" [alt]="product().name" class="product-image">
+    <div class="image-overlay"></div>
+
+    <!-- Prominent Action Buttons -->
+    <div class="action-buttons">
+      <button 
+        pButton
+        type="button" 
+        icon="pi pi-pencil"
+        class="action-btn edit-btn"
+        pTooltip="Edit Product"
+        tooltipPosition="left"
+        (click)="onEdit()">
+      </button>
+      <button 
+        pButton
+        type="button" 
+        icon="pi pi-trash"
+        class="action-btn delete-btn"
+        pTooltip="Delete Product"
+        tooltipPosition="left"
+        (click)="onDelete()">
+      </button>
     </div>
-    <div class="product-details">
-        <h3 class="product-name">{{product?.name}}</h3>
-        <p class="product-description">{{product?.description}}</p>
-        <p-divider></p-divider>
-        <div class="price">Rs.{{ product?.cost }}</div>
+  </div>
+
+  <div class="card-content">
+    <h3 class="product-name">{{ product()?.name }}</h3>
+    <p class="product-description">{{ product()?.description || 'No description available' }}</p>
+
+    <div class="card-footer">
+      <div class="price-container">
+        <span class="price-label">Price</span>
+        <span class="price-value">Rs. {{ product()?.cost }}</span>
+      </div>
     </div>
+  </div>
 </div>

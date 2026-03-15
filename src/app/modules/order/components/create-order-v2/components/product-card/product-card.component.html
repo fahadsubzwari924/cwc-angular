@@ -1,0 +1,128 @@
+@let entry = item();
+<div class="product-card">
+  <div class="product-card__header">
+    <div class="product-card__icon-wrap">
+      <i class="pi pi-box"></i>
+    </div>
+    <div class="product-card__info">
+      <span class="product-card__name">{{ entry.product?.name }}</span>
+      <div class="product-card__badges">
+        <span class="badge badge--cost">
+          <i class="pi pi-tag"></i>
+          Cost: {{ entry.product?.cost | number }}
+        </span>
+        <span class="badge badge--qty">
+          <i class="pi pi-list"></i>
+          {{ entry.rowGroups.length }} item(s)
+        </span>
+        <span class="badge badge--weight">
+          <i class="pi pi-inbox"></i>
+          {{ entry.product?.weight }}
+        </span>
+      </div>
+    </div>
+    <p-button
+      icon="pi pi-trash"
+      severity="danger"
+      [text]="true"
+      [rounded]="true"
+      size="small"
+      styleClass="btn-remove-product"
+      pTooltip="Remove product"
+      tooltipPosition="left"
+      (onClick)="removeProduct.emit(entry.product)"
+    />
+  </div>
+
+  <p-divider styleClass="product-card__divider" />
+
+  <div class="product-card__price-section" [formGroup]="entry.formGroup">
+    <div class="price-field">
+      <label class="field-label">
+        Selling Price per Item <span class="required">*</span>
+      </label>
+      <p-inputNumber
+        formControlName="price"
+        [min]="0"
+        mode="decimal"
+        [useGrouping]="true"
+        (onBlur)="priceBlur.emit()"
+        placeholder="Set your selling price"
+        styleClass="w-full"
+      />
+      @if (entry.product?.cost) {
+        <small class="field-hint">
+          <i class="pi pi-info-circle"></i>
+          Base cost is <strong>{{ entry.product?.cost | number }}</strong>.
+          Total for {{ entry.rowGroups.length }} item(s):
+          <strong class="hint-total">{{ getLineTotal(entry) | number }}</strong>
+        </small>
+      }
+    </div>
+  </div>
+
+  <div class="product-card__items">
+    <div class="items-table-header">
+      <span class="items-table-header__num">#</span>
+      <span>Customize Name</span>
+      <span>Color</span>
+      <span></span>
+    </div>
+
+    @for (rowGroup of entry.rowGroups; track $index) {
+      <div class="item-row" [formGroup]="rowGroup" [class.item-row--even]="$index % 2 === 1">
+        <span class="item-row__index">{{ $index + 1 }}</span>
+
+        <div class="item-row__field">
+          <p-floatLabel>
+            <input
+              pInputText
+              [id]="'cn-' + entry.product.name + '-' + $index"
+              formControlName="customizeName"
+              class="w-full"
+            />
+            <label [for]="'cn-' + entry.product.name + '-' + $index">Customize Name</label>
+          </p-floatLabel>
+        </div>
+
+        <div class="item-row__field">
+          <p-floatLabel>
+            <input
+              pInputText
+              [id]="'clr-' + entry.product.name + '-' + $index"
+              formControlName="color"
+              class="w-full"
+            />
+            <label [for]="'clr-' + entry.product.name + '-' + $index">Color</label>
+          </p-floatLabel>
+        </div>
+
+        <div class="item-row__action">
+          @if ($index > 0) {
+            <p-button
+              icon="pi pi-times"
+              severity="danger"
+              [text]="true"
+              [rounded]="true"
+              size="small"
+              styleClass="btn-remove-row"
+              pTooltip="Remove this item"
+              tooltipPosition="top"
+              (onClick)="removeRow.emit($index)"
+            />
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="product-card__add-row">
+    <p-button
+      icon="pi pi-plus"
+      label="Add item"
+      size="small"
+      styleClass="btn-add-item"
+      (onClick)="addRow.emit()"
+    />
+  </div>
+</div>

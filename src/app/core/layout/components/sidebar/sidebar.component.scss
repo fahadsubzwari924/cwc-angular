@@ -1,0 +1,6 @@
+/* Sidebar host: fill parent and ensure menu layout */
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
