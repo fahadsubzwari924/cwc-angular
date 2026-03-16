@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   OnDestroy,
   Renderer2,
@@ -39,8 +38,19 @@ export class LayoutComponent implements OnDestroy {
   menuOutsideClickListener: any;
   profileMenuOutsideClickListener: any;
 
-  /** True when current route is dashboard; enables vertical scroll for graph visibility. */
-  readonly isDashboardRoute = signal(false);
+  /**
+   * Routes whose content can exceed the viewport and need page-level vertical scroll.
+   * List / table pages are intentionally excluded so PrimeNG scrollHeight="flex" works.
+   */
+  private static readonly SCROLLABLE_ROUTES: string[] = [
+    '/dashboard',
+    '/reports',
+    '/orders/create',
+    '/orders/',       // edit order (e.g. /orders/42/edit)
+  ];
+
+  /** True when the current route needs unrestricted vertical scroll. */
+  readonly isScrollablePage = signal(false);
 
   @ViewChild(SidebarComponent) appSidebar!: SidebarComponent;
   @ViewChild(TopbarComponent) appTopbar!: TopbarComponent;
@@ -48,10 +58,9 @@ export class LayoutComponent implements OnDestroy {
   constructor(
     public layoutService: LayoutService,
     public renderer: Renderer2,
-    public router: Router,
-    private cdr: ChangeDetectorRef
+    public router: Router
   ) {
-    this.isDashboardRoute.set(this.isDashboardUrl(this.router.url));
+    this.isScrollablePage.set(this.isScrollableUrl(this.router.url));
     this.overlayMenuOpenSubscription =
       this.layoutService.overlayOpen$.subscribe(() => {
         if (!this.menuOutsideClickListener) {
@@ -109,15 +118,16 @@ export class LayoutComponent implements OnDestroy {
         takeUntilDestroyed()
       )
       .subscribe(() => {
-        this.isDashboardRoute.set(this.isDashboardUrl(this.router.url));
-        this.cdr.markForCheck();
+        this.isScrollablePage.set(this.isScrollableUrl(this.router.url));
         this.hideMenu();
         this.hideProfileMenu();
       });
   }
 
-  private isDashboardUrl(url: string): boolean {
-    return url.includes('dashboard');
+  private isScrollableUrl(url: string): boolean {
+    return LayoutComponent.SCROLLABLE_ROUTES.some((route) =>
+      url.includes(route)
+    );
   }
 
   hideMenu() {
@@ -184,7 +194,7 @@ export class LayoutComponent implements OnDestroy {
       'layout-mobile-active': state.staticMenuMobileActive,
       'p-input-filled': config.inputStyle === 'filled',
       'p-ripple-disabled': !config.ripple,
-      'layout-dashboard': this.isDashboardRoute(),
+      'layout-scrollable': this.isScrollablePage(),
     };
   }
 

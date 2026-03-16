@@ -1,33 +1,27 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   Router,
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { Observable } from 'rxjs';
-import { Utils } from '../services/utils.service';
+import { AuthService } from '../services/auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuard {
-  constructor(private router: Router) {}
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot,
-    pulrouter: Router
-  ):
-    | Observable<boolean | UrlTree>
-    | Promise<boolean | UrlTree>
-    | boolean
-    | UrlTree {
-    const isRouteAllowed = !!Utils.getItemFromLocalStorage('token');
-    if (isRouteAllowed) {
+    _route: ActivatedRouteSnapshot,
+    _state: RouterStateSnapshot
+  ): boolean | UrlTree {
+    const hasToken = !!this.authService.getStoredToken();
+    if (hasToken) {
       return true;
     }
-    this.router.navigate(['login']);
-    return false;
+    return this.router.createUrlTree(['/login']);
   }
 }

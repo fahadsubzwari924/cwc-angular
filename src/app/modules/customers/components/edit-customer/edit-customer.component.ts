@@ -3,10 +3,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Validators } from '@angular/forms';
 import { CreateCustomerComponent } from '../create-customer/create-customer.component';
 import { Customer } from '../../models/customer.model';
+import { Country } from 'src/app/shared/models';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
+import { forkJoin, switchMap, tap } from 'rxjs';
+
 @Component({
   selector: 'app-edit-customer',
   templateUrl: '../create-customer/create-customer.component.html',
@@ -33,7 +36,7 @@ export class EditCustomerComponent
   }
 
   override buildForm(): void {
-    this.customerForm = this.formBuilder.group({
+    const form = this.formBuilder.group({
       id: [this.customer?.id],
       fullName: [
         this.customer?.fullName,
@@ -46,6 +49,8 @@ export class EditCustomerComponent
       country: ['', [Validators.required]],
       province: ['', [Validators.required]],
     });
+    this.customerForm.set(form);
+    this.subscribeToCountryChanges();
   }
 
   override saveCustomer(): void {
@@ -54,7 +59,7 @@ export class EditCustomerComponent
 
   override initializeDataAndBuildForm(): void {
     this.loadingService.show('Loading...');
-    this.fetchDataForFormInitialization()
+    this.fetchEditFormData()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -62,7 +67,27 @@ export class EditCustomerComponent
           this.populateCountryProvinceCity();
           this.loadingService.hide();
         },
+        error: () => this.loadingService.hide(),
       });
+  }
+
+  private fetchEditFormData() {
+    return forkJoin({
+      countries: this.countryCityService.getCountries(),
+      provinces: this.countryCityService.getProvinces(),
+    }).pipe(
+      tap(({ countries, provinces }) => {
+        this.countries = countries;
+        this.provinces = provinces;
+      }),
+      switchMap(({ countries }) => {
+        const customerCountry = this.findItem(countries, this.customer?.country, 'name');
+        const countryCode = customerCountry?.code ?? this.defaultCountryCode;
+        return this.countryCityService.getCitiesByCountry(countryCode).pipe(
+          tap((cities) => { this.cities.set(cities); })
+        );
+      })
+    );
   }
 
   updateProduct(): void {
@@ -79,36 +104,20 @@ export class EditCustomerComponent
   }
 
   populateCountryProvinceCity(): void {
-    const selectedCountry = this.findRelevantCountryProvinceCity(
-      this.countries,
-      this.customer?.country,
-      'name'
+    const selectedCountry = this.findItem(this.countries, this.customer?.country, 'name');
+    const selectedProvince = this.findItem(this.provinces, this.customer?.province, 'name');
+    const selectedCity = this.findItem(this.cities(), this.customer?.city, 'name');
+    // emitEvent: false prevents subscribeToCountryChanges from reloading cities
+    // when programmatically setting the initial values
+    this.customerForm()?.patchValue(
+      { country: selectedCountry, province: selectedProvince, city: selectedCity },
+      { emitEvent: false }
     );
-    const selectedProvince = this.findRelevantCountryProvinceCity(
-      this.provinces,
-      this.customer?.province,
-      'name'
-    );
-    const selectedCity = this.findRelevantCountryProvinceCity(
-      this.cities,
-      this.customer?.city,
-      'name'
-    );
-    this.customerForm.patchValue({
-      country: selectedCountry,
-      province: selectedProvince,
-      city: selectedCity,
-    });
   }
 
-  findRelevantCountryProvinceCity<T>(
-    list: T[],
-    customerValue: string,
-    key: keyof T
-  ): T | undefined {
+  findItem<T>(list: T[], value: string, key: keyof T): T | undefined {
     return list.find(
-      (item) =>
-        item[key]?.toString().toLowerCase() === customerValue?.toLowerCase()
+      (item) => item[key]?.toString().toLowerCase() === value?.toLowerCase()
     );
   }
 }

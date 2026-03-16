@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReportsService } from './services/reports.service';
 import { CustomResponse, NameValueOption } from 'src/app/shared/models';
@@ -38,7 +38,6 @@ import { ChartHostComponent } from 'src/app/shared/components/chart-host/chart-h
 })
 export class ReportsComponent implements OnInit {
   private readonly reportsService = inject(ReportsService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly loadingService = inject(LoadingService);
 

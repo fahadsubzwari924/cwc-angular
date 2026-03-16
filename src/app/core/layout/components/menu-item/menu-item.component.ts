@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   HostBinding,
@@ -146,7 +145,6 @@ export class MenuItemComponent implements OnInit, OnDestroy {
 
   constructor(
     public layoutService: LayoutService,
-    private cd: ChangeDetectorRef,
     public router: Router,
     private menuService: MenuService
   ) {

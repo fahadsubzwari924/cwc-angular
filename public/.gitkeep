@@ -1,0 +1,9 @@
+# Public assets configuration file
+# This folder contains all public static assets:
+# - Favicons (favicon.svg, favicon-*.svg, apple-touch-icon.svg)
+# - PWA manifest (manifest.webmanifest)
+# - robots.txt
+# - sitemap.xml
+# - .well-known files
+
+# These files are served from the root of the domain (/) when deployed
