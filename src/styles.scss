@@ -63,6 +63,52 @@ $gutter: 1rem; //for primeflex grid system
   --spacing-5: 1.25rem;
   --spacing-6: 1.5rem;
   --spacing-8: 2rem;
+
+  /* Scrollbars — single source for consistent thin width (vertical & horizontal) */
+  --scrollbar-size: 6px;
+  --scrollbar-track: var(--neutral-100);
+  --scrollbar-thumb: var(--neutral-300);
+  --scrollbar-thumb-hover: var(--neutral-400);
+}
+
+/* ============================================
+   GLOBAL SCROLLBARS — thin, consistent (vertical & horizontal)
+   Uses design tokens; applied to all scroll containers.
+   ============================================ */
+@mixin thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+
+  &::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 10px;
+
+    &:hover {
+      background: var(--scrollbar-thumb-hover);
+    }
+  }
+}
+
+/* Apply to all scrollable regions app-wide */
+html,
+body,
+.card-content,
+.layout-main-container,
+.p-datatable-table-container,
+.p-datatable-wrapper,
+.p-scroller-viewport,
+.p-datatable .p-datatable-table-container {
+  @include thin-scrollbar;
 }
 
 /* Global Typography - Modern & Clean */
@@ -680,25 +726,7 @@ $dt-row-border: 1px solid var(--neutral-100, #f3f4f6);
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
-      overflow-x: hidden;
-
-      /* Custom scrollbar — thin, neutral */
-      &::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: var(--neutral-300, #d1d5db);
-        border-radius: 10px;
-
-        &:hover {
-          background: var(--neutral-400, #9ca3af);
-        }
-      }
+      overflow-x: auto;
     }
   }
 
@@ -1188,30 +1216,4 @@ button.action-btn .p-button-icon {
   font-size: 1rem !important;
 }
 
-/* Scrollable table: same scrollbar thickness for vertical and horizontal */
-.p-datatable.p-datatable-scrollable {
-  .p-datatable-wrapper,
-  .p-scroller-viewport {
-    &::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: var(--neutral-100, #f3f4f6);
-      border-radius: 4px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: var(--neutral-300, #d1d5db);
-      border-radius: 4px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background: var(--neutral-400, #9ca3af);
-    }
-  }
-}
-
-/* Firefox: thin scrollbars so horizontal matches vertical thickness */
-.p-datatable.p-datatable-scrollable .p-datatable-wrapper,
-.p-datatable.p-datatable-scrollable .p-scroller-viewport {
-  scrollbar-width: thin;
-}
+/* Scrollable table scrollbars use global thin-scrollbar (see GLOBAL SCROLLBARS above). */

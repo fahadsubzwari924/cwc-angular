@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------
+   Default layout: fixed-height container so PrimeNG tables with
+   scrollHeight="flex" can fill the remaining viewport space on list pages.
+   --------------------------------------------------------------------------- */
 .layout-main-container {
     display: flex;
     flex-direction: column;
@@ -20,7 +24,7 @@
         display: none;
     }
 
-    /* Route component host: fill all remaining space as a flex column */
+    /* Route component host: fill all remaining height as a flex column */
     > *:not(router-outlet) {
         display: flex;
         flex-direction: column;
@@ -30,42 +34,32 @@
     }
 }
 
-/* -----------------------------------------------------------------------------
-   Dashboard page exception: allow vertical scroll so the Monthly Orders graph
-   (and any content below the fold) is visible. Other pages keep overflow hidden.
-   
-   Key changes for dashboard:
-   1. layout-main-container: overflow-y: auto for vertical scroll
-   2. dashboard component host: flex: 0 1 auto (shrink-to-fit) + overflow: visible
-   3. grid inside dashboard: flex: 0 0 auto (no flex growth) + overflow: visible
-   4. col inside grid: overflow: visible so content can expand
-   ----------------------------------------------------------------------------- */
-.layout-wrapper.layout-dashboard {
+/* ---------------------------------------------------------------------------
+   Scrollable-page variant: applied to routes whose content can exceed the
+   viewport (e.g. dashboard, reports, create-order, edit-order).
+   The container becomes the single scroll root; route components grow with
+   their content instead of being clipped.
+   --------------------------------------------------------------------------- */
+.layout-wrapper.layout-scrollable {
     .layout-main-container {
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
+        overflow-y: auto;
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
     }
 
     .layout-main {
         overflow: visible;
-        
+
         > *:not(router-outlet) {
+            display: block;
             flex: 0 1 auto;
             min-height: min-content;
             overflow: visible;
-            display: block;
         }
     }
 
-/* Grids on dashboard don't grow with flex; they flow with content */
-    .grid {
-        flex: 0 0 auto !important;
-        overflow: visible !important;
-        /* Don't override display: grid — let PrimeFlex handle it */
-        
-        > [class*="col"] {
-            overflow: visible !important;
-        }
+    /* PrimeFlex grid columns must not clip chart/card content */
+    .grid > [class*="col"] {
+        overflow: visible;
     }
 }

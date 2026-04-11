@@ -18,7 +18,7 @@ import { Product } from 'src/app/modules/product/models/product.model';
 import { ProductService } from 'src/app/modules/product/services/product-api.service';
 import { OrderService } from '../../services/order.service';
 import { MessageService } from 'primeng/api';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   AutoCompleteCompleteEvent,
   AutoCompleteSelectEvent,
@@ -35,6 +35,8 @@ import { requireNonEmptyArray } from '../../validators/order.validators';
 
 import { LoadingService } from 'src/app/core/services/loading.service';
 
+import { Order } from '../../models/order.model';
+import { groupBy, uniqBy } from 'lodash-es';
 import { OrderInfoFormComponent } from './components/order-info-form/order-info-form.component';
 import { ProductSearchComponent } from './components/product-search/product-search.component';
 import { ProductCardComponent } from './components/product-card/product-card.component';
@@ -67,6 +69,7 @@ export class CreateOrderV2Component implements OnInit {
   protected readonly titleCasePipe = inject(TitleCasePipe);
   protected readonly destroyRef = inject(DestroyRef);
   protected readonly loadingService = inject(LoadingService);
+  private readonly activatedRoute = inject(ActivatedRoute);
 
   protected productDataMap = new Map<string, ProductOrderProduct>();
 
@@ -91,14 +94,74 @@ export class CreateOrderV2Component implements OnInit {
   /** Keeps summary Save button in sync with form validity under OnPush. */
   formInvalid = signal(true);
 
+  /** Set when route has :orderId (edit mode). */
+  orderId: number | null = null;
+
+  /** Loaded order when in edit mode. */
+  order: Order | null = null;
+
   ngOnInit(): void {
-    this.getOrderSources();
     this.buildOrderForm();
     this.buildPaymentMethodOptions();
     this.orderForm.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.formInvalid.set(this.orderForm.invalid));
     this.formInvalid.set(this.orderForm.invalid);
+
+    const orderIdParam = this.activatedRoute.snapshot.paramMap.get('orderId');
+    this.orderId = orderIdParam ? Number(orderIdParam) : null;
+
+    this.getOrderSources();
+    if (this.orderId) {
+      this.getOrder();
+    }
+  }
+
+  getOrder(): void {
+    if (this.orderId == null) return;
+    this.loadingService.show('Loading order...');
+    this.orderService
+      .getOrderById(this.orderId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (order: Order) => {
+          this.order = order;
+          this.populateOrderForm();
+          this.loadingService.hide();
+        },
+        error: () => this.loadingService.hide(),
+      });
+  }
+
+  populateOrderForm(): void {
+    if (!this.order) return;
+    const orderSourceIds = this.order.orderSources?.map((os: OrderSource) => os.id) ?? [];
+    this.orderForm.get('selectedCustomer')?.setValue(this.order.customer);
+    this.orderForm.get('description')?.setValue(this.order.description);
+    const productsByOrderId = uniqBy(this.order.products ?? [], 'id');
+    this.orderForm.get('selectedProducts')?.setValue(productsByOrderId);
+    this.orderForm.get('orderDate')?.setValue(new Date(this.order.orderDate as string));
+    this.orderForm.get('selectedOrderSources')?.setValue(orderSourceIds);
+
+    productsByOrderId.forEach((product: OrderProduct) => {
+      this.productDataMap.set(product.name, product);
+      this.initizalizeProductDetail(product, true);
+    });
+    this.populateProductRows();
+    this.calculateOrderTotalAmount();
+    this.refreshOrderProductsMap();
+  }
+
+  private populateProductRows(): void {
+    if (!this.order?.products?.length) return;
+    const productsGroupedByName = groupBy(this.order.products, 'name');
+    Object.keys(productsGroupedByName).forEach((productName: string) => {
+      const group = productsGroupedByName[productName];
+      group.forEach((orderProduct: OrderProduct) => {
+        this.addOrderProductRow(orderProduct as ProductOrderProduct);
+      });
+    });
+    this.canShowProductDetailsTable.set(true);
   }
 
   buildOrderForm(): void {
@@ -278,19 +341,40 @@ export class CreateOrderV2Component implements OnInit {
   }
 
   saveOrder(): void {
-    this.createOrder();
+    if (this.orderId != null) {
+      this.updateOrder();
+    } else {
+      this.createOrder();
+    }
   }
 
   createOrder(): void {
     this.loadingService.show('Saving order...');
-    const createOrderPayload = this.buildCreateOrderPayload();
+    const payload = this.buildCreateOrderPayload();
     this.orderService
-      .createOrder(createOrderPayload)
+      .createOrder(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.loadingService.hide();
           this.showToast('Order created!');
+          this.router.navigate(['/orders']);
+        },
+        error: () => this.loadingService.hide(),
+      });
+  }
+
+  updateOrder(): void {
+    if (this.orderId == null) return;
+    this.loadingService.show('Updating order...');
+    const payload = this.buildCreateOrderPayload();
+    this.orderService
+      .updateOrder(this.orderId, payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.loadingService.hide();
+          this.showToast('Order updated!');
           this.router.navigate(['/orders']);
         },
         error: () => this.loadingService.hide(),

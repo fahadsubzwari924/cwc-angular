@@ -1,5 +1,5 @@
-@if (customerForm) {
-  <form [formGroup]="customerForm" class="create-customer-form p-fluid">
+@if (customerForm(); as form) {
+  <form [formGroup]="form" class="create-customer-form p-fluid">
     <div class="formgrid grid">
       <div class="field col-12">
         <label for="fullName">Full Name <span class="required">*</span></label>
@@ -44,7 +44,7 @@
         <p-dropdown
           formControlName="city"
           inputId="city"
-          [options]="cities"
+          [options]="cities()"
           optionLabel="name"
           [filter]="true"
           filterBy="name"
@@ -68,7 +68,7 @@
       <p-button
         label="Save"
         styleClass="p-button-sm"
-        [disabled]="customerForm.invalid"
+        [disabled]="form.invalid"
         (onClick)="saveCustomer()"
       ></p-button>
     </div>

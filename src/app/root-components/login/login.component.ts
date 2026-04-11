@@ -8,9 +8,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LayoutService } from 'src/app/core/layout/service/app.layout.service';
-import { LoginResponse } from 'src/app/core/models/login-response.model';
 import { AuthService } from 'src/app/core/services/auth.service';
-import { Utils } from 'src/app/core/services/utils.service';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -34,16 +32,13 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   isLoading = signal(false);
 
+  protected readonly layoutService = inject(LayoutService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly formBuilder = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
-  constructor(
-    public layoutService: LayoutService,
-    private authService: AuthService,
-    private router: Router,
-    private formBuilder: FormBuilder
-  ) {}
-
-  get controls() {
+  get controls(): FormGroup['controls'] {
     return this.loginForm.controls;
   }
 
@@ -57,10 +52,10 @@ export class LoginComponent implements OnInit {
       .signIn(this.loginForm.value)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response: LoginResponse) => {
+        next: (response) => {
+          this.authService.setSession(response);
           this.isLoading.set(false);
-          Utils.setItemFromToStorage('token', response.accessToken);
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl('/dashboard', { replaceUrl: true });
         },
         error: () => {
           this.isLoading.set(false);
@@ -68,7 +63,7 @@ export class LoginComponent implements OnInit {
       });
   }
 
-  createLoginForm() {
+  private createLoginForm(): void {
     this.loginForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.maxLength(15)]],

@@ -11,24 +11,27 @@ import { Province } from '../models';
 export class CountryCityService {
   private readonly http = inject(HttpClient);
 
-  // Fetch and map countries
   getCountries(): Observable<Array<Country>> {
     return this.http
       .get<Array<Country>>('assets/data/countries.json')
       .pipe(map((data) => data.map((item) => new Country(item))));
   }
 
-  // Fetch and map cities
   getProvinces(): Observable<Array<Province>> {
     return this.http
       .get<Array<Province>>('assets/data/provinces.json')
       .pipe(map((data) => data.map((item) => new Province(item))));
   }
 
-  // Fetch and map cities
-  getCities(): Observable<Array<City>> {
+  /**
+   * Loads cities for a specific country from a pre-split per-country file.
+   * Each file lives at assets/data/cities/{countryCode}.json and is generated
+   * from the full world dataset, keeping only the relevant subset.
+   * This reduces payload from ~14MB to ~27KB for PK, for example.
+   */
+  getCitiesByCountry(countryCode: string): Observable<Array<City>> {
     return this.http
-      .get<Array<City>>('assets/data/cities.json')
-      .pipe(map((data) => data.map((item) => new City(item))));
+      .get<Array<Omit<City, 'country'>>>(`assets/data/cities/${countryCode}.json`)
+      .pipe(map((data) => data.map((item) => new City({ ...item, country: countryCode }))));
   }
 }
