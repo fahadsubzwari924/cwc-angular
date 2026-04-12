@@ -35,9 +35,20 @@ export class ProductCardComponent {
   removeRow = output<number>();
   addRow = output<void>();
   priceBlur = output<void>();
+  quantityBlur = output<void>();
+
+  totalUnits(entry: OrderProductMapEntry): number {
+    return entry.rowGroups.reduce((sum, row) => {
+      const q = Math.max(1, Math.floor(Number(row.get('quantity')?.value) || 1));
+      return sum + q;
+    }, 0);
+  }
 
   getLineTotal(entry: OrderProductMapEntry): number {
-    const price = entry.formGroup?.get('price')?.value ?? 0;
-    return price * entry.rowGroups.length;
+    const price = Number(entry.formGroup?.get('price')?.value) || 0;
+    return entry.rowGroups.reduce((sum, row) => {
+      const q = Math.max(1, Math.floor(Number(row.get('quantity')?.value) || 1));
+      return sum + price * q;
+    }, 0);
   }
 }

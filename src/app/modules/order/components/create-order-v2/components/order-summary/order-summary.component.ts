@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-
 import { OrderProductMapEntry } from '../../../../interfaces/order-product.interface';
 
 @Component({
@@ -20,8 +19,18 @@ export class OrderSummaryComponent {
   save = output<void>();
   cancel = output<void>();
 
+  totalUnitsForProduct(item: OrderProductMapEntry): number {
+    return item.rowGroups.reduce((sum, row) => {
+      const q = Math.max(1, Math.floor(Number(row.get('quantity')?.value) || 1));
+      return sum + q;
+    }, 0);
+  }
+
   getLineTotal(item: OrderProductMapEntry): number {
-    const price = item.formGroup?.get('price')?.value ?? 0;
-    return price * item.rowGroups.length;
+    const price = Number(item.formGroup?.get('price')?.value) || 0;
+    return item.rowGroups.reduce((sum, row) => {
+      const q = Math.max(1, Math.floor(Number(row.get('quantity')?.value) || 1));
+      return sum + price * q;
+    }, 0);
   }
 }

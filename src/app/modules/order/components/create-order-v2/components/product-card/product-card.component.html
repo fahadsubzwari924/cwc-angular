@@ -13,7 +13,7 @@
         </span>
         <span class="badge badge--qty">
           <i class="pi pi-list"></i>
-          {{ entry.rowGroups.length }} item(s)
+          {{ entry.rowGroups.length }} line(s), {{ totalUnits(entry) }} units
         </span>
         <span class="badge badge--weight">
           <i class="pi pi-inbox"></i>
@@ -54,7 +54,7 @@
         <small class="field-hint">
           <i class="pi pi-info-circle"></i>
           Base cost is <strong>{{ entry.product?.cost | number }}</strong>.
-          Total for {{ entry.rowGroups.length }} item(s):
+          Line total ({{ totalUnits(entry) }} units):
           <strong class="hint-total">{{ getLineTotal(entry) | number }}</strong>
         </small>
       }
@@ -64,6 +64,7 @@
   <div class="product-card__items">
     <div class="items-table-header">
       <span class="items-table-header__num">#</span>
+      <span>Qty</span>
       <span>Customize Name</span>
       <span>Color</span>
       <span></span>
@@ -72,6 +73,18 @@
     @for (rowGroup of entry.rowGroups; track $index) {
       <div class="item-row" [formGroup]="rowGroup" [class.item-row--even]="$index % 2 === 1">
         <span class="item-row__index">{{ $index + 1 }}</span>
+
+        <div class="item-row__field item-row__field--qty">
+          <p-inputNumber
+            formControlName="quantity"
+            [min]="1"
+            [useGrouping]="false"
+            [showButtons]="true"
+            inputStyleClass="w-full"
+            styleClass="w-full"
+            (onBlur)="quantityBlur.emit()"
+          />
+        </div>
 
         <div class="item-row__field">
           <p-floatLabel>

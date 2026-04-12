@@ -238,18 +238,24 @@ export class CreateOrderComponent implements OnInit {
     return this.formBuilder.group({
       price: [product.price ?? null, [Validators.required]],
       rows: this.formBuilder.array(
-        isEmptyRows ? [] : [this.newOrderProductRow(product)],
+        isEmptyRows ? [] : [this.newOrderProductRow(product, {})],
         Validators.required
       ),
     });
   }
 
-  newOrderProductRow(product: ProductOrderProduct, isNew = false): FormGroup {
-    const customizeName = isNew
+  newOrderProductRow(
+    product: ProductOrderProduct,
+    options: { isBlankRow?: boolean; quantity?: number } = {},
+  ): FormGroup {
+    const isBlank = options.isBlankRow ?? false;
+    const customizeName = isBlank
       ? ''
       : (product as OrderProduct).customizeName ?? '';
-    const color = isNew ? '' : (product as OrderProduct).color ?? '';
-    const quantity = this.getOrderProductQuantity(product.name, isNew);
+    const color = isBlank ? '' : (product as OrderProduct).color ?? '';
+    const quantity =
+      options.quantity ??
+      (isBlank ? 1 : (product as OrderProduct).quantity ?? 1);
     return this.formBuilder.group({
       productId: [product.id, [Validators.required]],
       color: color,
@@ -257,7 +263,7 @@ export class CreateOrderComponent implements OnInit {
       name: product.name,
       cost: product.cost,
       weight: product.weight,
-      quantity: quantity,
+      quantity: [quantity, [Validators.required, Validators.min(1)]],
     });
   }
 
@@ -275,25 +281,37 @@ export class CreateOrderComponent implements OnInit {
     this.canShowProductDetailsTable.set(true);
   }
 
-  addOrderProductRow(product: ProductOrderProduct, isNew = false): void {
+  addOrderProductRow(
+    product: ProductOrderProduct,
+    isNewBlankRow = false,
+    explicitQuantity?: number,
+  ): void {
     const productRows = this.getOrderProductRows(product.name);
-    productRows.push(this.newOrderProductRow(product, isNew));
-    this.incrementProductQuantityCount(product.name);
+    const quantity =
+      explicitQuantity ??
+      (isNewBlankRow ? 1 : (product as OrderProduct).quantity ?? 1);
+    productRows.push(
+      this.newOrderProductRow(product, {
+        isBlankRow: isNewBlankRow,
+        quantity,
+      }),
+    );
     this.calculateOrderTotalAmount();
     this.refreshOrderProductsMap();
   }
 
   calculateOrderTotalAmount(): void {
     let total = 0;
-    Object.keys(this.orderForm.value.orderProducts).forEach(
-      (productName: string) => {
-        const orderProducts = this.orderForm.value.orderProducts[productName];
-        const orderProductQuantity = orderProducts.rows?.length;
-        if (orderProducts?.price > 0) {
-          total += orderProducts?.price * orderProductQuantity;
-        }
-      }
-    );
+    const orderProductsRoot = this.orderForm.value.orderProducts ?? {};
+    Object.keys(orderProductsRoot).forEach((productName: string) => {
+      const bundle = orderProductsRoot[productName];
+      const price = Number(bundle?.price) || 0;
+      const rows = bundle?.rows ?? [];
+      rows.forEach((row: { quantity?: number }) => {
+        const q = Math.max(1, Math.floor(Number(row.quantity) || 1));
+        total += price * q;
+      });
+    });
     this.orderTotalAmount.set(total);
   }
 
@@ -355,14 +373,20 @@ export class CreateOrderComponent implements OnInit {
   }
 
   buildCreateOrderPayload() {
+    const orderItems = this.buildOrderProductsPayload();
+    const totalUnits = orderItems.reduce(
+      (sum, row) =>
+        sum + Math.max(1, Math.floor(Number(row.quantity) || 1)),
+      0,
+    );
     return {
       description: this.orderForm.value.description,
       paymentMethod: this.orderForm.value.paymentMethod?.value,
       amount: this.orderTotalAmount(),
       customerId: this.orderForm.value.selectedCustomer?.id,
-      totalProductQuantity: this.buildOrderProductsPayload()?.length,
+      totalProductQuantity: totalUnits,
       totalWeight: this.getTotalCountByProperty('weight').toString(),
-      orderItems: this.buildOrderProductsPayload(),
+      orderItems,
       orderDate: this.orderForm.value?.orderDate,
       orderSourceIds: this.orderForm.value.selectedOrderSources,
     };
@@ -371,7 +395,6 @@ export class CreateOrderComponent implements OnInit {
   onRemoveProductRow(rowIndex: number, productName: string): void {
     const orderProductRows = this.getOrderProductRows(productName);
     orderProductRows.removeAt(rowIndex);
-    this.decrementProductQuantityCount(productName);
     this.calculateOrderTotalAmount();
     this.refreshOrderProductsMap();
   }
@@ -407,10 +430,11 @@ export class CreateOrderComponent implements OnInit {
       (value) => value.rows
     );
     const totalWeight = sumBy(orderProducts, (item) => {
-      const numericWeight = parseFloat(
-        item[propertyName].replace(/[^\d.]/g, '')
-      );
-      return isNaN(numericWeight) ? 0 : numericWeight;
+      const raw = String(item[propertyName] ?? '').replace(/[^\d.]/g, '');
+      const numericWeight = parseFloat(raw);
+      const units = Math.max(1, Math.floor(Number(item.quantity) || 1));
+      const perUnit = isNaN(numericWeight) ? 0 : numericWeight;
+      return perUnit * units;
     });
     return totalWeight;
   }
@@ -432,42 +456,11 @@ export class CreateOrderComponent implements OnInit {
     });
   }
 
-  private incrementProductQuantityCount(productName: string): void {
-    const orderProductRows = this.getOrderProductRows(productName);
-    const incrementedOrderProductQuantity =
-      Number(orderProductRows.controls[0].get('quantity')?.value) + 1;
-    for (let i = 0; i < orderProductRows.length; i++) {
-      orderProductRows.controls[i]
-        .get('quantity')
-        ?.setValue(incrementedOrderProductQuantity);
-    }
-  }
-
-  private decrementProductQuantityCount(productName: string): void {
-    const orderProductRows = this.getOrderProductRows(productName);
-    let decrementedOrderProductQuantity =
-      this.getOrderProductQuantity(productName);
-    decrementedOrderProductQuantity =
-      decrementedOrderProductQuantity > 0
-        ? decrementedOrderProductQuantity--
-        : 0;
-    for (let i = 0; i < orderProductRows.length; i++) {
-      orderProductRows.controls[i]
-        .get('quantity')
-        ?.setValue(decrementedOrderProductQuantity);
-    }
-  }
-
   protected removeProductFormGroup(productName: string): void {
     const orderProductFormGroup = this.orderForm.get(
       'orderProducts'
     ) as FormGroup;
     orderProductFormGroup.removeControl(productName);
-  }
-
-  private getOrderProductQuantity(productName: string, isNew = false): number {
-    const orderProductRows = this.getOrderProductRows(productName);
-    return isNew ? orderProductRows.length + 1 : orderProductRows?.length ?? 1;
   }
 
   private mapOrderSourcesToNameValue(
