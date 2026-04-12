@@ -32,6 +32,7 @@
           (removeRow)="onRemoveProductRow($event, item.product.name)"
           (addRow)="addOrderProductRow(item.product, true)"
           (priceBlur)="calculateOrderTotalAmount()"
+          (quantityBlur)="calculateOrderTotalAmount()"
         />
       }
 

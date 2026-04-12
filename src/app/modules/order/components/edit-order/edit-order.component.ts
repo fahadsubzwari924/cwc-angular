@@ -8,6 +8,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Order } from '../../models/order.model';
 import { OrderProduct } from '../../models/order-product.model';
 import { groupBy, uniqBy } from 'lodash-es';
+import { ProductOrderProduct } from '../../types/order-product.type';
 import { OrderSource } from 'src/app/modules/order-source/models/order-source.model';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { DropdownModule } from 'primeng/dropdown';
@@ -121,12 +122,15 @@ export class EditOrderComponent extends CreateOrderComponent implements OnInit {
   }
 
   private populateProductRows(): void {
-    const productsGrupedByName = groupBy(this.order.products, 'name');
-    Object.keys(productsGrupedByName).forEach((orderProductKey: string) => {
-      this.order.products?.forEach((orderProduct: OrderProduct) => {
-        if (orderProduct.name === orderProductKey) {
-          this.addOrderProductRow(orderProduct as OrderProduct);
-        }
+    if (!this.order?.products?.length) return;
+    const byName = groupBy(this.order.products, 'name');
+    Object.keys(byName).forEach((productName: string) => {
+      byName[productName].forEach((orderProduct: OrderProduct) => {
+        this.addOrderProductRow(
+          orderProduct as ProductOrderProduct,
+          false,
+          orderProduct.quantity,
+        );
       });
     });
     this.canShowProductDetailsTable.set(true);

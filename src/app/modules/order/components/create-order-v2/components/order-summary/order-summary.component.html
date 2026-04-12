@@ -11,7 +11,7 @@
           <div class="summary-line__left">
             <span class="summary-line__name">{{ item.product?.name }}</span>
             <span class="summary-line__qty">
-              {{ item.formGroup.get('price')?.value ?? 0 | number }} × {{ item.rowGroups.length }}
+              {{ item.formGroup.get('price')?.value ?? 0 | number }} × {{ totalUnitsForProduct(item) }} units
             </span>
           </div>
           <span class="summary-line__amount">{{ getLineTotal(item) | number }}</span>

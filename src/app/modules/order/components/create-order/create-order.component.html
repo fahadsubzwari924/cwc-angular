@@ -88,13 +88,16 @@
                       @if (canShowProductDetailsTable()) {
                         <div class="order-product-table">
                           <div class="grid header-row mt-2">
-                            <div class="col-3 column">
+                            <div class="col-2 column">
                               <h5 class="text-primary">Name</h5>
                             </div>
                             <div class="col-2 column">
                               <h5 class="text-primary">Cost</h5>
                             </div>
-                            <div class="col-3 column">
+                            <div class="col-2 column">
+                              <h5 class="text-primary">Qty</h5>
+                            </div>
+                            <div class="col-2 column">
                               <h5 class="text-primary">Customize Name</h5>
                             </div>
                             <div class="col-2 column">
@@ -103,9 +106,13 @@
                           </div>
                           @for (rowGroup of item.rowGroups; track $index) {
                           <div class="grid">
-                            <div class="col-3 column">{{ item.product?.name }}</div>
+                            <div class="col-2 column">{{ item.product?.name }}</div>
                             <div class="col-2 column">{{ item.product?.cost }}</div>
-                            <div class="col-3" [formGroup]="rowGroup">
+                            <div class="col-2" [formGroup]="rowGroup">
+                              <input type="number" min="1" formControlName="quantity" (blur)="calculateOrderTotalAmount()"
+                                class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                            </div>
+                            <div class="col-2" [formGroup]="rowGroup">
                               <input id="customize-name" type="text" formControlName="customizeName"
                                 class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
                             </div>
@@ -154,6 +161,13 @@
                       </div>
                       @for (rowGroup of item.rowGroups; track $index) {
                       <div class="grid mt-3 order-items-list">
+                        <div class="col-6" [formGroup]="rowGroup">
+                          <div class="flex flex-column gap-2">
+                            <label class="font-bold">Quantity</label>
+                            <input type="number" min="1" formControlName="quantity" (blur)="calculateOrderTotalAmount()"
+                              class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full" />
+                          </div>
+                        </div>
                         <div class="col-6" [formGroup]="rowGroup">
                           <div class="flex flex-column gap-2">
                             <label class="font-bold">Customize Name</label>

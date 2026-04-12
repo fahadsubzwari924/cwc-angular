@@ -158,7 +158,11 @@ export class CreateOrderV2Component implements OnInit {
     Object.keys(productsGroupedByName).forEach((productName: string) => {
       const group = productsGroupedByName[productName];
       group.forEach((orderProduct: OrderProduct) => {
-        this.addOrderProductRow(orderProduct as ProductOrderProduct);
+        this.addOrderProductRow(
+          orderProduct as ProductOrderProduct,
+          false,
+          orderProduct.quantity,
+        );
       });
     });
     this.canShowProductDetailsTable.set(true);
@@ -256,16 +260,22 @@ export class CreateOrderV2Component implements OnInit {
     return this.formBuilder.group({
       price: [product.price ?? null, [Validators.required]],
       rows: this.formBuilder.array(
-        isEmptyRows ? [] : [this.newOrderProductRow(product)],
+        isEmptyRows ? [] : [this.newOrderProductRow(product, {})],
         Validators.required
       ),
     });
   }
 
-  newOrderProductRow(product: ProductOrderProduct, isNew = false): FormGroup {
-    const customizeName = isNew ? '' : (product as OrderProduct).customizeName ?? '';
-    const color = isNew ? '' : (product as OrderProduct).color ?? '';
-    const quantity = this.getOrderProductQuantity(product.name, isNew);
+  newOrderProductRow(
+    product: ProductOrderProduct,
+    options: { isBlankRow?: boolean; quantity?: number } = {},
+  ): FormGroup {
+    const isBlank = options.isBlankRow ?? false;
+    const customizeName = isBlank ? '' : (product as OrderProduct).customizeName ?? '';
+    const color = isBlank ? '' : (product as OrderProduct).color ?? '';
+    const quantity =
+      options.quantity ??
+      (isBlank ? 1 : (product as OrderProduct).quantity ?? 1);
     return this.formBuilder.group({
       productId: [product.id, [Validators.required]],
       color,
@@ -273,7 +283,7 @@ export class CreateOrderV2Component implements OnInit {
       name: product.name,
       cost: product.cost,
       weight: product.weight,
-      quantity,
+      quantity: [quantity, [Validators.required, Validators.min(1)]],
     });
   }
 
@@ -307,10 +317,21 @@ export class CreateOrderV2Component implements OnInit {
     this.refreshOrderProductsMap();
   }
 
-  addOrderProductRow(product: ProductOrderProduct, isNew = false): void {
+  addOrderProductRow(
+    product: ProductOrderProduct,
+    isNewBlankRow = false,
+    explicitQuantity?: number,
+  ): void {
     const productRows = this.getOrderProductRows(product.name);
-    productRows.push(this.newOrderProductRow(product, isNew));
-    this.incrementProductQuantityCount(product.name);
+    const quantity =
+      explicitQuantity ??
+      (isNewBlankRow ? 1 : (product as OrderProduct).quantity ?? 1);
+    productRows.push(
+      this.newOrderProductRow(product, {
+        isBlankRow: isNewBlankRow,
+        quantity,
+      }),
+    );
     this.calculateOrderTotalAmount();
     this.refreshOrderProductsMap();
   }
@@ -318,26 +339,31 @@ export class CreateOrderV2Component implements OnInit {
   onRemoveProductRow(rowIndex: number, productName: string): void {
     const orderProductRows = this.getOrderProductRows(productName);
     orderProductRows.removeAt(rowIndex);
-    this.decrementProductQuantityCount(productName);
     this.calculateOrderTotalAmount();
     this.refreshOrderProductsMap();
   }
 
   calculateOrderTotalAmount(): void {
     let total = 0;
-    Object.keys(this.orderForm.value.orderProducts).forEach((productName: string) => {
-      const orderProducts = this.orderForm.value.orderProducts[productName];
-      const orderProductQuantity = orderProducts.rows?.length;
-      if (orderProducts?.price > 0) {
-        total += orderProducts?.price * orderProductQuantity;
-      }
+    const orderProductsRoot = this.orderForm.value.orderProducts ?? {};
+    Object.keys(orderProductsRoot).forEach((productName: string) => {
+      const bundle = orderProductsRoot[productName];
+      const price = Number(bundle?.price) || 0;
+      const rows = bundle?.rows ?? [];
+      rows.forEach((row: { quantity?: number }) => {
+        const q = Math.max(1, Math.floor(Number(row.quantity) || 1));
+        total += price * q;
+      });
     });
     this.orderTotalAmount.set(total);
   }
 
   getLineTotal(item: { formGroup: FormGroup; rowGroups: FormGroup[] }): number {
-    const price = item.formGroup?.get('price')?.value ?? 0;
-    return price * item.rowGroups.length;
+    const price = Number(item.formGroup?.get('price')?.value) || 0;
+    return item.rowGroups.reduce((sum, row) => {
+      const q = Math.max(1, Math.floor(Number(row.get('quantity')?.value) || 1));
+      return sum + price * q;
+    }, 0);
   }
 
   saveOrder(): void {
@@ -390,14 +416,22 @@ export class CreateOrderV2Component implements OnInit {
   }
 
   buildCreateOrderPayload(): object {
+    const orderItems = this.buildOrderProductsPayload() as Array<{
+      quantity?: number;
+    }>;
+    const totalUnits = orderItems.reduce(
+      (sum, row) =>
+        sum + Math.max(1, Math.floor(Number(row.quantity) || 1)),
+      0,
+    );
     return {
       description: this.orderForm.value.description,
       paymentMethod: this.orderForm.value.paymentMethod?.value,
       amount: this.orderTotalAmount(),
       customerId: this.orderForm.value.selectedCustomer?.id,
-      totalProductQuantity: this.buildOrderProductsPayload()?.length,
+      totalProductQuantity: totalUnits,
       totalWeight: this.getTotalCountByProperty('weight').toString(),
-      orderItems: this.buildOrderProductsPayload(),
+      orderItems,
       orderDate: this.orderForm.value?.orderDate,
       orderSourceIds: this.orderForm.value.selectedOrderSources,
     };
@@ -431,8 +465,11 @@ export class CreateOrderV2Component implements OnInit {
   private getTotalCountByProperty(propertyName: string): number {
     const orderProducts = flatMap(this.orderForm.value?.orderProducts, (value) => value.rows);
     return sumBy(orderProducts, (item) => {
-      const numericWeight = parseFloat(String(item[propertyName]).replace(/[^\d.]/g, ''));
-      return isNaN(numericWeight) ? 0 : numericWeight;
+      const raw = String(item[propertyName] ?? '').replace(/[^\d.]/g, '');
+      const numericWeight = parseFloat(raw);
+      const units = Math.max(1, Math.floor(Number(item.quantity) || 1));
+      const perUnit = isNaN(numericWeight) ? 0 : numericWeight;
+      return perUnit * units;
     });
   }
 
@@ -446,29 +483,6 @@ export class CreateOrderV2Component implements OnInit {
       customizeName: product.customizeName,
       quantity: product.quantity,
     }));
-  }
-
-  private incrementProductQuantityCount(productName: string): void {
-    const orderProductRows = this.getOrderProductRows(productName);
-    const incremented =
-      Number(orderProductRows.controls[0]?.get('quantity')?.value) + 1;
-    for (let i = 0; i < orderProductRows.length; i++) {
-      orderProductRows.controls[i].get('quantity')?.setValue(incremented);
-    }
-  }
-
-  private decrementProductQuantityCount(productName: string): void {
-    const orderProductRows = this.getOrderProductRows(productName);
-    let qty = this.getOrderProductQuantity(productName);
-    qty = qty > 0 ? qty - 1 : 0;
-    for (let i = 0; i < orderProductRows.length; i++) {
-      orderProductRows.controls[i].get('quantity')?.setValue(qty);
-    }
-  }
-
-  private getOrderProductQuantity(productName: string, isNew = false): number {
-    const orderProductRows = this.getOrderProductRows(productName);
-    return isNew ? orderProductRows.length + 1 : orderProductRows?.length ?? 1;
   }
 
   private mapOrderSourcesToNameValue(orderSources: Array<OrderSource>): Array<OrderSource> {
