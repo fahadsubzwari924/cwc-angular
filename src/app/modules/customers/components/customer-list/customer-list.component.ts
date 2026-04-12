@@ -21,7 +21,10 @@ import { CreateCustomerComponent } from '../create-customer/create-customer.comp
 import { EditCustomerComponent } from '../edit-customer/edit-customer.component';
 import { UtilService } from '../../../../util/util.service';
 import { ListConstants } from 'src/app/constants/list-constants';
-import { AutoCompleteCompleteEvent } from 'src/app/modules/order/interfaces/order-product.interface';
+import {
+  AutoCompleteCompleteEvent,
+  AutoCompleteSelectEvent,
+} from 'src/app/modules/order/interfaces/order-product.interface';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -222,9 +225,10 @@ export class CustomerListComponent implements OnInit {
       });
   }
 
-  getSelectedCustomer(selectedCustomer: any): void {
+  getSelectedCustomer(event: AutoCompleteSelectEvent): void {
+    const selected = event.value as Customer;
     const queryParams = {
-      filters: JSON.stringify({ fullName: selectedCustomer?.fullName }),
+      filters: JSON.stringify({ fullName: selected?.fullName }),
     };
     this.getCustomers(queryParams);
   }

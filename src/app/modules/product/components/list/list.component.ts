@@ -23,7 +23,10 @@ import { CustomResponse } from 'src/app/shared/models/response.model';
 import { PaginationConstants } from 'src/app/shared/constants/pagination.constants';
 import { UtilService } from 'src/app/util/util.service';
 import { ListConstants } from 'src/app/constants/list-constants';
-import { AutoCompleteCompleteEvent } from 'src/app/modules/order/interfaces/order-product.interface';
+import {
+  AutoCompleteCompleteEvent,
+  AutoCompleteSelectEvent,
+} from 'src/app/modules/order/interfaces/order-product.interface';
 import { ListSortOrder } from 'src/app/shared/enums/sort-order.enum';
 import { ButtonModule } from 'primeng/button';
 import { DataViewModule } from 'primeng/dataview';
@@ -210,9 +213,10 @@ export class ListComponent implements OnInit {
       });
   }
 
-  getSelectedProduct(selectedProduct: any): void {
+  getSelectedProduct(event: AutoCompleteSelectEvent): void {
+    const selected = event.value as Product;
     const queryParams = {
-      filters: JSON.stringify({ name: selectedProduct?.name }),
+      filters: JSON.stringify({ name: selected?.name }),
     };
     this.getProducts(queryParams);
   }
