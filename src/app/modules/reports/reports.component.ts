@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReportsService } from './services/reports.service';
 import { CustomResponse, NameValueOption } from 'src/app/shared/models';
 import { ReportType } from './models/report-type.model';
+import { ReportTypeGroupOption } from './models/report-type-group.model';
 import { INameValue } from 'src/app/shared/interfaces';
 import { ReportFilters } from './interfaces';
 import { first, last } from 'lodash-es';
@@ -46,12 +47,14 @@ export class ReportsComponent implements OnInit {
   selectedReportTypes: Array<ReportType> = [];
   selectedYear!: number;
   selectedDateRange: any;
-  reportTypes = signal<Array<ReportType>>([]);
+  /** Report types for the type MultiSelect, grouped by category (PrimeNG `group` mode). */
+  groupedReportTypeOptions = signal<Array<ReportTypeGroupOption>>([]);
   yearOptions = [
     { name: 2022, value: 2022 },
     { name: 2023, value: 2023 },
     { name: 2024, value: 2024 },
     { name: 2025, value: 2025 },
+    { name: 2026, value: 2026 },
   ];
 
   ordersDemographicsReportData: Array<INameValue> = [];
@@ -79,17 +82,70 @@ export class ReportsComponent implements OnInit {
       .getReportTypes()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (reportTypes: Array<ReportType>) => {
-          if (reportTypes?.length) {
-            this.reportTypes.set(
-              reportTypes.filter((reportType: ReportType) =>
-                this.selectedReportCategories.includes(reportType.category)
-              )
-            );
-          }
+        next: (allReportTypes: Array<ReportType>) => {
+          const categoryFilter = this.selectedReportCategories ?? [];
+          const filtered =
+            categoryFilter.length && allReportTypes?.length
+              ? allReportTypes.filter((rt) =>
+                  categoryFilter.includes(rt.category)
+                )
+              : [];
+
+          this.selectedReportTypes = (this.selectedReportTypes ?? []).filter(
+            (rt) => categoryFilter.includes(rt.category)
+          );
+
+          this.groupedReportTypeOptions.set(
+            this.buildGroupedReportTypeOptions(filtered, categoryFilter)
+          );
+          this.onSelectReportType();
         },
         error: (error) => console.log(error),
       });
+  }
+
+  private buildGroupedReportTypeOptions(
+    types: Array<ReportType>,
+    categoryOrder: Array<string>
+  ): Array<ReportTypeGroupOption> {
+    const meta = this.reportCategories();
+    const byCategory = new Map<string, Array<ReportType>>();
+
+    for (const t of types) {
+      const list = byCategory.get(t.category) ?? [];
+      list.push(t);
+      byCategory.set(t.category, list);
+    }
+
+    const groups: Array<ReportTypeGroupOption> = [];
+    for (const catValue of categoryOrder) {
+      const items = byCategory.get(catValue);
+      if (!items?.length) {
+        continue;
+      }
+      const label =
+        meta.find((c) => c.value === catValue)?.name ??
+        this.fallbackCategoryLabel(catValue);
+      groups.push({
+        label,
+        items: [...items].sort((a, b) =>
+          (a.name ?? a.value).localeCompare(b.name ?? b.value, undefined, {
+            sensitivity: 'base',
+          })
+        ),
+      });
+    }
+    return groups;
+  }
+
+  private fallbackCategoryLabel(categoryValue: string): string {
+    return categoryValue
+      .split(/[_\s]+/)
+      .filter(Boolean)
+      .map(
+        (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+      )
+      .join(' ');
   }
 
   onSelectReportType(): void {

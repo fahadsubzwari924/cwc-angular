@@ -1,10 +1,13 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
+  effect,
   inject,
+  Injector,
   input,
-  OnInit,
+  OnDestroy,
   Type,
   ViewChild,
   ViewContainerRef,
@@ -24,22 +27,42 @@ import { DeepBarGraphComponent } from '../deep-bar-graph/deep-bar-graph.componen
   standalone: true,
   imports: [],
 })
-export class ChartHostComponent implements OnInit {
+export class ChartHostComponent implements OnDestroy {
   private readonly chartService = inject(ChartService);
   private readonly reportsDataService = inject(ReportDataService);
+  private readonly injector = inject(Injector);
 
   reportData = input.required<ReportData>();
 
   @ViewChild('chartContainer', { read: ViewContainerRef, static: true })
   chartContainer!: ViewContainerRef;
-  private componentRef: ComponentRef<any> | null = null;
 
-  ngOnInit(): void {
-    this.loadChartComponent();
+  private componentRef: ComponentRef<
+    PieChartComponent | BarGraphComponent | DeepBarGraphComponent
+  > | null = null;
+
+  constructor() {
+    afterNextRender(
+      () => {
+        effect(
+          () => {
+            const data = this.reportData();
+            this.mountChart(data);
+          },
+          { injector: this.injector }
+        );
+      },
+      { injector: this.injector }
+    );
   }
 
-  private loadChartComponent(): void {
-    const data = this.reportData();
+  private mountChart(data: ReportData): void {
+    if (!this.chartContainer) {
+      return;
+    }
+
+    this.clearChart();
+
     const chartData = this.reportsDataService.generateReportData(
       data.chartType,
       data.data,
@@ -48,23 +71,32 @@ export class ChartHostComponent implements OnInit {
     const chartComponent: Type<
       PieChartComponent | BarGraphComponent | DeepBarGraphComponent
     > = this.chartService.getChartComponent(data.chartType);
+
     this.componentRef = this.chartContainer.createComponent(chartComponent);
-    const chartId = `chart-${Math.random().toString(36).substr(2, 9)}`;
+    const chartId = `chart-${Math.random().toString(36).slice(2, 11)}`;
 
     Object.assign(this.componentRef.instance, {
       data: chartData,
       title: data?.title,
-      chartId: chartId,
+      chartId,
       subTitle: data.subTitle,
       tooltipFormat: data.tooltipFormat,
       tooltipTitle: data.tooltipTitle,
       showLegends: data.showLegends,
     });
+
+    this.componentRef.changeDetectorRef.detectChanges();
+  }
+
+  private clearChart(): void {
+    if (this.componentRef) {
+      this.componentRef.destroy();
+      this.componentRef = null;
+    }
+    this.chartContainer.clear();
   }
 
   ngOnDestroy(): void {
-    if (this.componentRef) {
-      this.componentRef.destroy();
-    }
+    this.clearChart();
   }
 }

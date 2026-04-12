@@ -5,6 +5,8 @@ import {
   OrdersSummaryReport,
   OrdersDemographicsReport,
   MonthlyOrdersReport,
+  MonthlyProfitReport,
+  YearlyProfitReport,
 } from './orders';
 
 export const REPORT_MODEL_REGISTRY: { [key: string]: any } = {
@@ -14,4 +16,6 @@ export const REPORT_MODEL_REGISTRY: { [key: string]: any } = {
   order_summary: OrdersSummaryReport,
   top_performing_products: TopTenBestPerformingProductsReport,
   orders_percentage_by_source: OrdersByOrderSource,
+  monthly_profit: MonthlyProfitReport,
+  yearly_profit: YearlyProfitReport,
 };

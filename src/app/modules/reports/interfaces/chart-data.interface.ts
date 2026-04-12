@@ -1,14 +1,14 @@
-import { DeepBarGraphData } from 'src/app/shared/interfaces';
+import {
+  BarGraphData,
+  DeepBarGraphData,
+} from 'src/app/shared/interfaces';
 
 export interface ChartSeriesData {
   name: string;
   value: number;
 }
 
-export interface BarGraphData {
-  xAxis: Array<string>;
-  yAxis: Array<number>;
-}
+export type { BarGraphData };
 
 export interface LineGraphData {
   xAxis: Array<string>;

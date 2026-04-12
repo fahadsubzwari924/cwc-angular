@@ -58,6 +58,10 @@ App defaults to `http://localhost:4200/`. Point the API at your backend by editi
 - Run **`npm run build`** before considering UI work complete (catches template/type issues).
 - Match existing **ESLint** rules for the project.
 
+## Shipping (pull requests)
+
+When the user asks to **ship**, **open/create a PR**, or hand off merge-ready work, use the canonical checklist in **`.cursor/rules/ship-feature.mdc`** (also summarized in **`.ai/workflow.md`** step 6). In short: stash if dirty → checkout the repo’s **default** branch and pull → create **`feature/…`** or **`bugfix/…`** → `stash pop` if you stashed → conventional commit(s) → push → open PR with a proper **title** and **description** (what, why, verify, risk/rollback, related PRs for `nest-server`). Prefer **`@agency-devops-automator.mdc`** for executing that git/PR flow.
+
 ## References
 
 - Deploy: [`docs/DEPLOYMENT_SETUP.md`](docs/DEPLOYMENT_SETUP.md)

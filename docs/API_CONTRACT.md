@@ -22,5 +22,6 @@ This app is a **client** of the Nest API. The **authoritative** contract documen
 
 - **Login:** `POST .../auth/login` via `AuthService.signIn`; session persisted with **`token`** and **`user`** keys in `localStorage`.
 - **File uploads:** Use `httpPost` with `isFormData = true` so `Content-Type` is not forced to JSON.
+- **Reports:** `POST .../reports` supports order report types `monthly_profit` and `yearly_profit` (see `nest-server/docs/API_CONTRACT.md`). The staff UI loads definitions from `src/assets/data/report-types.json`; **`monthly_profit`** requires a selected **year** in the reports filter.
 
 Before changing response handling, read **`nest-server/docs/adr/0003-http-response-envelope-via-interceptor.md`**.

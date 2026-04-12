@@ -27,8 +27,8 @@
   </div>
 }
 
-<div class="grid mt-5">
-  @for (report of reports(); track $index) {
+<div class="grid mt-5 dashboard-reports-grid">
+  @for (report of reports(); track report.chartId) {
     <div [ngClass]="report.cssClasses">
       <div class="card report-chart-wrapper">
         <cwc-chart-host [reportData]="report"></cwc-chart-host>
