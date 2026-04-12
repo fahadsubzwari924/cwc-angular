@@ -5,6 +5,7 @@ import {
   ElementRef,
   inject,
   Input,
+  OnChanges,
   OnDestroy,
 } from '@angular/core';
 import { BarGraphData } from '../../interfaces';
@@ -21,7 +22,7 @@ type EChartsOption = echarts.EChartsOption;
   standalone: true,
   imports: [],
 })
-export class BarGraphComponent implements AfterViewInit, OnDestroy {
+export class BarGraphComponent implements AfterViewInit, OnDestroy, OnChanges {
   private readonly elementRef = inject(ElementRef);
 
   @Input() chartHeight: number = 400;
@@ -30,6 +31,7 @@ export class BarGraphComponent implements AfterViewInit, OnDestroy {
   @Input() chartId!: string;
   @Input() tooltipTitle!: string;
   @Input() chartType?: ChartTypes;
+  @Input() showLegends?: boolean;
 
   private barGraphChart!: echarts.ECharts;
   private chartInitialized: boolean = false;
@@ -39,14 +41,20 @@ export class BarGraphComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnChanges(): void {
-    if (
-      this.barGraphChart &&
-      this.data?.xAxis?.length &&
-      this.data?.yAxis?.length &&
-      this.chartInitialized
-    ) {
+    if (this.barGraphChart && this.chartInitialized && this.hasRenderableBarData()) {
       this.updateChart();
     }
+  }
+
+  private hasRenderableBarData(): boolean {
+    const xLen = this.data?.xAxis?.length ?? 0;
+    if (!xLen) {
+      return false;
+    }
+    if (this.data.series?.length) {
+      return this.data.series.every((s) => (s.data?.length ?? 0) === xLen);
+    }
+    return (this.data.yAxis?.length ?? 0) === xLen;
   }
 
   initChart(): void {
@@ -59,6 +67,7 @@ export class BarGraphComponent implements AfterViewInit, OnDestroy {
         const option: EChartsOption = this.getChartOption();
         this.barGraphChart.setOption(option);
         console.log('Bar graph chart updated successfully');
+        this.chartInitialized = true;
       } catch (error) {
         console.error('Error initializing bar graph chart:', error);
       }
@@ -80,15 +89,27 @@ export class BarGraphComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private getChartOption(): EChartsOption {
-    const yValues = this.data?.yAxis ?? [];
-    const dataMax = yValues.length
-      ? Math.max(...yValues, 0)
-      : 0;
-    // When all values are 0, set a visible scale so the chart and axis are shown
-    const yAxisMax = dataMax === 0 ? 10 : undefined;
+  private computeYAxisMax(): number | undefined {
+    let dataMax = 0;
+    if (this.data?.series?.length) {
+      for (const s of this.data.series) {
+        for (const v of s.data ?? []) {
+          dataMax = Math.max(dataMax, Number(v) || 0);
+        }
+      }
+    } else {
+      const yValues = this.data?.yAxis ?? [];
+      dataMax = yValues.length ? Math.max(...yValues, 0) : 0;
+    }
+    return dataMax === 0 ? 10 : undefined;
+  }
 
-    return {
+  private getChartOption(): EChartsOption {
+    const yAxisMax = this.computeYAxisMax();
+    const base: Pick<
+      EChartsOption,
+      'tooltip' | 'grid' | 'xAxis' | 'yAxis'
+    > = {
       tooltip: {
         trigger: 'axis',
         axisPointer: {
@@ -111,8 +132,28 @@ export class BarGraphComponent implements AfterViewInit, OnDestroy {
       yAxis: {
         type: 'value',
         min: 0,
-        ...(yAxisMax !== undefined && { max: yAxisMax }),
+        ...(yAxisMax !== undefined ? { max: yAxisMax } : {}),
       },
+    };
+
+    if (this.data?.series?.length) {
+      const showLegend = this.showLegends !== false;
+      return {
+        ...base,
+        legend: showLegend ? { show: true, top: 0 } : { show: false },
+        series: this.data.series.map((s) => ({
+          name: s.name,
+          type: 'bar' as const,
+          data: s.data,
+          barGap: '0%',
+          barWidth: '22%',
+        })),
+      };
+    }
+
+    const yValues = this.data?.yAxis ?? [];
+    return {
+      ...base,
       series: [
         {
           name: this.tooltipTitle,

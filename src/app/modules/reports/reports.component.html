@@ -16,9 +16,10 @@
                     <div class="col-4">
                         <div class="flex flex-column gap-2">
                             <label>Select Report Type</label>
-                            <p-multiSelect [options]="reportTypes()" [(ngModel)]="selectedReportTypes" styleClass="w-full"
-                                optionLabel="name" display="chip" appendTo="body" [showClear]="true"
-                                (onChange)="onSelectReportType()" />
+                            <p-multiSelect [options]="groupedReportTypeOptions()" [(ngModel)]="selectedReportTypes"
+                                styleClass="w-full" [group]="true" optionGroupLabel="label"
+                                optionGroupChildren="items" optionLabel="name" display="chip" appendTo="body"
+                                [showClear]="true" (onChange)="onSelectReportType()" />
                         </div>
                     </div>
                     <div class="col-4">
@@ -48,9 +49,9 @@
     </div>
 </div>
 
-<div class="grid mt-5">
-  @for (report of reports(); track $index) {
-    <div [ngClass]="report.cssClasses">
+<div class="grid mt-5 reports-results-grid">
+  @for (report of reports(); track report.chartId) {
+    <div [ngClass]="report.cssClasses" class="reports-results-grid__cell">
       <div class="card report-chart-wrapper">
         <cwc-chart-host [reportData]="report"></cwc-chart-host>
       </div>

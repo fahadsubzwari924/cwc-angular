@@ -50,9 +50,19 @@ export class ReportDataService {
     data: Array<T>,
     config: ChartDataConfig
   ): BarGraphData {
-    const xAxisData: Array<string> = data.map(
-      (item) => item[config.xAxisKey as string] as string
-    );
+    const xKey = config.xAxisKey as string;
+    if (config.seriesKeys?.length) {
+      const xAxisData = data.map((item) => String(item[xKey]));
+      return {
+        xAxis: xAxisData,
+        series: config.seriesKeys.map((sk) => ({
+          name: sk.name,
+          data: data.map((item) => Number(item[sk.field]) || 0),
+        })),
+      };
+    }
+
+    const xAxisData: Array<string> = data.map((item) => String(item[xKey]));
     const yAxisData: Array<number> = data.map(
       (item) => item[config.yAxisKey as string] as number
     );

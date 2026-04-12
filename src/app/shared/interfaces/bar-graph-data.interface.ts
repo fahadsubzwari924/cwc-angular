@@ -1,4 +1,12 @@
+export interface BarGraphSeries {
+  name: string;
+  data: number[];
+}
+
 export interface BarGraphData {
-  xAxis: Array<string>;
-  yAxis: Array<number>;
+  xAxis: string[];
+  /** Single-series charts (existing behavior). */
+  yAxis?: number[];
+  /** Multi-series grouped bars. */
+  series?: BarGraphSeries[];
 }

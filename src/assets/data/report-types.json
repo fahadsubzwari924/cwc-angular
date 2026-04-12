@@ -95,6 +95,55 @@
     "tooltipTitle": "Orders Count"
   },
   {
+    "name": "Monthly Profit",
+    "value": "monthly_profit",
+    "category": "orders",
+    "title": "Monthly Revenue & Profit",
+    "subTitle": "Delivered orders only",
+    "chartType": "barGraph",
+    "dataConfig": {
+      "xAxisKey": "month",
+      "seriesKeys": [
+        { "field": "revenue", "name": "Revenue" },
+        { "field": "profit", "name": "Profit" }
+      ]
+    },
+    "dependentFields": [
+      {
+        "fieldName": "year",
+        "label": "Select Year",
+        "type": "dropdown",
+        "options": [2022, 2023, 2024, 2025, 2026]
+      }
+    ],
+    "requiredParams": {
+      "year": true
+    },
+    "tooltipTitle": "Amount",
+    "showLegends": true
+  },
+  {
+    "name": "Yearly Profit",
+    "value": "yearly_profit",
+    "category": "orders",
+    "title": "Yearly Revenue & Profit",
+    "subTitle": "Delivered orders only",
+    "chartType": "barGraph",
+    "dataConfig": {
+      "xAxisKey": "year",
+      "seriesKeys": [
+        { "field": "revenue", "name": "Revenue" },
+        { "field": "profit", "name": "Profit" }
+      ]
+    },
+    "dependentFields": [],
+    "requiredParams": {
+      "year": false
+    },
+    "tooltipTitle": "Amount",
+    "showLegends": true
+  },
+  {
     "name": "Customer Orders By Age Group",
     "value": "customer_orders_by_age_group",
     "category": "customers",
